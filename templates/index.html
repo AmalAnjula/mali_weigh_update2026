@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OLS — Monitor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* ── Reset & base ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #f0f2f5;
+  --surface:  #ffffff;
+  --border:   #d0d5dd;
+  --text:     #1a1d23;
+  --muted:    #6b7280;
+  --green:    #16a34a;
+  --green-bg: #dcfce7;
+  --red:      #dc2626;
+  --red-bg:   #fee2e2;
+  --amber:    #d97706;
+  --amber-bg: #fef3c7;
+  --blue:     #2563eb;
+  --blue-bg:  #dbeafe;
+  --radius:   8px;
+  --shadow:   0 1px 3px rgba(0,0,0,0.1);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ── Layout ───────────────────────────────────── */
+.page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+/* ── Header ───────────────────────────────────── */
+header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 20px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+}
+/*
+.hdr-left h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: .3px; }
+.hdr-left p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.hdr-right   { display: flex; align-items: center; gap: 16px; }
+#clock        { font-size: 15px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+ */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-red   { background: var(--red-bg);   color: var(--red);   }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.dot.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+/* ── Tabs ─────────────────────────────────────── */
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 14px;
+}
+.tab {
+  padding: 7px 18px; border-radius: 6px;
+  font-size: 13px; font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all .15s;
+}
+.tab:hover { border-color: var(--blue); color: var(--blue); }
+.tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Monitor layout ───────────────────────────── */
+.monitor {
+  display: grid;
+  grid-template-columns: 1fr 220px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+/* ── Cards ────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card-head {
+  padding: 5px 10px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 2px;
+}
+.card-body { padding: 12px 14px; }
+
+/* ── Control panel ────────────────────────────── */
+.ctrl { display: flex; flex-direction: column; gap: 8px; }
+
+/* Button rows */
+.ctrl-btn {
+  width: 100%; padding: 12px 14px; border-radius: 7px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  cursor: pointer; text-align: left; transition: all .15s;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ctrl-btn:hover { border-color: var(--blue); }
+.ctrl-btn .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+.ctrl-btn .value { font-size: 20px; font-weight: 700; }
+
+.ctrl-btn.st-green  { border-color: var(--green); background: var(--green-bg); }
+.ctrl-btn.st-green .value { color: var(--green); }
+.ctrl-btn.st-red    { border-color: var(--red);   background: var(--red-bg);   }
+.ctrl-btn.st-red .value   { color: var(--red);   }
+.ctrl-btn.st-amber  { border-color: var(--amber); background: var(--amber-bg); }
+.ctrl-btn.st-amber .value { color: var(--amber); }
+.ctrl-btn.st-blue   { border-color: var(--blue);  background: var(--blue-bg);  }
+.ctrl-btn.st-blue .value  { color: var(--blue);  }
+.ctrl-btn.disabled  { opacity: .35; cursor: not-allowed; pointer-events: none; }
+
+/* Volume input */
+.vol-wrap { display: flex; flex-direction: column; gap: 5px; }
+.vol-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.vol-input {
+  width: 100%; padding: 10px 12px; border-radius: 6px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  font-size: 18px; font-weight: 600; text-align: center; color: var(--text);
+  outline: none; transition: border .15s;
+}
+.vol-input:focus { border-color: var(--blue); background: #fff; }
+.apply-btn {
+  width: 100%; padding: 10px;
+  border-radius: 6px; border: 1.5px solid var(--blue);
+  background: var(--blue); color: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.apply-btn:hover { background: #1d4ed8; border-color: #1d4ed8; }
+
+/* ── Stat tiles ───────────────────────────────── */
+.stat-tile {
+  padding: 12px 14px; border-radius: 7px;
+  border: 1.5px solid var(--border); background: var(--surface);
+}
+.stat-tile .st-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+.stat-tile .st-val   { font-size: 36px; font-weight: 800; color: var(--text); line-height: 1.1; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.stat-tile .st-unit  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.stat-tile.alarm-hi  { border-color: var(--red);   background: var(--red-bg); }
+.stat-tile.alarm-hi .st-val { color: var(--red); }
+.stat-tile.alarm-lo  { border-color: var(--amber); background: var(--amber-bg); }
+.stat-tile.alarm-lo .st-val { color: var(--amber); }
+
+.info-tile { padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; }
+.info-row  { display: flex; justify-content: space-between; align-items: center; }
+.info-row .il { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.info-row .iv { font-size: 15px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.info-row .iu { font-size: 11px; color: var(--muted); margin-left: 2px; }
+.hr { height: 1px; background: var(--border); }
+
+/* Level bar */
+.bar-wrap { display: flex; flex-direction: column; gap: 5px; }
+.bar-row  { display: flex; justify-content: space-between; align-items: center; }
+.bar-row .bl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.bar-row .bp { font-size: 16px; font-weight: 700; color: var(--blue); font-variant-numeric: tabular-nums; }
+.bar-row .bp.alarm-hi-txt { color: var(--red); }
+.bar-row .bp.alarm-lo-txt { color: var(--amber); }
+.bar-bg   { height: 12px; background: var(--bg); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+.bar-fill {
+  height: 100%; border-radius: 6px;
+  background: var(--blue);
+  transition: width .9s ease;
+}
+.bar-fill.alarm-hi { background: var(--red); }
+.bar-fill.alarm-lo { background: var(--amber); }
+
+.prod-row {
+  text-align: center; font-size: 12px; font-weight: 600;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 0;
+}
+
+/* ── TANK ─────────────────────────────────────── */
+.tank-wrap-outer {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+
+.sensor-row { display: flex; align-items: center; gap: 7px; }
+.sdot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #d0d5dd; border: 1.5px solid #b0b8c4;
+  flex-shrink: 0; transition: all .3s;
+}
+.sdot.alarm  { background: var(--red);   border-color: var(--red);   box-shadow: 0 0 8px rgba(220,38,38,.35); animation: blink .8s infinite; }
+.sdot.lo-alm { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 8px rgba(217,119,6,.35);  animation: blink .8s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+.slbl { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .5px; }
+.slbl.alarm  { color: var(--red); }
+.slbl.lo-alm { color: var(--amber); }
+
+/* Pipe */
+.pipe-h { width: 100%; height: 8px; background: #e5e7eb; border-radius: 2px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+.pipe-h.flowing::after {
+  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,.4), transparent);
+  animation: flow .8s linear infinite;
+}
+@keyframes flow { to { left: 150%; } }
+
+/* Valve */
+.valve-row { display: flex; align-items: center; gap: 0; width: 200px; }
+.vpipe     { flex: 1; height: 8px; background: #e5e7eb; border: 1px solid var(--border); }
+.vgate {
+  width: 36px; height: 36px; border-radius: 7px;
+  border: 2px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s; flex-shrink: 0;
+}
+.vgate:hover { border-color: var(--blue); }
+.vgate.open  { border-color: var(--green); background: var(--green-bg); }
+.vgate svg   { width: 16px; height: 16px; color: var(--muted); transition: color .2s; }
+.vgate.open svg { color: var(--green); }
+
+/* Port stub */
+.port-stub { width: 20px; height: 14px; background: #e5e7eb; border: 1px solid var(--border); margin: 0 auto; position: relative; overflow: hidden; }
+.port-stub.top  { border-radius: 4px 4px 0 0; border-bottom: none; }
+.port-stub.bot  { border-radius: 0 0 4px 4px; border-top:    none; }
+.port-stub.flowing::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green); animation: drip .6s infinite;
+}
+@keyframes drip { 0%{opacity:0;top:0;} 50%{opacity:1;} 100%{opacity:0;top:10px;} }
+
+/* Tank shell */
+.tank-shell {
+  width: 200px; height: 330px;
+  background: #f8fafc;
+  border: 2px solid var(--border);
+  border-radius: 16px 16px 12px 12px;
+  position: relative; overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.06);
+}
+
+/* Level indicator lines */
+.lvl-line { position: absolute; left: 0; right: 0; height: 1.5px; z-index: 4; pointer-events: none; }
+.lvl-line.hi { background: var(--red);   opacity: .6; }
+.lvl-line.lo { background: var(--amber); opacity: .6; }
+.lvl-tag {
+  position: absolute; right: 4px; z-index: 5;
+  font-size: 8px; font-weight: 700; letter-spacing: .5px;
+  padding: 1px 4px; border-radius: 3px; pointer-events: none;
+}
+.lvl-tag.hi { color: var(--red);   background: rgba(220,38,38,.12);  }
+.lvl-tag.lo { color: var(--amber); background: rgba(217,119,6,.12);  }
+
+/* Scale marks */
+.scale {
+  position: absolute; right: 7px; top: 0; bottom: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 10px 0; z-index: 4; pointer-events: none;
+}
+.scale span { font-size: 7px; color: #9ca3af; line-height: 1; }
+
+/* Oil fill */
+.oil-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  transition: height 1s ease;
+  overflow: hidden; border-radius: 0 0 10px 10px;
+}
+.oil-body {
+  position: absolute; bottom: 0; left: 0; right: 0; top: 30px;
+  background: linear-gradient(180deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+}
+.wave-box { position: absolute; top: 0; left: 0; right: 0; height: 34px; overflow: hidden; }
+.wv       { position: absolute; top: 0; width: 300%; left: -100%; height: 34px; }
+.wv svg   { position: absolute; top: 0; width: 100%; height: 34px; }
+.wv1 { animation: wmove 3s linear infinite; }
+.wv2 { animation: wmove 5s linear infinite reverse; opacity: .5; }
+@keyframes wmove { 0%{transform:translateX(0);} 100%{transform:translateX(33.33%);} }
+
+/* ── Settings ─────────────────────────────────── */
+.settings-page { max-width: 780px; }
+.admin-lock {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; text-align: center;
+  margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.admin-lock h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+.admin-lock .pr { display: flex; gap: 8px; max-width: 320px; margin: 0 auto; }
+.admin-lock input {
+  flex: 1; padding: 9px 12px; border-radius: 6px;
+  border: 1.5px solid var(--border); font-size: 15px;
+  letter-spacing: 4px; outline: none; transition: border .15s;
+}
+.admin-lock input:focus { border-color: var(--blue); }
+.admin-lock .unlock { padding: 9px 16px; border-radius: 6px; background: var(--blue); color: #fff; border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+.admin-lock .unlock:hover { background: #1d4ed8; }
+.admin-err { font-size: 11px; color: var(--red); margin-top: 6px; min-height: 14px; }
+
+.admin-open-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  padding: 8px 14px; background: var(--green-bg);
+  border: 1px solid var(--green); border-radius: 7px;
+  font-size: 12px; font-weight: 600; color: var(--green);
+}
+.lock-btn {
+  margin-left: auto; padding: 5px 12px; border-radius: 5px;
+  border: 1px solid var(--red); color: var(--red); background: transparent;
+  font-size: 11px; cursor: pointer; font-weight: 600;
+}
+.lock-btn:hover { background: var(--red-bg); }
+
+.settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 12px; }
+.sc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
+}
+.sc h4 { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.sr { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+.sr label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.si {
+  padding: 8px 10px; border-radius: 5px; border: 1.5px solid var(--border);
+  font-size: 14px; background: var(--bg); color: var(--text); outline: none; transition: border .15s;
+}
+.si:focus  { border-color: var(--blue); background: #fff; }
+.si:disabled { opacity: .4; cursor: not-allowed; }
+.save-btn {
+  width: 100%; padding: 9px; margin-top: 4px; border-radius: 6px;
+  background: var(--blue); color: #fff; border: none;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s;
+}
+.save-btn:hover { background: #1d4ed8; }
+.save-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Log ──────────────────────────────────────── */
+.log-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.ltb {
+  padding: 6px 14px; border-radius: 5px; border: 1px solid var(--border);
+  background: var(--surface); font-size: 12px; font-weight: 500; color: var(--muted);
+  cursor: pointer; transition: all .15s;
+}
+.ltb:hover { border-color: var(--blue); color: var(--blue); }
+.ltb.danger:hover { border-color: var(--red); color: var(--red); }
+.log-ct { font-size: 11px; color: var(--muted); margin-left: auto; }
+.log-tw {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow);
+}
+.log-scroll { max-height: 460px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px; color: var(--muted);
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 2;
+}
+tbody td { padding: 8px 12px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--bg); }
+tbody tr:hover td { background: var(--bg); }
+td.ev  { color: var(--text); font-weight: 500; }
+td.ca  { color: var(--red); font-weight: 600; }
+td.cin { color: var(--blue); }
+td.cout{ color: var(--amber); }
+td.cwt { color: var(--green); }
+
+/* ── Status bar ───────────────────────────────── */
+.status-bar {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 6px 16px; margin-top: 12px;
+  display: flex; gap: 24px; font-size: 11px; color: var(--muted);
+  box-shadow: var(--shadow);
+}
+.status-bar span { font-weight: 600; color: var(--text); margin-left: 4px; }
+
+/* ── Toast ────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 20px; right: 20px; z-index: 999;
+  padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  opacity: 0; transform: translateY(6px); transition: all .25s;
+  pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.ok   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+.toast.warn { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red);   }
+</style>
+</head>
+<body>
+<div class="page">
+
+ 
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
+  <button class="tab" onclick="switchTab('setting',this)">Settings</button>
+  <button class="tab" onclick="switchTab('log',this)">Log</button>
+</div>
+
+<!-- ═══ MONITOR ═══ -->
+<div id="tab-monitor" class="tab-panel active">
+<div class="monitor">
+
+  <!-- INFEED -->
+  <div class="card">
+    <div class="card-head">◀ Infeed</div>
+    <div class="card-body ctrl">
+      <button class="ctrl-btn st-green" id="in-mode-btn" onclick="ctrl('infeed','mode')">
+        <span class="label">Control Mode</span>
+        <span class="value" id="in-mode-val">AUTO</span>
+      </button>
+      <button class="ctrl-btn" id="in-op-btn" onclick="ctrl('infeed','operation')">
+        <span class="label">Operation</span>
+        <span class="value" id="in-op-val">LOCAL</span>
+      </button>
+      <button class="ctrl-btn st-red" id="in-run-btn" onclick="ctrl('infeed','run')">
+        <span class="label">Run State</span>
+        <span class="value" id="in-run-val">STOP</span>
+      </button>
+      <div class="vol-wrap">
+        <span class="vol-label">Infeed Volume (L)</span>
+        <input type="number" class="vol-input" id="in-vol" value="25.00" step="0.01" min="0">
+        <button class="apply-btn" onclick="applyVol('infeed')">Apply Infeed</button>
+      </div>
+      <!-- Weight tile — bottom left -->
+      <div class="stat-tile" id="wt-tile" style="margin-top:4px;">
+        <div class="st-label">Tank Weight</div>
+        <div class="st-val" id="wt-val">---</div>
+        <div class="st-unit">KG</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TANK -->
+  <div class="tank-wrap-outer">
+    <!-- HI sensor -->
+    <div class="sensor-row">
+      <div class="sdot" id="hi-dot"></div>
+      <span class="slbl" id="hi-lbl">HI LEVEL</span>
+    </div>
+
+    <!-- Input valve -->
+    <div class="valve-row">
+      <div class="vpipe"></div>
+      <div class="vgate" id="in-valve" onclick="ctrlValve('infeed')" title="Input Valve">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="3" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/>
+        </svg>
+      </div>
+      <div class="vpipe"></div>
+    </div>
+
+    <div class="port-stub top" id="port-top"></div>
+
+    <!-- Tank body -->
+    <div class="tank-shell">
+      <div class="lvl-line hi" id="hi-line" style="bottom:80%"></div>
+      <div class="lvl-tag  hi" id="hi-tag"  style="bottom:80%;transform:translateY(50%)">HI</div>
+      <div class="lvl-line lo" id="lo-line" style="bottom:20%"></div>
+      <div class="lvl-tag  lo" id="lo-tag"  style="bottom:20%;transform:translateY(50%)">LO</div>
+      <div class="scale">
+        <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+      </div>
+      <div class="oil-fill" id="oil-fill" style="height:35%">
+        <div class="oil-body"></div>
+        <div class="wave-box">
+          <div class="wv wv1">
+            <svg viewBox="0 0 300 34" preserveAspectRatio="none">
+              <path d="M0,17 C25,5 50,29 75,17 C100,5 125,29 150,17 C175,5 200,29 225,17 C250,5 275,29 300,17 L300,34 L0,34 Z" fill="#e59400"/>
+            </svg>
+          </div>
+          <div class="wv wv2">
+            <svg viewBox="0 0 300 34" preserveAspectRatio="none">
+              <path d="M0,22 C25,9 50,34 75,22 C100,9 125,34 150,22 C175,9 200,34 225,22 C250,9 275,34 300,22 L300,34 L0,34 Z" fill="#f59e0b" fill-opacity=".5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="port-stub bot" id="port-bot"></div>
+
+    <!-- Output valve -->
+    <div class="valve-row">
+      <div class="vpipe"></div>
+      <div class="vgate" id="out-valve" onclick="ctrlValve('outfeed')" title="Output Valve">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="3" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/>
+        </svg>
+      </div>
+      <div class="vpipe"></div>
+    </div>
+
+    <!-- LO sensor -->
+    <div class="sensor-row">
+      <div class="sdot" id="lo-dot"></div>
+      <span class="slbl" id="lo-lbl">LO LEVEL</span>
+    </div>
+  </div><!-- /tank-wrap-outer -->
+
+  <!-- OUTFEED -->
+  <div class="card">
+    <div class="card-head">Outfeed ▶</div>
+    <div class="card-body ctrl">
+      <button class="ctrl-btn st-green" id="out-mode-btn" onclick="ctrl('outfeed','mode')">
+        <span class="label">Control Mode</span>
+        <span class="value" id="out-mode-val">AUTO</span>
+      </button>
+      <button class="ctrl-btn" id="out-op-btn" onclick="ctrl('outfeed','operation')">
+        <span class="label">Operation</span>
+        <span class="value" id="out-op-val">LOCAL</span>
+      </button>
+      <button class="ctrl-btn st-red" id="out-run-btn" onclick="ctrl('outfeed','run')">
+        <span class="label">Run State</span>
+        <span class="value" id="out-run-val">STOP</span>
+      </button>
+      <div class="vol-wrap">
+        <span class="vol-label">Outfeed Volume (L)</span>
+        <input type="number" class="vol-input" id="out-vol" value="0.00" step="0.01" min="0">
+        <button class="apply-btn" onclick="applyVol('outfeed')">Apply Outfeed</button>
+      </div>
+      <!-- Info tile — bottom right -->
+      <div class="card info-tile" style="margin-top:4px;">
+        <div class="info-row">
+         
+        </div>
+        <div class="hr"></div>
+        <div class="bar-wrap">
+          <div class="bar-row">
+            <span class="bl">Level</span>
+            <span class="bp" id="lvl-pct">--%</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="lvl-bar" style="width:35%"></div></div>
+        </div>
+        <div class="hr"></div>
+        <div class="prod-row" id="prod-tag">--</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /monitor -->
+</div><!-- /tab-monitor -->
+
+<!-- ═══ SETTINGS ═══ -->
+<div id="tab-setting" class="tab-panel">
+<div class="settings-page">
+  <div class="admin-lock" id="admin-gate">
+    <h3>🔒 Admin Login Required</h3>
+    <div class="pr">
+      <input type="password" id="pass-in" placeholder="Password" maxlength="20"
+             onkeydown="if(event.key==='Enter')checkPass()">
+      <button class="unlock" onclick="checkPass()">Unlock</button>
+    </div>
+    <div class="admin-err" id="admin-err"></div>
+  </div>
+  <div id="admin-open" style="display:none;">
+    <div class="admin-open-bar">
+      🔓 Admin Mode Active
+      <button class="lock-btn" onclick="lockAdmin()">Lock</button>
+    </div>
+  </div>
+  <div class="settings-grid">
+    <div class="sc">
+      <h4>Product Info</h4>
+      <div class="sr"><label>Product Code</label><input type="text" class="si af" id="s-code" disabled></div>
+      <div class="sr"><label>Product Name</label><input type="text" class="si af" id="s-name" disabled></div>
+    </div>
+    <div class="sc">
+      <h4>Tank Parameters</h4>
+      <div class="sr"><label>Max Capacity (kg)</label><input type="number" class="si af" id="s-maxkg" disabled></div>
+      <div class="sr"><label>Oil Density (kg/L)</label><input type="number" class="si af" id="s-density" step="0.01" disabled></div>
+      <div class="sr"><label>Tare Weight (kg)</label><input type="number" class="si af" id="s-tare" step="0.01" disabled></div>
+    </div>
+    <div class="sc">
+      <h4>Alarm Thresholds</h4>
+      <div class="sr"><label>Hi Level (%)</label><input type="number" class="si af" id="s-hi" min="0" max="100" disabled></div>
+      <div class="sr"><label>Lo Level (%)</label><input type="number" class="si af" id="s-lo" min="0" max="100" disabled></div>
+    </div>
+    <div class="sc">
+      <h4>Infeed Settings</h4>
+      <div class="sr"><label>Default Volume (L)</label><input type="number" class="si af" id="s-inf-def" step="0.01" disabled></div>
+      <div class="sr"><label>Max Volume (L)</label><input type="number" class="si af" id="s-inf-max" step="0.01" disabled></div>
+      <button class="save-btn af-btn" id="save-btn" onclick="saveSettings()" disabled>Save Settings</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ LOG ═══ -->
+<div id="tab-log" class="tab-panel">
+  <div class="log-toolbar">
+    <button class="ltb" onclick="exportJSON()">↓ Export JSON</button>
+    <button class="ltb danger" onclick="clearLog()">✕ Clear Log</button>
+    <span class="log-ct" id="log-ct">0 events</span>
+  </div>
+  <div class="log-tw">
+    <div class="log-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th><th>Event</th>
+            <th>Infeed (L)</th><th>Outfeed (L)</th>
+            <th>Weight (kg)</th><th>Level (%)</th>
+          </tr>
+        </thead>
+        <tbody id="log-tbody">
+          <tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;">No events yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div>Unit: <span id="sb-unit">--</span></div>
+  <div>Capacity: <span id="sb-cap">-- kg</span></div>
+  <div>Status: <span id="sb-status">--</span></div>
+  <div>Last update: <span id="sb-ts">--</span></div>
+</div>
+
+</div><!-- /page -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═════════════════════════════════════════════════
+// STATE (local cache — refreshed from server at 1Hz)
+// ═════════════════════════════════════════════════
+let D = null;          // last data snapshot
+let adminOn = false;
+const PASS = "1234";
+
+// ═════════════════════════════════════════════════
+// 1 Hz POLL
+// ═════════════════════════════════════════════════
+async function poll() {
+  try {
+    const r = await fetch("/api/data", { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    D = await r.json();
+    render(D);
+    setConn(true);
+  } catch(e) {
+    setConn(false);
+  }
+}
+
+function setConn(ok) {
+  const b = document.getElementById("conn-badge");
+  b.className = "badge " + (ok ? "badge-green" : "badge-red");
+  b.innerHTML = `<span class="dot ${ok?"pulse":""}"></span>${ok?"ONLINE":"OFFLINE"}`;
+}
+
+// Start 1 Hz poll
+poll();
+setInterval(poll, 1000);
+
+// ═════════════════════════════════════════════════
+// RENDER (called every 1 Hz with fresh data)
+// ═════════════════════════════════════════════════
+function render(d) {
+  const tk = d.tank;
+  const ifd = d.infeed;
+  const ofd = d.outfeed;
+
+  // Weight
+  const net = Math.max(0, tk.weight_kg - tk.tare_kg);
+  const wEl = document.getElementById("wt-val");
+  wEl.textContent = net.toFixed(2);
+
+  const wtTile = document.getElementById("wt-tile");
+  wtTile.className = "stat-tile" + (tk.hi_alarm ? " alarm-hi" : tk.lo_alarm ? " alarm-lo" : "");
+
+  // Tare & level
+  //document.getElementById("tare-val").textContent = (tk.tare_kg || 0).toFixed(2);
+  const pct = tk.level_pct;
+  document.getElementById("lvl-pct").textContent = pct.toFixed(1) + "%";
+  document.getElementById("lvl-pct").className = "bp" + (tk.hi_alarm ? " alarm-hi-txt" : tk.lo_alarm ? " alarm-lo-txt" : "");
+  const bar = document.getElementById("lvl-bar");
+  bar.style.width = pct + "%";
+  bar.className = "bar-fill" + (tk.hi_alarm ? " alarm-hi" : tk.lo_alarm ? " alarm-lo" : "");
+
+  // Product
+ // document.getElementById("prod-tag").textContent = d.product || "--";
+  //document.getElementById("hdr-prod").textContent = d.product || "--";
+  //document.getElementById("hdr-code").textContent = d.product_code || "--";
+
+  // Tank fill + wave
+  document.getElementById("oil-fill").style.height = pct + "%";
+
+  // Level lines
+  document.getElementById("hi-line").style.bottom = tk.hi_threshold_pct + "%";
+  document.getElementById("hi-tag").style.bottom  = tk.hi_threshold_pct + "%";
+  document.getElementById("lo-line").style.bottom = tk.lo_threshold_pct + "%";
+  document.getElementById("lo-tag").style.bottom  = tk.lo_threshold_pct + "%";
+
+  // Sensors
+  const hiD = document.getElementById("hi-dot");
+  const loD = document.getElementById("lo-dot");
+  const hiL = document.getElementById("hi-lbl");
+  const loL = document.getElementById("lo-lbl");
+  hiD.className = "sdot" + (tk.hi_alarm ? " alarm"  : "");
+  loD.className = "sdot" + (tk.lo_alarm ? " lo-alm" : "");
+  hiL.className = "slbl" + (tk.hi_alarm ? " alarm"  : "");
+  loL.className = "slbl" + (tk.lo_alarm ? " lo-alm" : "");
+
+  // Valves
+  renderValve("in",  ifd.valve_open && ifd.running);
+  renderValve("out", ofd.valve_open && ofd.running);
+  const flowIn  = ifd.valve_open && ifd.running;
+  const flowOut = ofd.valve_open && ofd.running;
+  document.getElementById("port-top").className = "port-stub top" + (flowIn  ? " flowing" : "");
+  document.getElementById("port-bot").className = "port-stub bot" + (flowOut ? " flowing" : "");
+
+  // Panels
+  renderPanel("in",  ifd);
+  renderPanel("out", ofd);
+
+  // Status bar
+  document.getElementById("sb-unit").textContent   = d.product_code || "--";
+  document.getElementById("sb-cap").textContent    = tk.max_kg + " kg";
+  document.getElementById("sb-status").textContent = (ifd.running || ofd.running) ? "Running" : "Idle";
+  const ts = d.timestamp ? d.timestamp.replace("T"," ").slice(0,19) : "--";
+  document.getElementById("sb-ts").textContent = ts;
+
+  // Log
+  renderLog(d.log || []);
+
+  // Sync settings inputs (once)
+  syncSettings(d);
+}
+
+function renderValve(side, open) {
+  const el = document.getElementById(side + "-valve");
+  el.className = "vgate" + (open ? " open" : "");
+  el.querySelector("svg").style.color = open ? "var(--green)" : "";
+}
+
+function renderPanel(side, s) {
+  const remote = s.operation === "REMOTE";
+  const running = s.running;
+
+  // Mode btn
+  const mb = document.getElementById(side + "-mode-btn");
+  mb.className = "ctrl-btn " + (s.mode === "AUTO" ? "st-green" : "st-blue") + (remote ? " disabled" : "");
+  document.getElementById(side + "-mode-val").textContent = s.mode;
+
+  // Op btn
+  const ob = document.getElementById(side + "-op-btn");
+  ob.className = "ctrl-btn " + (remote ? "st-amber" : "");
+  document.getElementById(side + "-op-val").textContent = s.operation;
+
+  // Run btn
+  const rb = document.getElementById(side + "-run-btn");
+  rb.className = "ctrl-btn " + (running ? "st-green" : "st-red") + (remote ? " disabled" : "");
+  document.getElementById(side + "-run-val").textContent = running ? "START" : "STOP";
+}
+
+// ═════════════════════════════════════════════════
+// CONTROLS → POST to server → simulator reads
+// ═════════════════════════════════════════════════
+async function ctrl(side, action) {
+  await fetch("/api/control", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ side, action })
+  });
+  poll(); // immediate refresh
+}
+
+async function ctrlValve(side) {
+  // toggle valve via run state proxy
+  if (D) {
+    const s = D[side];
+    if (s.operation !== "REMOTE") await ctrl(side, "run");
+  }
+}
+
+async function applyVol(side) {
+  const vol = parseFloat(document.getElementById(side === "infeed" ? "in-vol" : "out-vol").value) || 0;
+  if (vol <= 0) { showToast("Enter a valid volume > 0", "warn"); return; }
+  await fetch("/api/control", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ side, action: "apply", vol })
+  });
+  const kg = vol * (D?.tank?.density_kgl || 0.87);
+  showToast((side === "infeed" ? "Infeed +" : "Outfeed −") + kg.toFixed(2) + " kg", "ok");
+  poll();
+}
+
+// ═════════════════════════════════════════════════
+// ADMIN / SETTINGS
+// ═════════════════════════════════════════════════
+let settingsSynced = false;
+function syncSettings(d) {
+  if (settingsSynced) return;
+  settingsSynced = true;
+  const tk = d.tank;
+  document.getElementById("s-code").value    = d.product_code || "";
+  document.getElementById("s-name").value    = d.product || "";
+  document.getElementById("s-maxkg").value   = tk.max_kg;
+  document.getElementById("s-density").value = tk.density_kgl || 0.87;
+  document.getElementById("s-tare").value    = tk.tare_kg || 0;
+  document.getElementById("s-hi").value      = tk.hi_threshold_pct;
+  document.getElementById("s-lo").value      = tk.lo_threshold_pct;
+  document.getElementById("s-inf-def").value = d.infeed?.manual_vol_L || 25;
+  document.getElementById("s-inf-max").value = 200;
+}
+
+function checkPass() {
+  if (document.getElementById("pass-in").value === PASS) {
+    adminOn = true;
+    document.getElementById("admin-gate").style.display = "none";
+    document.getElementById("admin-open").style.display = "";
+    document.querySelectorAll(".af").forEach(el => el.disabled = false);
+    document.getElementById("save-btn").disabled = false;
+    document.getElementById("admin-err").textContent = "";
+  } else {
+    document.getElementById("admin-err").textContent = "Incorrect password";
+    document.getElementById("pass-in").value = "";
+  }
+}
+
+function lockAdmin() {
+  adminOn = false;
+  document.getElementById("admin-gate").style.display = "";
+  document.getElementById("admin-open").style.display = "none";
+  document.getElementById("pass-in").value = "";
+  document.querySelectorAll(".af").forEach(el => el.disabled = true);
+  document.getElementById("save-btn").disabled = true;
+  settingsSynced = false;
+}
+
+async function saveSettings() {
+  if (!adminOn || !D) return;
+  D.product_code = document.getElementById("s-code").value;
+  D.product      = document.getElementById("s-name").value;
+  D.tank.max_kg              = parseFloat(document.getElementById("s-maxkg").value)   || D.tank.max_kg;
+  D.tank.density_kgl         = parseFloat(document.getElementById("s-density").value) || D.tank.density_kgl;
+  D.tank.tare_kg             = parseFloat(document.getElementById("s-tare").value)    || 0;
+  D.tank.hi_threshold_pct    = parseFloat(document.getElementById("s-hi").value)      || D.tank.hi_threshold_pct;
+  D.tank.lo_threshold_pct    = parseFloat(document.getElementById("s-lo").value)      || D.tank.lo_threshold_pct;
+  D.infeed.manual_vol_L      = parseFloat(document.getElementById("s-inf-def").value) || D.infeed.manual_vol_L;
+
+  await fetch("/api/control", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ side: "_settings", action: "save_settings", data: D })
+  });
+  showToast("Settings saved", "ok");
+  settingsSynced = false;
+  poll();
+}
+
+// ═════════════════════════════════════════════════
+// LOG
+// ═════════════════════════════════════════════════
+function renderLog(rows) {
+  document.getElementById("log-ct").textContent = rows.length + " events";
+  const tbody = document.getElementById("log-tbody");
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;">No events yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const alarm = r.evt && (r.evt.includes("⚠") || r.evt.includes("ALARM"));
+    return `<tr>
+      <td style="color:#9ca3af;font-size:11px;">${(r.ts||"").replace("T"," ").slice(0,19)}</td>
+      <td class="${alarm?"ca":"ev"}">${r.evt||""}</td>
+      <td class="cin">${r.inVol  != null ? r.inVol.toFixed(2)+"L" : "—"}</td>
+      <td class="cout">${r.outVol != null ? r.outVol.toFixed(2)+"L" : "—"}</td>
+      <td class="cwt">${r.weight != null ? r.weight+" kg" : "—"}</td>
+      <td class="cin">${r.level  != null ? r.level+"%" : "—"}</td>
+    </tr>`;
+  }).join("");
+}
+
+function exportJSON() {
+  if (!D) return;
+  const blob = new Blob([JSON.stringify(D, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ols_" + new Date().toISOString().slice(0,10) + ".json";
+  a.click();
+  showToast("Exported", "ok");
+}
+
+async function clearLog() {
+  if (!confirm("Clear all log entries?")) return;
+  await fetch("/api/log", { method: "DELETE" });
+  showToast("Log cleared", "ok");
+  poll();
+}
+
+// ═════════════════════════════════════════════════
+// TABS / TOAST / CLOCK
+// ═════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  btn.classList.add("active");
+}
+
+let _tt;
+function showToast(msg, type = "") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (type ? " " + type : "");
+  clearTimeout(_tt);
+  _tt = setTimeout(() => { t.className = "toast"; }, 3000);
+}
+
+function tick() {
+  document.getElementById("clock").textContent =
+    new Date().toLocaleTimeString("en-US", { hour12: false });
+}
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
+  

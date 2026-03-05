@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-03-02T17:23:34.027173+00:00",
+  "product": "CHOCO PUF",
+  "product_code": "OLS-001",
+  "tank": {
+    "weight_kg": 295.0,
+    "tare_kg": 0.0,
+    "level_pct": 59.0,
+    "max_kg": 500,
+    "density_kgl": 0.87,
+    "hi_alarm": false,
+    "lo_alarm": false,
+    "hi_threshold_pct": 80,
+    "lo_threshold_pct": 20
+  },
+  "infeed": {
+    "mode": "MANUAL",
+    "operation": "LOCAL",
+    "running": false,
+    "valve_open": false,
+    "manual_vol_L": 30.0,
+    "flow_rate_lpm": 0.0
+  },
+  "outfeed": {
+    "mode": "MANUAL",
+    "operation": "LOCAL",
+    "running": false,
+    "valve_open": false,
+    "manual_vol_L": 12.35,
+    "flow_rate_lpm": 0.0
+  },
+  "log": [
+    {
+      "ts": "2026-03-02T16:20:14.184516Z",
+      "evt": "\u26a0 HI LEVEL ALARM",
+      "weight": 499.996,
+      "level": 100.0
+    },
+    "dsdfsf,er,erf,erg"
+  ]
+}
