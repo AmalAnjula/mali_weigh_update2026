@@ -50,37 +50,50 @@ def my_serial_read(thread_name,my_delay):
 
     ser.flushInput()
     while(True):
-        
-        
-        try:    
-            dt=ser.read_until(b'\n').decode("utf-8").strip() 
-            ser.flushInput()
-            dt=dt.replace("=","")
-            dt=dt.replace(" ","")   
-            nowval=float(dt)
+        try:
+            # Read 20 characters
              
-            if abs(nowval - oldval) > MAX_ALLOWED_JUMP and oldval!=-200:
-                tech_log.warning("Weight jump detected: %.2f kg (from %.2f to %.2f)", abs(nowval - oldval), oldval, nowval)
-                time.sleep(1)  # brief pause to allow for stabilization
-                ser.flushInput()    
-            else:
-                weiVal=nowval
-            oldval=nowval
-            serial_error=False
-        except ValueError:
-            tech_log.warning("Received non-integer data from serial: %s", dt)
+            data = ser.readline().decode('utf-8', errors='ignore').strip()
+            #print(data)
+            #data = ser.readline().decode('utf-8', errors='ignore')[:20]
             
-            time.sleep(1)  # brief pause before next read   
-            ser.flushInput()    
-            print(dt)
+            
+            # Split data between two newlines
+            
+            
+            # Process the data
+            dt = data.strip()
+            dt = dt.replace("=", "")
+            dt = dt.replace(" ", "")
+            dt = dt.replace("\n", "")
+            dt = dt.replace("\r", "")
+            
+            if dt:  # Only process if not empty
+                nowval = float(dt)
+                
+                if abs(nowval - oldval) > MAX_ALLOWED_JUMP and oldval != -200:
+                    #tech_log.warning("Weight jump detected: %.2f kg (from %.2f to %.2f)", abs(nowval - oldval), oldval, nowval)
+                    time.sleep(1)
+                    ser.flushInput()
+                else:
+                    weiVal = nowval
+                    #print("Current weight value:", weiVal)
+                oldval = nowval
+                serial_error = False
+        except ValueError:
+            tech_log.warning("Received non-numeric data from serial: %s", data)
+            time.sleep(1)
+            ser.flushInput()
             continue
         except serial.SerialException as e:
             tech_log.error("Serial communication error: %s", str(e))
-            serial_error=True
+            serial_error = True
             continue
-
-        #time.sleep(my_delay)
-        #print("Current weight value:", weiVal)
+        except Exception as e:
+            tech_log.error("Error reading serial data: %s", str(e))
+            time.sleep(1)
+            ser.flushInput()
+            continue
 
 
  

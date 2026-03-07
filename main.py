@@ -24,7 +24,16 @@ tank = {}
 infeed = {}
 outfeed = {}
 log_data = []
-UkiqySVBAKhpg9Q
+
+
+infeed_now_control_mode =  None
+infeed_now_operation_mode = None
+infeed_now_running = None
+outfeed_now_control_mode = None
+outfeed_now_operation_mode = None
+outfeed_now_running = None
+ 
+ 
 # Track previous state for change detection
 prev_infeed_mode = None
 prev_infeed_operation = None
@@ -149,7 +158,7 @@ def oil_add(now_weight ,required_weight):
     time.sleep(2)  # Simulating time taken for oil addition
      
 
- 
+
 def check_infeed_mode_change(src):
     """Check if infeed mode changed and log it."""
     global prev_infeed_mode
@@ -185,6 +194,23 @@ def check_outfeed_operation_change(src):
         tech_log.warning("OUTFEED OPERATION CHANGE: %s -> %s", prev_outfeed_operation, current_operation)
         print ("OUTFEED OPERATION CHANGE: %s -> %s", prev_outfeed_operation, current_operation)
     prev_outfeed_operation = current_operation
+def check_infeed_running_change(src):
+    """Check if infeed running state changed and log it."""
+    global prev_infeed_running
+    current_running = src.get("running")
+    if prev_infeed_running is not None and current_running != prev_infeed_running:
+        tech_log.warning("INFEED RUNNING CHANGE: %s -> %s", prev_infeed_running, current_running)
+        print("INFEED RUNNING CHANGE: %s -> %s", prev_infeed_running, current_running)    
+    prev_infeed_running = current_running
+
+def check_outfeed_running_change(src):  
+    """Check if outfeed running state changed and log it."""
+    global prev_outfeed_running
+    current_running = src.get("running")
+    if prev_outfeed_running is not None and current_running != prev_outfeed_running:
+        tech_log.warning("OUTFEED RUNNING CHANGE: %s -> %s", prev_outfeed_running, current_running)
+        print("OUTFEED RUNNING CHANGE: %s -> %s", prev_outfeed_running, current_running)    
+    prev_outfeed_running = current_running
 
 def load_data_json():
     """Read data.json and populate module-level variables.
@@ -192,24 +218,36 @@ def load_data_json():
     Detects state changes in infeed/outfeed mode and operation.
     Call this periodically or once at startup. Any errors are logged.
     """
-    global DATA, timestamp, product, product_code, tank, infeed, outfeed, log_data
+    global DATA, timestamp, product, product_code, tank, infeed, outfeed, log_data,infeed_now_control_mode,infeed_now_operation_mode,infeed_now_running,outfeed_now_control_mode,outfeed_now_operation_mode,outfeed_now_running
     try:
         with open("data.json") as f:
             DATA = json.load(f)
         
-        timestamp = DATA.get("timestamp")
-        product = DATA.get("product")
-        product_code = DATA.get("product_code")
-        tank = DATA.get("tank", {})
+        
+       
         infeed = DATA.get("infeed", {})
         outfeed = DATA.get("outfeed", {})
-        log_data = DATA.get("log", [])
+         
+
+        
+        infeed_now_control_mode = infeed.get("mode")
+        infeed_now_operation_mode = infeed.get("operation") 
+        infeed_now_running = infeed.get("running")
+
+        outfeed_now_control_mode = outfeed.get("mode")
+        outfeed_now_operation_mode = outfeed.get("operation")
+        outfeed_now_running = outfeed.get("running")
+
+
         
         # Check for state changes
         check_infeed_mode_change(infeed)
         check_infeed_operation_change(infeed)
+        check_infeed_running_change(infeed)
+
         check_outfeed_mode_change(outfeed)
         check_outfeed_operation_change(outfeed)
+        check_outfeed_running_change(outfeed)
         
         #tech_log.debug("Loaded data.json: %s", DATA)
     except Exception as e:
@@ -230,10 +268,12 @@ def check_button_change(thread_name,my_delay):
         # Update flags based on current infeed state
         infeed_mode_change = (infeed.get("mode") != prev_infeed_mode)
         infeed_local_remote_change = (infeed.get("operation") != prev_infeed_operation)
-        
+         
         remote_stop = (infeed.get("operation") == "REMOTE" and infeed.get("running") == False)
         local_stop = (infeed.get("operation") == "LOCAL" and infeed.get("running") == False)
+        
 
+ 
 
 def update_weight_in_json():
     """Read weight from sensor and update data.json."""
@@ -292,15 +332,7 @@ def main():
     # read initial JSON data into variables
     load_data_json()
 
-    #oil_add(58, 50.0)  # Example: Add oil until we reach 50 kg
-    while True:
-        time.sleep(1)
-        # Update weight from sensor into data.json
-        update_weight_in_json()
-        # Reload JSON data periodically to detect state changes
-        load_data_json()
-        print("Weight:", give_me_weight())
-
+    
 
     # ---- Technical logs ----
     '''tech_log.debug("DB connection started")
@@ -311,12 +343,39 @@ def main():
     prod_log.warning("Payment delay detected")'''
 
 
+def do_work(thread_name,my_delay):
+    global infeed_now_control_mode,infeed_now_operation_mode,infeed_now_running,outfeed_now_control_mode,outfeed_now_operation_mode,outfeed_now_running
+  
+    while True:
+        #oil_add(58, 50.0)  # Example: Add oil until we reach 50 kg
+       
+        time.sleep(1)
+        # Update weight from sensor into data.json
+        update_weight_in_json()
+        # Reload JSON data periodically to detect state changes
+        load_data_json()
+        print("Weight:", give_me_weight())
+        print("Infeed mode:", infeed_now_control_mode, "operation:", infeed_now_operation_mode, "running:", infeed_now_running)
+        print("Outfeed mode:", outfeed_now_control_mode, "operation:", outfeed_now_operation_mode, "running:", outfeed_now_running)
+
+        # You can add more periodic tasks here as needed
+
+
 t = threading.Thread(
     target=check_button_change,
     args=("btnChnageEvent", 0.001),
 )
 t.daemon = True
 t.start()
+
+
+t = threading.Thread(
+    target=do_work,
+    args=("do_work_thead", 0.001),
+)
+t.daemon = True
+t.start()
+
 
 if __name__ == "__main__":
     try:

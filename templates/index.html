@@ -726,11 +726,18 @@ function render(d) {
   renderPanel("out", ofd);
 
   // Status bar
-  document.getElementById("sb-unit").textContent   = d.product_code || "--";
+  document.getElementById("sb-unit").textContent   = "KG";  // Unit for weight
   document.getElementById("sb-cap").textContent    = tk.max_kg + " kg";
-  document.getElementById("sb-status").textContent = (ifd.running || ofd.running) ? "Running" : "Idle";
+  let status = "OK";
+  if (tk.hi_alarm) status = "HI ALARM";
+  else if (tk.lo_alarm) status = "LO ALARM";
+  document.getElementById("sb-status").textContent = status;
   const ts = d.timestamp ? d.timestamp.replace("T"," ").slice(0,19) : "--";
   document.getElementById("sb-ts").textContent = ts;
+
+  // Update volume inputs from data
+  //document.getElementById("in-vol").value = (d.infeed?.manual_vol_L || 0).toFixed(2);
+  document.getElementById("out-vol").value = (d.outfeed?.manual_vol_L || 0).toFixed(2);
 
   // Log
   renderLog(d.log || []);
@@ -762,7 +769,8 @@ function renderPanel(side, s) {
   // Run btn
   const rb = document.getElementById(side + "-run-btn");
   rb.className = "ctrl-btn " + (running ? "st-green" : "st-red") + (remote ? " disabled" : "");
-  document.getElementById(side + "-run-val").textContent = running ? "START" : "STOP";
+  // show "STOP" when running, otherwise "START"
+  document.getElementById(side + "-run-val").textContent = running ? "STOP" : "START";
 }
 
 // ═════════════════════════════════════════════════
@@ -783,6 +791,16 @@ async function ctrlValve(side) {
     const s = D[side];
     if (s.operation !== "REMOTE") await ctrl(side, "run");
   }
+}
+
+async function setValve(side, state) {
+  // Direct valve control: state = true (open) or false (close)
+  await fetch("/api/control", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ side, action: "valve", state })
+  });
+  poll(); // immediate refresh
 }
 
 async function applyVol(side) {

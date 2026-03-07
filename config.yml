@@ -1,10 +1,10 @@
-serial:
-  port: "/dev/ttyUSB1"
-  baudrate: 9600
-  timeout: 2
-
 infeed:
+  filling_time: 15
+  manual_vol_L: 25.0
   max_weight: 100.0
   min_weight: 0.0
   weight_jump_threshold: 3.0
-  filling_time: 1000
+serial:
+  baudrate: 9600
+  port: /dev/ttyUSB0
+  timeout: 0.3
