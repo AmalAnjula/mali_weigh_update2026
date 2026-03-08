@@ -4,6 +4,10 @@ infeed:
   max_weight: 100.0
   min_weight: 0.0
   weight_jump_threshold: 3.0
+outfeed:
+  draining_time: 30
+  manual_vol_L: 10.0
+  min_weight: 20.0
 serial:
   baudrate: 9600
   port: /dev/ttyUSB0

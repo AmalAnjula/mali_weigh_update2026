@@ -49,12 +49,10 @@ header {
   justify-content: space-between;
   box-shadow: var(--shadow);
 }
-/*
 .hdr-left h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: .3px; }
 .hdr-left p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .hdr-right   { display: flex; align-items: center; gap: 16px; }
 #clock        { font-size: 15px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
- */
 .badge {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 4px 10px; border-radius: 20px;
@@ -397,7 +395,19 @@ td.cwt { color: var(--green); }
 <body>
 <div class="page">
 
- 
+<!-- HEADER -->
+<header>
+  <div class="hdr-left">
+    <h1>OLS &mdash; Monitor</h1>
+    <p>Oil Level System</p>
+  </div>
+  <div class="hdr-right">
+    <span id="clock">--:--:--</span>
+    <span class="badge badge-green" id="conn-badge">
+      <span class="dot pulse"></span>ONLINE
+    </span>
+  </div>
+</header>
 
 <!-- TABS -->
 <div class="tabs">
@@ -626,6 +636,10 @@ td.cwt { color: var(--green); }
   <div>Capacity: <span id="sb-cap">-- kg</span></div>
   <div>Status: <span id="sb-status">--</span></div>
   <div>Last update: <span id="sb-ts">--</span></div>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
+    <div style="font-size:11px;color:var(--muted)">MQTT last: <span id="sb-mqtt-ts" style="font-weight:600;color:var(--text)">--</span></div>
+    <span class="badge badge-red" id="sb-mqtt"><span class="dot"></span>MQTT OFF</span>
+  </div>
 </div>
 
 </div><!-- /page -->
@@ -735,9 +749,23 @@ function render(d) {
   const ts = d.timestamp ? d.timestamp.replace("T"," ").slice(0,19) : "--";
   document.getElementById("sb-ts").textContent = ts;
 
+  // MQTT status badge
+  const mq = d.mqtt || {};
+  const mqEl = document.getElementById("sb-mqtt");
+  const mqTs = document.getElementById("sb-mqtt-ts");
+  if (mqEl) {
+    let mqLabel, mqCls;
+    if (mq.serial_error)        { mqLabel = "SENSOR ERR"; mqCls = "badge badge-red";   }
+    else if (mq.connected)      { mqLabel = "MQTT OK";    mqCls = "badge badge-green"; }
+    else                        { mqLabel = "MQTT OFF";   mqCls = "badge badge-red";   }
+    mqEl.className = mqCls;
+    mqEl.innerHTML = `<span class="dot ${mq.connected && !mq.serial_error ? "pulse" : ""}"></span>${mqLabel}`;
+  }
+  if (mqTs) mqTs.textContent = mq.last_ts ? mq.last_ts.replace("T"," ").slice(0,19) : "--";
+
   // Update volume inputs from data
   //document.getElementById("in-vol").value = (d.infeed?.manual_vol_L || 0).toFixed(2);
-  document.getElementById("out-vol").value = (d.outfeed?.manual_vol_L || 0).toFixed(2);
+  //document.getElementById("out-vol").value = (d.outfeed?.manual_vol_L || 0).toFixed(2);
 
   // Log
   renderLog(d.log || []);
@@ -756,19 +784,27 @@ function renderPanel(side, s) {
   const remote = s.operation === "REMOTE";
   const running = s.running;
 
+  // API-driven button overrides (from /api/buttons)
+  const uiBtns = D?.ui?.buttons || {};
+  const apiDisMode = uiBtns[side + "-mode-btn"]?.disabled || false;
+  const apiDisOp   = uiBtns[side + "-op-btn"]?.disabled   || false;
+  const apiDisRun  = uiBtns[side + "-run-btn"]?.disabled  || false;
+
   // Mode btn
   const mb = document.getElementById(side + "-mode-btn");
-  mb.className = "ctrl-btn " + (s.mode === "AUTO" ? "st-green" : "st-blue") + (remote ? " disabled" : "");
+  mb.className = "ctrl-btn " + (s.mode === "AUTO" ? "st-green" : "st-blue")
+               + (remote || apiDisMode ? " disabled" : "");
   document.getElementById(side + "-mode-val").textContent = s.mode;
 
   // Op btn
   const ob = document.getElementById(side + "-op-btn");
-  ob.className = "ctrl-btn " + (remote ? "st-amber" : "");
+  ob.className = "ctrl-btn " + (remote ? "st-amber" : "") + (apiDisOp ? " disabled" : "");
   document.getElementById(side + "-op-val").textContent = s.operation;
 
   // Run btn
   const rb = document.getElementById(side + "-run-btn");
-  rb.className = "ctrl-btn " + (running ? "st-green" : "st-red") + (remote ? " disabled" : "");
+  rb.className = "ctrl-btn " + (running ? "st-green" : "st-red")
+               + (remote || apiDisRun ? " disabled" : "");
   // show "STOP" when running, otherwise "START"
   document.getElementById(side + "-run-val").textContent = running ? "STOP" : "START";
 }
@@ -948,4 +984,3 @@ setInterval(tick, 1000);
 </script>
 </body>
 </html>
-  
