@@ -39,14 +39,13 @@ import os, json, time, logging, logging.handlers, threading
 from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 import yaml
-import RPi.GPIO as GPIO
-
-GPIO.setmode(GPIO.BCM)
-time.sleep(0.01)
-GPIO.cleanup()
-GPIO.setmode(GPIO.BCM) 
-
  
+
+import gpio_reader as gpio
+ 
+
+inputs = {}
+
 with open("config.yml") as f:
     CONFIG = yaml.safe_load(f)
 
@@ -135,6 +134,7 @@ _lock = threading.Lock()
 def _now():
     return datetime.now().isoformat(timespec="seconds")
 
+ 
 state = {
     "product":      "Crude Oil",
     "product_code": "OIL-001",
@@ -154,12 +154,18 @@ state = {
         "hi_level":          85.0,
     },
 
+# ── Physical sensor states ──────────────────────────────
+    "sensors": {
+        "lo_level": False,   # True = float switch triggered
+        "hi_level": False,
+    },
+
     "infeed": {
         "mode":         "AUTO",
         "operation":    "LOCAL",
         "running":      False,
         "valve_open":   False,
-        "manual_vol_L": 25.0,
+         "manual_vol_L": CONFIG["infeed"].get("manual_vol_L", 25.0),
     },
 
     "outfeed": {
@@ -167,7 +173,7 @@ state = {
         "operation":    "LOCAL",
         "running":      False,
         "valve_open":   False,
-        "manual_vol_L": 0.0,
+        "manual_vol_L": CONFIG["outfeed"].get("manual_vol_L", 26.0),
     },
 
     # ── MQTT status block — read by the UI ──────────────────────
@@ -199,6 +205,8 @@ state = {
 weiVal       = 0.0
 serial_error = False
 
+
+ 
 # ── Infeed sequence control flags ──────────────────────────────────
 # busyFlagInfeedBusy  → True while oil_add() sequence is running
 # busyFlagOutfeedBusy → set True externally when outfeed is active;
@@ -220,6 +228,96 @@ outfeed_local_stop            = False
 outfeed_remote_stop           = False
 outfeed_local_remote_change   = False
 outfeed_mode_change           = False
+
+
+# ── GPIO HANDLER THREAD  (polls GPIO states and updates shared state) ───────────────────────
+
+def gpio_handler():
+    tech_log.info("GPIO handler thread started.")
+    global inputs, local_stop, remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change
+
+    gpio.update() 
+    if gpio.state("intake_mode") and state["infeed"]["operation"] == "REMOTE" :
+        state["infeed"]["mode"] = "AUTO"
+    elif gpio.state("intake_mode") and state["infeed"]["operation"] == "MANUAL"  :
+        state["infeed"]["mode"] = "MANUAL"
+
+    while True:
+
+        try:
+            time.sleep(0.1)   # brief sleep to allow graceful shutdown (not implemented here, but good practice)
+            gpio.update()  # read all GPIO pins and update internal state for edge detection
+            
+            # Rising edge — fires ONCE when button pressed, not every poll
+            if gpio.rising("intke_start") and state["infeed"]["mode"]=="MANUAL" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"]:
+                    _now_w = weiVal
+                    _req_w = state["infeed"]["manual_vol_L"]
+                    t = threading.Thread(
+                        target=oil_add,
+                        args=(_now_w, _req_w,False),
+                        daemon=True,
+                        name="infeed_manual_remote",
+                    )
+                    t.start()
+                    tech_log.info(
+                        "oil_add thread started remote manual — now=%.2f kg  requested=%.2f kg",
+                        _now_w, _req_w)
+                    print(f"[infeed remote manual ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+
+            elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"]:
+                    _now_w = weiVal
+                    _req_w = state["infeed"]["manual_vol_L"]
+                    t = threading.Thread(
+                        target=auto_infeed_control,
+                        args=(_now_w, _req_w,True),
+                        daemon=True,
+                        name="infeed_auto_remote",
+                    )
+                    t.start()
+                    tech_log.info(
+                        "oil_add thread started remote Auto — now=%.2f kg  requested=%.2f kg",
+                        _now_w, _req_w)
+                    print(f"[infeed remote auto ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+                
+            if gpio.rising("intke_stop")  :
+                tech_log.info("GPIO: intke_stop_pin triggered — setting remote_stop=True")
+                print("[GPIO] intke_stop_pin triggered — setting remote_stop=True")
+                remote_stop = True
+
+            if gpio.changed("intake_mode") and state["infeed"]["operation"] == "REMOTE":
+                 
+                if  not gpio.state("intake_mode"):
+                    print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
+                    state["infeed"]["mode"] = "AUTO"
+                else:   
+                    print("[GPIO] intake_mode_pin LOW — setting infeed mode to MANUAL")
+                    state["infeed"]["mode"] = "MANUAL"
+
+                #tech_log.info("GPIO: intke_stop_pin triggered — setting local_stop=True")
+
+            
+            
+                
+                 
+
+
+
+                #tech_log.info("GPIO: intke_remot_pin triggered — setting remote_stop=True")
+            state["sensors"]["lo_level"] = not gpio.state("lowr_sns")   # assuming active LOW sensor (0 when triggered)
+            state["sensors"]["hi_level"] = gpio.state("up_sns")      # assuming active HIGH sensor (1 when triggered)
+
+ 
+            #print("tank low level sensor:", inputs["lowr_sns"], "  tank up level sensor:", inputs["up_sns"])
+                #tech_log.info("GPIO: lowr_sns_pin triggered — setting low_level_sensor=True")
+
+            # For demonstration, we log the pin states. In a real application,
+            # you would use these values to update the shared state or trigger actions.
+             
+        except Exception as e:
+            tech_log.error(f"Error reading GPIO states: {e}")
+        time.sleep(1)   # poll interval
+
+
 # ══════════════════════════════════════════════════════════════════
 #  HELPERS
 # ══════════════════════════════════════════════════════════════════
@@ -282,16 +380,22 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
          
         #print("wait for tank empty")
          
-        if(local_stop):
+        if(local_stop ):
             print("Local stop received, exiting auto control. 1")
             state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
             state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
             local_stop=False
             break
+        elif remote_stop:
+            print("Remote stop received, exiting auto control.")
+            state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+            state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+            remote_stop=False
+            break
 
         if (weiVal<state["tank"]["lo_level"]) :
                         
-            oil_add(weiVal, required_weight,infeed_auto)
+            oil_add(weiVal, required_weight,True)
             print("Auto fill done")
             state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
             state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
@@ -365,7 +469,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
 
     start_time = time.time()
     infeed_open(True)
-    
+    infeed_run_state(True)
     _log("Infeed oil addition started",
          weight=round(intial_weight, 2), requested=round(required_weight, 2))
 
@@ -373,7 +477,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     done = False
     while not done:
         elapsed = time.time() - start_time
-
+        print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg", end="\r")
         # Timeout
         if elapsed > INFEED_TIMEOUT:
             done = True
@@ -385,6 +489,9 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("⚠ Infeed timeout", elapsed_s=round(elapsed, 1),
                  initial=round(intial_weight, 2), requested=round(required_weight, 2),
                  final=round(weiVal, 2))
+            if infeed_auto:
+                infeed_run_state(False)
+                local_stop=True
             break
         
         elif low_level_sensor:
@@ -936,6 +1043,7 @@ def index():
 def api_data():
     with _lock:
         state["timestamp"] = _now()
+        
         return jsonify(state)
 
 
@@ -968,6 +1076,7 @@ def api_control():
             _recalc_alarms()
             _print_event({"action": "save_settings", "status": "ok"})
             _log("Settings saved")
+             
             return jsonify({"ok": True})
 
         if side not in ("infeed", "outfeed"):
@@ -1017,27 +1126,32 @@ def api_control():
                         target=oil_add,
                         args=(_now_w, _req_w,False),
                         daemon=True,
-                        name="infeed_manual",
+                        name="infeed_manual_local_thread",
                     )
                     t.start()
                     tech_log.info(
-                        "oil_add thread started — now=%.2f kg  requested=%.2f kg",
+                        "oil_add thread started local manual — now=%.2f kg  requested=%.2f kg",
                         _now_w, _req_w)
-                    print(f"[infeed] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+                    print(f"[infeed local manual ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
 
                 elif s["running"] and s["mode"] == "AUTO" and s["operation"] == "LOCAL":
                     _now_w = weiVal
                     _req_w = state["infeed"]["manual_vol_L"]
                     # START in AUTO mode → just open the valve, no thread
-                    tech_log.info("Infeed AUTO-LOCAL started ")
-                    print("[infeed] AUTO-LOCAL started ")
+                    tech_log.info(
+                        "oil_add thread started local auto — now=%.2f kg  requested=%.2f kg",
+                        _now_w, _req_w)
+                    print(f"[infeed local auto ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
                     t = threading.Thread(
                         target=auto_infeed_control,
                         args=(_now_w, _req_w,True),
                         daemon=True,
-                        name="infeed_auto",
+                        name="infeed_auto_local_thread",
                     )
                     t.start()
+
+                elif s["operation"] == "REMOTE":
+                    state["infeed"]["running"] = False
 
 
                 elif not s["running"]:
@@ -1086,49 +1200,29 @@ def api_control():
             _log(f"{side.capitalize()} valve -> {'OPEN' if s['valve_open'] else 'CLOSED'}")
 
         elif action == "apply":
-            vol     = float(body.get("vol", 0))
-            density = state["tank"]["density_kgl"]
-            kg      = vol * density
+            vol = float(body.get("vol", 0))
+            if vol <= 0:
+                return jsonify({"error": "volume must be > 0"}), 400
 
-            if side == "infeed":
-                state["tank"]["weight_kg"] += kg
-            else:
-                state["tank"]["weight_kg"] = max(0, state["tank"]["weight_kg"] - kg)
+            # Save to state
+            state[side]["manual_vol_L"] = vol
 
-            _recalc_alarms()
-            _print_event({
-                "side":      side,
-                "button":    "apply_volume",
-                "vol_L":     vol,
-                "weight_kg": round(kg, 3),
-                "new_level": state["tank"]["level_pct"],
-            })
-            if side == "infeed":
-                state["infeed"]["manual_vol_L"] = vol
-            elif side == "outfeed":
-                state["outfeed"]["manual_vol_L"] = vol
-
+            # Save to config.yml
             try:
-               
                 cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
                 with open(cfg_path) as f:
                     cfg = yaml.safe_load(f) or {}
-                cfg.setdefault("infeed", {})["manual_vol_L"] = state["infeed"]["manual_vol_L"] 
-                cfg.setdefault("outfeed", {})["manual_vol_L"] = state["outfeed"]["manual_vol_L"]
+                cfg.setdefault(side, {})["manual_vol_L"] = vol
                 with open(cfg_path, "w") as f:
                     yaml.safe_dump(cfg, f)
-                tech_log.info("manual_vol_L %.2f L saved to config.yml", vol)
+                tech_log.info("manual_vol_L %.2f L saved to config.yml [%s]", vol, side)
             except Exception as e:
-                tech_log.error("Failed to save manual_vol_L to config.yml: %s", e)
-            
+                tech_log.error("Failed to save manual_vol_L: %s", e)
 
-            _log(
-                f"{side.capitalize()} volume applied",
-                inVol  = vol if side == "infeed"  else None,
-                outVol = vol if side == "outfeed" else None,
-                weight = round(state["tank"]["weight_kg"], 2),
-                level  = state["tank"]["level_pct"],
-            )
+            _print_event({"side": side, "button": "apply_volume", "vol_L": vol})
+            _log(f"{side.capitalize()} volume set to {vol} L")
+
+
         else:
             return jsonify({"error": f"unknown action: {action}"}), 400
 
@@ -1214,6 +1308,9 @@ if __name__ == "__main__":
     t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
     t.start()
     print(f"[MQTT] Thread started (id={t.ident})\n")
+
+    t = threading.Thread(target=gpio_handler, name="gpio-handler", daemon=True)
+    t.start()
 
     # Start Flask (use_reloader=False required when using threads)
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

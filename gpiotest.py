@@ -16,34 +16,39 @@ myrelay =12
 
  
 
-val_down_pin=27
-val_up_pin=17
-lowr_sns_pin=10
-up_sns_pin=22
-intke_remot_pin=26
-intke_start_pin=13
-intke_stop_pin=19
-
-outtk_start_pin=11
-outtk_stop_pin=5
+# ── Pin definitions ────────────────────────────────────────────────
+val_down_pin        = 27
+val_up_pin          = 17
+lowr_sns_pin        = 10
+up_sns_pin          = 22
+intke_remot_pin     = 26
+intke_start_pin     = 13
+intke_stop_pin      = 19
+lock_btn_pin        = 21
+outtk_start_pin     = 11
+outtk_stop_pin      = 5
+outk_remot_pin      = 6
+relay_normal_off_pin= 12
+pwr_pin             = 16
 
 
  
 GPIO.setup(val_down_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(val_up_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
-
-
 GPIO.setup(lowr_sns_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(up_sns_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
-
 GPIO.setup(intke_remot_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(intke_start_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(intke_stop_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
-
 GPIO.setup(outtk_start_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(outtk_stop_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(relay_normal_off_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(lock_btn_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(outk_remot_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(pwr_pin,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 
+
+val_down_state = GPIO.input(val_down_pin)
 
 while True:
     time.sleep(0.5)

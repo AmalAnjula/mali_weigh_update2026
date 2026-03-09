@@ -653,6 +653,11 @@ let D = null;          // last data snapshot
 let adminOn = false;
 const PASS = "1234";
 
+// ── Dirty flags — set when user is typing in vol inputs ───────────
+// Prevents the 1Hz poll from overwriting what the user is typing
+let inVolDirty  = false;
+let outVolDirty = false;
+
 // ═════════════════════════════════════════════════
 // 1 Hz POLL
 // ═════════════════════════════════════════════════
@@ -677,6 +682,10 @@ function setConn(ok) {
 // Start 1 Hz poll
 poll();
 setInterval(poll, 1000);
+
+// ── Attach dirty-flag listeners once DOM is ready ─────────────────
+document.getElementById("in-vol").addEventListener("input",  () => { inVolDirty  = true; });
+document.getElementById("out-vol").addEventListener("input", () => { outVolDirty = true; });
 
 // ═════════════════════════════════════════════════
 // RENDER (called every 1 Hz with fresh data)
@@ -722,10 +731,16 @@ function render(d) {
   const loD = document.getElementById("lo-dot");
   const hiL = document.getElementById("hi-lbl");
   const loL = document.getElementById("lo-lbl");
-  hiD.className = "sdot" + (tk.hi_alarm ? " alarm"  : "");
-  loD.className = "sdot" + (tk.lo_alarm ? " lo-alm" : "");
-  hiL.className = "slbl" + (tk.hi_alarm ? " alarm"  : "");
-  loL.className = "slbl" + (tk.lo_alarm ? " lo-alm" : "");
+  
+  // AFTER — uses physical sensor state (falls back to alarm if no sensor data)
+const sns = d.sensors || {};
+const hiSns = sns.hi_level || false;
+const loSns = sns.lo_level || false;
+
+hiD.className = "sdot" + (hiSns ? " alarm"  : "");
+loD.className = "sdot" + (loSns ? " lo-alm" : "");
+hiL.className = "slbl" + (hiSns ? " alarm"  : "");
+loL.className = "slbl" + (loSns ? " lo-alm" : "");
 
   // Valves
   renderValve("in",  ifd.valve_open && ifd.running);
@@ -763,9 +778,9 @@ function render(d) {
   }
   if (mqTs) mqTs.textContent = mq.last_ts ? mq.last_ts.replace("T"," ").slice(0,19) : "--";
 
-  // Update volume inputs from data
-  //document.getElementById("in-vol").value = (d.infeed?.manual_vol_L || 0).toFixed(2);
-  //document.getElementById("out-vol").value = (d.outfeed?.manual_vol_L || 0).toFixed(2);
+  // Update volume inputs — only when user is NOT typing
+  if (!inVolDirty)  document.getElementById("in-vol").value  = (d.infeed?.manual_vol_L  || 0).toFixed(2);
+  if (!outVolDirty) document.getElementById("out-vol").value = (d.outfeed?.manual_vol_L || 0).toFixed(2);
 
   // Log
   renderLog(d.log || []);
@@ -840,15 +855,18 @@ async function setValve(side, state) {
 }
 
 async function applyVol(side) {
-  const vol = parseFloat(document.getElementById(side === "infeed" ? "in-vol" : "out-vol").value) || 0;
+  const inputEl = document.getElementById(side === "infeed" ? "in-vol" : "out-vol");
+  const vol = parseFloat(inputEl.value) || 0;
   if (vol <= 0) { showToast("Enter a valid volume > 0", "warn"); return; }
   await fetch("/api/control", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ side, action: "apply", vol })
   });
-  const kg = vol * (D?.tank?.density_kgl || 0.87);
-  showToast((side === "infeed" ? "Infeed +" : "Outfeed −") + kg.toFixed(2) + " kg", "ok");
+  // Clear dirty flag — server now has the saved value, safe to sync again
+  if (side === "infeed")  inVolDirty  = false;
+  if (side === "outfeed") outVolDirty = false;
+  showToast((side === "infeed" ? "Infeed" : "Outfeed") + " volume set: " + vol.toFixed(2) + " L", "ok");
   poll();
 }
 

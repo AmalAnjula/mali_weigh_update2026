@@ -1,0 +1,36 @@
+1. this is oil weigh system. oil measure from Kg. kg is can read from the mqtt. details as below
+MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
+MQTT_PORT   = int(os.getenv("MQTT_PORT",  "1883"))
+MQTT_TOPIC  = os.getenv("MQTT_TOPIC",  "serial/weight")
+
+2. on the Tank weight lable should show that weight reading. it should fast as can
+3. there is two level sensor. up and low. when sensor deteict oil, it give high pulse. that input show on respectively top and bottom of the tank. RPI pins as below
+lowr_sns_pin         = 10
+up_sns_pin           = 22
+4. there is two, infeed and outfeed.  infeed have auto/manual, remote/local,start/stop. those button same for the outfeeed to. on the buttons should show current state. 
+5. when select remote option, need to diable mode and state button of both side. again anable when operation is manual. for the intake operation can chnage using physical pin intke_remot_pin=26. detect its chnage event and chnage infeed operation remote or manual
+6. both side haeve user input(number). infeed volume and outfeed voulme. when enter it, shoudl save both value on yml file. and load whrn programe open
+7. when select manual, local, start. system should be check still outfeed work or not. if not work need to start filling. it should be indicate on the UI. and turn on in_solv=24 pin.the final value should be reach to infeed volume. then seq should be stop
+8. in mean time need to stop sequnce under below senario
+    a. if timer get more than saved. (filling time saved on yml)
+    b. when press stop button or ecternal stop (intke_stop_pin       = 19)
+    c. if hi level sensor triger
+    d. if pre define hi level sensor reach
+    e. if any infeed button pressed.
+9. its same for the rempte operation. only differnce is start signal given by phycail pin (intke_start_pin      = 13)
+10. when select auto mode. local and start, system mode and operatio button should disbale. enable when exit the seq. in this, system need to wait untill the pre define min value. that value saved on yml. when system weight below than that, need tostart filling. when reach to infeed volume system will stop. but need to stay on auto mode. that means need to wait till min level and then fill. this senario will continue. if ress stop button or extrnal infeed stop, senaroi should stop. and also if time out occure. 
+11. auto,remote start also same. only differq is start and stop signal read from phycal pins
+12. if some reasin system weit for infeed. it need to show (in_wei_led=15)
+13. outfeed side now
+14. in this manual,local,start means oil out value should open and weit till outfeed volume out. then stop the value. need to show value state. and alsp all the outfeed senario same logic as infeed. there also have low_level on the yml file. tank cannot go beyon that level.  and also lower sesnor. 
+15. auto,local,start also same as 14. all the time outfeed also need to wait if already infeed runing. the waiting led is out_wei_led=18 #25
+16. remote,manual,start means same as 14. but only start when outtk_start_pin=11 pin goes to low to high level. 
+17 . if any time press stop button or outtk_stop_pin=5 any outfeed process should stop. 
+    
+18. ther should be logger. max size is 200mb. 
+19 . should csv file. in that file header are>  Date	time	reason	now	req	final	item_name
+    item name can catch from setting page of the UI. reason means opration sucess or not. if fail add short discription.
+20. and i need alarm indicator. alm_led=1 . if tank level goes hi, low serial error,time out.... 
+21. on the Log tab add last 10 records with scroll funtion. same as last 10 records in csv file
+22.other  UI data also load from yml file. like unit,capacity.....
+23. use separate thread for infeed outfeed and others. i think it will good. and also carefully kill when finish.  and also check this. when press start button twise, two trhad can be start. speciily it can happen debounce issue. so handle it carefully
