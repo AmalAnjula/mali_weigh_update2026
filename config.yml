@@ -1,14 +1,22 @@
 infeed:
-  filling_time: 15
-  manual_vol_L: 55.0
-  max_weight: 100.0
-  min_weight: 0.0
-  weight_jump_threshold: 3.0
+  filling_time: 300
+  manual_vol_L: 75.0
+  min_level_kg: 300.0
 outfeed:
-  draining_time: 30
-  manual_vol_L: 25.0
-  min_weight: 20.0
+  draining_time: 300
+  manual_vol_L: 10.0
+product: Hydraulic Fluid
+product_code: OIL-005
 serial:
-  baudrate: 9600
+  baudrate: 1200
   port: /dev/ttyUSB0
-  timeout: 0.3
+  diff: 3
+tank:
+  density_kgl: 1.0
+  hi_level_kg: 90.0
+  hi_threshold_pct: 85.0
+  infeed_valve: 5.0
+  lo_level_kg: 5.0
+  lo_threshold_pct: 10.0
+  max_kg: 100.0
+  tare_kg: 0.0

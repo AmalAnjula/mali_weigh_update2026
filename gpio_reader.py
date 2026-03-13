@@ -2,6 +2,21 @@ import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
 
+ 
+
+# ── Output pin definitions ─────────────────────────────────────────
+timer_pin      = 25
+in_wei_led     = 15
+out_wei_led    = 18
+myrelay        = 12
+alm_led        = 1
+pwr_led        = 14
+out_solv       = 23
+in_solv        = 24
+ind_led_in     = 7
+ind_led_out    = 8
+b_led          = 20
+
 # ── Pin definitions ────────────────────────────────────────────────
 val_down_pin         = 27
 val_up_pin           = 17
@@ -16,6 +31,20 @@ outtk_stop_pin       = 5
 outk_remot_pin       = 6
 relay_normal_off_pin = 12
 pwr_pin              = 16
+
+OUTPUT_PINS = {
+    "timer": timer_pin,
+    "in_wei_led": in_wei_led,
+    "out_wei_led": out_wei_led,
+    "myrelay": myrelay,
+    "alm_led": alm_led,
+    "pwr_led": pwr_led,
+    "out_solv": out_solv,
+    "in_solv": in_solv,
+    "ind_led_in": ind_led_in,
+    "ind_led_out": ind_led_out,
+    "b_led": b_led,
+}
 
 # ── Pin map ────────────────────────────────────────────────────────
 INPUT_PINS = {
@@ -36,6 +65,10 @@ INPUT_PINS = {
 
 for pin in INPUT_PINS.values():
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+for pin in OUTPUT_PINS.values():
+    GPIO.setup(pin, GPIO.OUT)
+    GPIO.output(pin, GPIO.LOW)
 
 # ── Previous / current state — used for edge detection ────────────
 _prev: dict[str, int] = {name: 0 for name in INPUT_PINS}
@@ -83,3 +116,26 @@ def read_pin(name: str) -> int:
     if pin is None:
         raise ValueError(f"Unknown pin name: {name}")
     return GPIO.input(pin)
+
+
+def set_output(name: str, value: int):
+    pin = OUTPUT_PINS.get(name)
+    if pin is None:
+        raise ValueError(f"Unknown output pin: {name}")
+    GPIO.output(pin, value)
+
+
+def output_on(name: str):
+    set_output(name, 1)
+
+
+def output_off(name: str):
+    set_output(name, 0)
+
+
+def toggle_output(name: str):
+    pin = OUTPUT_PINS.get(name)
+    if pin is None:
+        raise ValueError(f"Unknown output pin: {name}")
+    GPIO.output(pin, not GPIO.input(pin))
+    

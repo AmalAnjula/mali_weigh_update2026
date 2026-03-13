@@ -1,0 +1,1514 @@
+2026-03-11 00:00:10 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-03-11 00:00:10 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:00:10 [WARNING] ols.tech: Remote stop. initial=14.00 requested=55.00 final=14.00
+2026-03-11 00:00:10 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:00:10 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:00:16 [INFO] ols.tech: oil_add thread started remote Auto — now=14.00 kg  requested=55.00 kg
+2026-03-11 00:00:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:00:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:00:16 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:00:16 [INFO] ols.tech: Oil addition started. Initial: 14.00 kg  Requested: 55.00 kg
+2026-03-11 00:00:16 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:00:16 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:00:22 [ERROR] ols.tech: Received non-numeric weight value: 1Hd,@:Edhh`2AhFI50
+2026-03-11 00:00:22 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:00:22 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:00:22 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:00:38 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-03-11 00:03:59 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 00:03:59 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 00:04:09 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:04:09 [INFO] ols.tech: oil_add thread started remote Auto — now=54.00 kg  requested=55.00 kg
+2026-03-11 00:04:18 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:04:18 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:04:18 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:04:18 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:04:18 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:04:25 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:04:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:04:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:04:25 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:04:25 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:04:32 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:04:32 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:04:32 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:04:32 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:04:32 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:04:40 [ERROR] ols.tech: Received non-numeric weight value: 1Hlkd(@zhhb"lfI50
+2026-03-11 00:04:40 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:04:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:04:40 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:04:40 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:05:22 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:05:22 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:05:22 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:05:22 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:05:22 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:05:32 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:05:32 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:05:32 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:05:32 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:05:32 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:05:38 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:05:39 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:05:39 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:05:39 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:05:39 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:05:53 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-03-11 00:05:53 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:05:53 [WARNING] ols.tech: Remote stop. initial=19.00 requested=55.00 final=50.00
+2026-03-11 00:05:53 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:05:53 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:05:53 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:07:55 [ERROR] ols.tech: Received non-numeric weight value: dO,HZ|hIY:8h|JGɢ50
+2026-03-11 00:08:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:08:41 [INFO] ols.tech: oil_add thread started remote Auto — now=47.00 kg  requested=55.00 kg
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:08:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:08:56 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:08:56 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:08:56 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:08:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:08:56 [INFO] ols.tech: Oil addition started. Initial: 17.00 kg  Requested: 55.00 kg
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:08:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:02 [INFO] ols.tech: Required weight reached. initial=17.00 requested=55.00 final=55.00
+2026-03-11 00:09:02 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:02 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:02 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:02 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:11 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:11 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:11 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:11 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:11 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:24 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=19.00 requested=55.00 final=18.00
+2026-03-11 00:09:24 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:24 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:24 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:24 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:24 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:24 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:24 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:24 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:24 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:24 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:24 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:24 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:25 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:25 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:25 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:25 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:25 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:25 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:25 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:25 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:25 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:25 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:25 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:25 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:25 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:25 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:25 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:38 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:38 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:38 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:38 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:39 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:39 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:39 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:39 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:39 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:39 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:39 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:39 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:39 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:39 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:39 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:40 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:40 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:40 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:40 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:40 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:40 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:40 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:40 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:40 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:40 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:40 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:41 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:41 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:41 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:41 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:41 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:41 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:41 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:41 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:41 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:41 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:42 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:42 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:09:42 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:09:42 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:09:42 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:09:42 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:09:42 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:14:42 [WARNING] ols.tech: Oil add TIMEOUT after 300s. initial=18.00 requested=55.00 final=18.00
+2026-03-11 00:14:42 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:14:42 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:14:42 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:14:42 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:19:03 [INFO] ols.tech: oil_add thread started remote Auto — now=18.00 kg  requested=55.00 kg
+2026-03-11 00:19:03 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:19:03 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:19:03 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:19:03 [INFO] ols.tech: Oil addition started. Initial: 18.00 kg  Requested: 55.00 kg
+2026-03-11 00:19:03 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:19:03 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:19:36 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=18.00 requested=55.00 final=43.00
+2026-03-11 00:19:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:19:36 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:19:36 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:20:03 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:20:03 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:20:03 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:20:03 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:20:03 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:20:14 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:20:14 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:20:14 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:20:14 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:20:14 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:21:00 [ERROR] ols.tech: Received non-numeric weight value: 3dO|W$hYi|hXhKK450
+2026-03-11 00:27:39 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 00:27:39 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 00:29:14 [INFO] ols.tech: oil_add thread started remote Auto — now=50.00 kg  requested=55.00 kg
+2026-03-11 00:29:14 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:29:24 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:29:24 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:29:24 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:29:24 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:29:24 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:29:29 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:29:29 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:29:29 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:29:29 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:29:29 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:29:42 [ERROR] ols.tech: Received non-numeric weight value: 39HPȤ0GDxIXt`]50
+2026-03-11 00:32:57 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 00:32:57 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 00:33:05 [INFO] ols.tech: oil_add thread started remote Auto — now=50.00 kg  requested=55.00 kg
+2026-03-11 00:33:05 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:33:10 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:33:10 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:33:10 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:33:10 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:33:10 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:33:17 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:33:17 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:33:17 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:33:17 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:33:17 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:33:17 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:33:27 [ERROR] ols.tech: Received non-numeric weight value: 4Hp$0Vt4h$غh$AI,LI250
+2026-03-11 00:36:15 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 00:36:15 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 00:36:52 [INFO] ols.tech: oil_add thread started remote Auto — now=50.00 kg  requested=55.00 kg
+2026-03-11 00:36:52 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:02 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:02 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:37:02 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:37:02 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:37:02 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:37:13 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:37:13 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:13 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:13 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:37:13 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:37:13 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:37:21 [ERROR] ols.tech: Received non-numeric weight value: 36HQ@`L,@zx~hAt 50
+2026-03-11 00:37:21 [ERROR] ols.tech: Serial error detected in auto control loop.
+2026-03-11 00:37:27 [INFO] ols.tech: oil_add thread started remote Auto — now=50.00 kg  requested=55.00 kg
+2026-03-11 00:37:27 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:38 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:38 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:37:38 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:37:38 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:37:38 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:37:44 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:37:44 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:44 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:44 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:37:44 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:37:44 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:37:51 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:51 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:37:51 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:37:51 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:37:51 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:37:55 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:37:56 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:37:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:56 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:37:56 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:37:56 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:37:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:37:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:37:56 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:37:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:37:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:38:05 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:38:05 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:38:05 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:05 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:38:06 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:38:06 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:38:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:06 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:38:06 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:38:06 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:38:06 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:38:15 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:38:16 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:38:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:16 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:38:16 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:38:16 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:38:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:16 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:38:16 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:38:16 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:38:16 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:38:25 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:38:26 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:38:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:26 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:38:26 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:38:26 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:38:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:26 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:38:26 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:38:26 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:38:26 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:38:35 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:38:35 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:38:35 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:35 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:38:36 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:38:36 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:38:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:36 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:38:36 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:38:36 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:38:36 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:38:45 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:38:46 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:38:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:46 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:38:46 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:38:46 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:38:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:46 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:38:46 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:38:46 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:38:46 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:38:55 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:38:56 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:38:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:56 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:38:56 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:38:56 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:38:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:38:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:38:56 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:38:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:38:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:39:05 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:39:05 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:39:05 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:05 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:39:06 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:39:06 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:39:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:06 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:39:06 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:39:06 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:39:06 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:39:15 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:39:16 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:39:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:16 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:39:16 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:39:16 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:39:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:16 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:39:16 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:39:16 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:39:16 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:39:25 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:39:26 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:39:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:26 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:39:26 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:39:26 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:39:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:26 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:39:26 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:39:26 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:39:26 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:39:35 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:39:36 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:39:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:36 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:39:36 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:39:36 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:39:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:36 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:39:36 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:39:36 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:39:36 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:39:45 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:39:45 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:39:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:46 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:39:46 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:39:46 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:39:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:46 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:39:46 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:39:46 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:39:46 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:39:55 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:39:56 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:39:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:56 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:39:56 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:39:56 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:39:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:39:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:39:56 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:39:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:39:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:40:05 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:40:06 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:40:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:06 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:40:06 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:40:06 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:40:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:06 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:40:06 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:40:06 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:40:06 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:40:15 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:40:15 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:40:15 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:15 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:40:16 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:40:16 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:40:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:16 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:40:16 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:40:16 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:40:16 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:40:25 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:40:26 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:40:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:26 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:40:26 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:40:26 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:40:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:26 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:40:26 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:40:26 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:40:26 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:40:35 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:40:36 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:40:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:36 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:40:36 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:40:36 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:40:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:36 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:40:36 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:40:36 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:40:36 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:40:45 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:40:46 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:40:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:46 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:40:46 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:40:46 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:40:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:46 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:40:46 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:40:46 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:40:46 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:40:55 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:40:56 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:40:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:56 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:40:56 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:40:56 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:40:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:40:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:40:56 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:40:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:40:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:41:05 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:41:06 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:41:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:06 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:41:06 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:41:06 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:41:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:06 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:41:06 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:41:06 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:41:06 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:41:15 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:41:16 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:41:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:16 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:41:16 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:41:16 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:41:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:16 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:41:16 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:41:16 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:41:16 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:41:25 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:41:25 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:41:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:26 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:41:26 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:41:26 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:41:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:26 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:41:26 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:41:26 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:41:26 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:41:35 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:41:36 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:41:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:36 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:41:36 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:41:36 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:41:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:36 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:41:36 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:41:36 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:41:36 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:41:45 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:41:46 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:41:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:46 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:41:46 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:41:46 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:41:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:46 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:41:46 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:41:46 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:41:46 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:41:55 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:41:55 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:41:55 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:55 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:41:56 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:41:56 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:41:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:41:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:41:56 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:41:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:41:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:42:05 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:42:06 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:42:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:06 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:42:06 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:42:06 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:42:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:06 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:42:06 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:42:06 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:42:06 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:42:15 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:42:16 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:42:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:16 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:42:16 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:42:16 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:42:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:16 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:42:16 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:42:16 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:42:16 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:42:25 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:42:26 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:42:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:26 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:42:26 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:42:26 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:42:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:26 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:42:26 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:42:26 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:42:26 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:42:36 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:42:36 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:42:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:36 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:42:36 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:42:36 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:42:36 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:36 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:42:36 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:42:36 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:42:36 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:42:46 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:42:46 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:42:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:46 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:42:46 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:42:46 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:42:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:46 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:42:46 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:42:46 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:42:46 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:42:56 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:42:56 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:42:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:56 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:42:56 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:42:56 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:42:56 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:42:56 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:42:56 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:42:56 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:42:56 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:43:06 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:43:06 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:43:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:43:06 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:43:06 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:43:06 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:43:06 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:43:06 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:43:06 [INFO] ols.tech: Oil addition started. Initial: 15.00 kg  Requested: 55.00 kg
+2026-03-11 00:43:06 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:43:06 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:43:17 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 00:43:17 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 00:43:54 [ERROR] ols.tech: Error message received from MQTT: #null
+2026-03-11 00:44:16 [INFO] ols.tech: oil_add thread started remote Auto — now=50.00 kg  requested=55.00 kg
+2026-03-11 00:44:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:44:16 [ERROR] ols.tech: Serial error detected in auto control loop.
+2026-03-11 00:44:55 [INFO] ols.tech: oil_add thread started remote Auto — now=57.00 kg  requested=55.00 kg
+2026-03-11 00:44:55 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:45:03 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:45:03 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:45:03 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:45:03 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:45:03 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:45:08 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:45:08 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:45:08 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:45:08 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:45:08 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:45:08 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:45:14 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:45:14 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:45:14 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:45:14 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:45:14 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:45:18 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:45:18 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:45:18 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:45:18 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:45:19 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:45:19 [WARNING] ols.tech: Auto fill sequence failed or aborted in auto control loop.
+2026-03-11 00:45:28 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-03-11 00:46:06 [ERROR] ols.tech: Error message received from MQTT: #null
+2026-03-11 00:46:11 [INFO] ols.tech: oil_add thread started local auto — now=14.00 kg  requested=55.00 kg
+2026-03-11 00:46:11 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:11 [ERROR] ols.tech: Serial error detected in auto control loop.
+2026-03-11 00:46:13 [INFO] ols.tech: Local stop signalled to oil_add.
+2026-03-11 00:46:15 [INFO] ols.tech: oil_add thread started local auto — now=14.00 kg  requested=55.00 kg
+2026-03-11 00:46:15 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:15 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:15 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:46:15 [INFO] ols.tech: Oil addition started. Initial: 14.00 kg  Requested: 55.00 kg
+2026-03-11 00:46:15 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:46:15 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:46:27 [INFO] ols.tech: Required weight reached. initial=14.00 requested=55.00 final=55.00
+2026-03-11 00:46:27 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:27 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:27 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:46:27 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:46:27 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:46:34 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:34 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:46:34 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:46:34 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:46:34 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:46:40 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 00:46:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:40 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:46:40 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:46:40 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 00:46:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:46 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:46:46 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:46:46 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:46:46 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:46:52 [INFO] ols.tech: Local stop signalled to oil_add.
+2026-03-11 00:46:52 [WARNING] ols.tech: Local stop. initial=19.00 requested=55.00 final=19.00
+2026-03-11 00:46:52 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:52 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:46:53 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:46:53 [WARNING] ols.tech: Auto fill sequence failed or aborted in auto control loop.
+2026-03-11 00:46:54 [INFO] ols.tech: oil_add thread started local auto — now=19.00 kg  requested=55.00 kg
+2026-03-11 00:46:54 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:54 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:46:54 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:46:54 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:46:54 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:46:54 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:47:00 [ERROR] ols.tech: Received non-numeric weight value: 1HlhdM,`<IC(IKi50
+2026-03-11 00:47:00 [ERROR] ols.tech: Serial error during oil addition — aborting.
+2026-03-11 00:47:00 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:47:00 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:47:00 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:47:00 [WARNING] ols.tech: Auto fill sequence failed or aborted in auto control loop.
+2026-03-11 00:47:15 [INFO] ols.tech: oil_add thread started local auto — now=50.00 kg  requested=55.00 kg
+2026-03-11 00:47:15 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:47:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:47:26 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 00:47:26 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 00:47:26 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 00:47:26 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 00:49:02 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-03-11 00:49:02 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:49:02 [WARNING] ols.tech: Remote stop. initial=19.00 requested=55.00 final=17.00
+2026-03-11 00:49:02 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 00:49:02 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 00:49:02 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 00:49:02 [WARNING] ols.tech: Auto fill sequence failed or aborted in auto control loop.
+2026-03-11 01:18:55 [INFO] ols.tech: manual_vol_L 10.00 L saved to config.yml [outfeed]
+2026-03-11 01:19:01 [INFO] ols.tech: oil_add thread started local manual — now=17.00 kg  requested=55.00 kg
+2026-03-11 01:19:01 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:19:01 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:19:01 [INFO] ols.tech: Oil addition started. Initial: 17.00 kg  Requested: 55.00 kg
+2026-03-11 01:19:01 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:19:01 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:19:04 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:19:04 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:19:04 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:19:14 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:19:47 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:19:47 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:19:47 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:19:48 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:19:50 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:19:50 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:19:50 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:19:59 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:21:24 [INFO] ols.tech: Local stop signalled to oil_add.
+2026-03-11 01:21:24 [WARNING] ols.tech: Local stop. initial=17.00 requested=55.00 final=17.00
+2026-03-11 01:21:24 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:21:24 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:21:24 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:21:24 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 01:21:24 [INFO] ols.tech: [outfeed] Infeed cleared — proceeding.
+2026-03-11 01:21:24 [INFO] ols.tech: [outfeed] Drain started. current=17.00 kg  requested=8.70 kg  target=8.30 kg
+2026-03-11 01:21:24 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:21:24 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=17.00 kg
+2026-03-11 01:21:24 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:21:24 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:21:24 [INFO] ols.tech: [outfeed] Infeed cleared — proceeding.
+2026-03-11 01:21:24 [INFO] ols.tech: [outfeed] Drain started. current=17.00 kg  requested=8.70 kg  target=8.30 kg
+2026-03-11 01:21:24 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:21:24 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=17.00 kg
+2026-03-11 01:21:24 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:21:24 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:21:24 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:21:25 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:21:25 [INFO] ols.tech: [outfeed] Infeed cleared — proceeding.
+2026-03-11 01:21:25 [INFO] ols.tech: [outfeed] Drain started. current=17.00 kg  requested=8.70 kg  target=8.30 kg
+2026-03-11 01:21:25 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:21:25 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=17.00 kg
+2026-03-11 01:21:25 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:21:25 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:21:25 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:22:26 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:22:26 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:22:26 [INFO] ols.tech: [outfeed] Drain started. current=17.00 kg  requested=8.70 kg  target=8.30 kg
+2026-03-11 01:22:26 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:22:26 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=17.00 kg
+2026-03-11 01:22:26 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:22:26 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:22:26 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:22:32 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:22:32 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:22:32 [INFO] ols.tech: [outfeed] Drain started. current=17.00 kg  requested=8.70 kg  target=8.30 kg
+2026-03-11 01:22:32 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:22:32 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=17.00 kg
+2026-03-11 01:22:32 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:22:32 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:22:32 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:24:33 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 01:24:33 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 01:25:03 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:25:03 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:25:03 [INFO] ols.tech: [outfeed] Drain started. current=17.00 kg  requested=8.70 kg  target=8.30 kg
+2026-03-11 01:25:03 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:25:03 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=17.00 kg
+2026-03-11 01:25:03 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:25:03 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:25:03 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:25:05 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:25:05 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:25:05 [INFO] ols.tech: [outfeed] Drain started. current=17.00 kg  requested=8.70 kg  target=8.30 kg
+2026-03-11 01:25:05 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:25:05 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=17.00 kg
+2026-03-11 01:25:05 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:25:05 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:25:05 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:25:28 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:25:28 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:25:28 [INFO] ols.tech: [outfeed] Drain started. current=39.00 kg  requested=8.70 kg  target=30.30 kg
+2026-03-11 01:25:28 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:25:32 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:25:32 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 01:25:32 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:25:32 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:25:32 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:25:34 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:25:34 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:25:34 [INFO] ols.tech: [outfeed] Drain started. current=39.00 kg  requested=8.70 kg  target=30.30 kg
+2026-03-11 01:25:34 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:25:43 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:25:43 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 01:25:43 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:25:43 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:25:43 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:26:32 [INFO] ols.tech: oil_add thread started local auto — now=39.00 kg  requested=55.00 kg
+2026-03-11 01:26:32 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:26:33 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:26:33 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:26:33 [INFO] ols.tech: [outfeed] Drain started. current=39.00 kg  requested=8.70 kg  target=30.30 kg
+2026-03-11 01:26:33 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:26:38 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:26:38 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 01:26:38 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:26:38 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:26:38 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:26:50 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:26:50 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:26:50 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 01:26:50 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:26:50 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:26:53 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:26:53 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:26:53 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:27:13 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 01:27:13 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:27:13 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:27:13 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:27:13 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 01:27:13 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 01:27:13 [INFO] ols.tech: [outfeed] Infeed cleared — proceeding.
+2026-03-11 01:27:13 [INFO] ols.tech: [outfeed] Drain started. current=59.00 kg  requested=8.70 kg  target=50.30 kg
+2026-03-11 01:27:13 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:27:18 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=50.00 kg
+2026-03-11 01:27:18 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:27:18 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:27:18 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:27:18 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:27:18 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:27:38 [INFO] ols.tech: oil_add thread started local auto — now=39.00 kg  requested=55.00 kg
+2026-03-11 01:27:38 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:27:41 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:27:41 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:27:41 [INFO] ols.tech: [outfeed] Drain started. current=39.00 kg  requested=8.70 kg  target=30.30 kg
+2026-03-11 01:27:41 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:27:42 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:27:42 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 01:27:42 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:27:42 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:27:42 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:27:50 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:27:50 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:27:50 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 01:27:50 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:27:50 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:27:50 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:27:50 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:27:50 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 01:27:50 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:27:50 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:27:54 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:27:54 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:27:54 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:27:56 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:28:25 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:28:25 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:28:25 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:32:14 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 01:32:14 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 01:32:16 [INFO] ols.tech: oil_add thread started local auto — now=16.00 kg  requested=55.00 kg
+2026-03-11 01:32:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:32:16 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:32:16 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:32:16 [INFO] ols.tech: Oil addition started. Initial: 16.00 kg  Requested: 55.00 kg
+2026-03-11 01:32:16 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:32:16 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:32:17 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:32:17 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:32:17 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:32:25 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:32:25 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:32:25 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:32:27 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:32:27 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:32:27 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:32:27 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:32:27 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:32:29 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:32:29 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:32:29 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:32:29 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:32:29 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:32:31 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:32:31 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:32:31 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:32:31 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:32:31 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:32:32 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:32:32 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:32:32 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:32:32 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:32:32 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:32:34 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:32:34 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:32:34 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:32:34 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:32:34 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:32:39 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:32:39 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:32:39 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:32:39 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:32:39 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:32:53 [INFO] ols.tech: Required weight reached. initial=16.00 requested=55.00 final=55.00
+2026-03-11 01:32:53 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:32:53 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:32:53 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:32:53 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 01:32:53 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 01:33:04 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:33:04 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:33:04 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 01:33:04 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:33:04 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:33:09 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:33:09 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:33:09 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:33:09 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:33:09 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:33:10 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:33:10 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:33:10 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:33:10 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:33:10 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:33:12 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:33:12 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:33:12 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:33:12 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:33:12 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:33:16 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:33:16 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:33:16 [WARNING] ols.tech: [outfeed AUTO] Infeed busy — waiting ...
+2026-03-11 01:33:16 [INFO] ols.tech: [outfeed AUTO] Stop requested while waiting for infeed.
+2026-03-11 01:33:16 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:33:49 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:33:49 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:33:49 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:33:49 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:33:49 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:34:01 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 01:34:01 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:01 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:01 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:34:01 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 01:34:01 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 01:34:02 [INFO] ols.tech: [outfeed] Infeed cleared — proceeding.
+2026-03-11 01:34:02 [INFO] ols.tech: [outfeed] Drain started. current=58.00 kg  requested=8.70 kg  target=49.30 kg
+2026-03-11 01:34:02 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:34:02 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:34:06 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=49.00 kg
+2026-03-11 01:34:06 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:06 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:06 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:06 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:07 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:34:14 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:34:14 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:34:14 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:14 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:14 [INFO] ols.tech: [outfeed] Drain started. current=46.00 kg  requested=8.70 kg  target=37.30 kg
+2026-03-11 01:34:14 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:34:14 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:34:19 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=37.00 kg
+2026-03-11 01:34:19 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:19 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:19 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:19 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:19 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:34:24 [INFO] ols.tech: oil_add thread started local auto — now=33.00 kg  requested=55.00 kg
+2026-03-11 01:34:24 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:26 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:34:26 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:34:26 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:26 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:26 [INFO] ols.tech: [outfeed] Drain started. current=33.00 kg  requested=8.70 kg  target=24.30 kg
+2026-03-11 01:34:26 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:34:26 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:34:30 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=24.00 kg
+2026-03-11 01:34:30 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:30 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:30 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:30 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:30 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:34:33 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:33 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:34:33 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 01:34:33 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:34:33 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:34:33 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:33 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:34:33 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 01:34:33 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:34:33 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:34:40 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:34:40 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:34:40 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:40 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:40 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 01:34:46 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 01:34:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:46 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:34:46 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 01:34:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:46 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:34:46 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:34:46 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 01:34:46 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 01:34:46 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 01:34:46 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 01:34:46 [INFO] ols.tech: [outfeed] Infeed cleared — proceeding.
+2026-03-11 01:34:46 [INFO] ols.tech: [outfeed] Drain started. current=55.00 kg  requested=8.70 kg  target=46.30 kg
+2026-03-11 01:34:46 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:34:46 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:34:51 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=46.00 kg
+2026-03-11 01:34:51 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:51 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:51 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:34:51 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:34:51 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:41:16 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:41:16 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:41:16 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:41:16 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:41:16 [INFO] ols.tech: [outfeed] Drain started. current=38.00 kg  requested=8.70 kg  target=29.30 kg
+2026-03-11 01:41:16 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:41:16 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:41:26 [INFO] ols.tech: oil_add thread started local auto — now=38.00 kg  requested=55.00 kg
+2026-03-11 01:41:26 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:41:30 [INFO] ols.tech: Local stop signalled to oil_add.
+2026-03-11 01:41:30 [ERROR] ols.tech: Local stop received in auto control loop.
+2026-03-11 01:41:31 [INFO] ols.tech: oil_add thread started local auto — now=38.00 kg  requested=55.00 kg
+2026-03-11 01:41:31 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:41:35 [INFO] ols.tech: Local stop signalled to oil_add.
+2026-03-11 01:41:35 [ERROR] ols.tech: Local stop received in auto control loop.
+2026-03-11 01:41:35 [ERROR] ols.tech: Local stop received in auto control loop.
+2026-03-11 01:41:40 [INFO] ols.tech: oil_add thread started local manual — now=38.00 kg  requested=55.00 kg
+2026-03-11 01:41:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:41:40 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 01:41:40 [WARNING] ols.tech: Outfeed busy — infeed waiting ...
+2026-03-11 01:41:46 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=29.00 kg
+2026-03-11 01:41:46 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:41:46 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:41:46 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:41:46 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:41:46 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:41:47 [INFO] ols.tech: Outfeed cleared — proceeding with oil addition.
+2026-03-11 01:41:47 [INFO] ols.tech: Oil addition started. Initial: 38.00 kg  Requested: 55.00 kg
+2026-03-11 01:41:47 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 01:41:47 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 01:41:54 [INFO] ols.tech: Required weight reached. initial=38.00 requested=55.00 final=55.00
+2026-03-11 01:41:54 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:41:54 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:41:54 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 01:41:54 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:41:54 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 01:41:54 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 01:42:07 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:42:07 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:42:07 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:42:07 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:42:07 [INFO] ols.tech: [outfeed] Drain started. current=58.00 kg  requested=8.70 kg  target=49.30 kg
+2026-03-11 01:42:07 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:42:07 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:42:17 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-03-11 01:42:17 [ERROR] ols.tech: Remote stop received in auto control loop.
+2026-03-11 01:43:31 [ERROR] ols.tech: Received non-numeric weight value: 58ExG$hYxx$B2ldIE50
+2026-03-11 01:43:31 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:31 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:31 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:31 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:35 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:35 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:35 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:35 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:35 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:35 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:35 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:35 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:35 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:35 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:35 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:42 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:42 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:42 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:42 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:42 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:42 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:42 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:42 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:42 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:42 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:42 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:43 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:43 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:43 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:43 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:43 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:43 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:43 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:43 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:43 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:43 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:43 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:48 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:48 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:48 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:48 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:48 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:48 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:48 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:48 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:48 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:48 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:48 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:53 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:53 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:53 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:53 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:53 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:53 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:53 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:53 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:53 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:53 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:53 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:56 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:56 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:56 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:56 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:56 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:56 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:56 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:56 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:56 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:56 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:56 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:57 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:57 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:57 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:57 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:57 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:57 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:57 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:57 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:57 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:57 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:57 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:58 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:58 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:58 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:58 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:58 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:58 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:58 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:58 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:58 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:58 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:58 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:43:59 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:43:59 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:43:59 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:59 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:59 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:43:59 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:43:59 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:43:59 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:43:59 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:43:59 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:43:59 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:44:25 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:44:25 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:44:25 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:44:25 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:44:25 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:44:25 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:44:25 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:44:25 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:44:25 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:44:25 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:44:25 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:44:58 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 01:44:58 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 01:45:05 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:45:05 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:45:05 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:45:05 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:45:05 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:45:05 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:45:05 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:45:12 [ERROR] ols.tech: Received non-numeric weight value: $l,4@M,`<YO`8C`ldHCiZ50
+2026-03-11 01:45:12 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:45:12 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:45:12 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:45:12 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:45:15 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:45:15 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:45:15 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:45:15 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:45:15 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:45:15 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:45:15 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:45:17 [ERROR] ols.tech: Received non-numeric weight value: Hl`lLElb<l:IXAh850
+2026-03-11 01:45:17 [ERROR] ols.tech: [outfeed] Serial error — aborting.
+2026-03-11 01:45:17 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:45:17 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:45:17 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:45:19 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:45:19 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:45:19 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:45:19 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:45:19 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:45:19 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:45:19 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:45:27 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:45:27 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 01:45:27 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:45:27 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:45:27 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:48:19 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:48:19 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:48:19 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:48:19 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:48:19 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:48:19 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:48:19 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:53:19 [WARNING] ols.tech: [outfeed] TIMEOUT after 300s. target=41.30 final=50.00
+2026-03-11 01:53:19 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:53:19 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:53:19 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:55:05 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 01:55:05 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 01:55:12 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:55:12 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:55:12 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:12 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:12 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:55:12 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:55:12 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:55:16 [INFO] ols.tech: GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True
+2026-03-11 01:55:16 [WARNING] ols.tech: [outfeed] Remote stop.
+2026-03-11 01:55:16 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:16 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:16 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:55:21 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:55:21 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:55:21 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:21 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:21 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:55:21 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:55:21 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:55:21 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:55:21 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 01:55:21 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:21 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:21 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:55:22 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:55:22 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:55:22 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:22 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:22 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:55:22 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:55:22 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:55:23 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 01:55:23 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 01:55:23 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:23 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:23 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:55:25 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 01:55:25 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 01:55:25 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:25 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:25 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 01:55:25 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 01:55:25 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 01:55:28 [INFO] ols.tech: GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True
+2026-03-11 01:55:28 [WARNING] ols.tech: [outfeed] Remote stop.
+2026-03-11 01:55:28 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:28 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:28 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 01:55:36 [INFO] ols.tech: [outfeed AUTO] auto_outfeed_control started.
+2026-03-11 01:55:36 [INFO] ols.tech: [outfeed] auto_outfeed_control thread started.
+2026-03-11 01:55:36 [INFO] ols.tech: [outfeed AUTO] Running. current=50.00 kg
+2026-03-11 01:55:39 [INFO] ols.tech: GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True
+2026-03-11 01:55:39 [INFO] ols.tech: [outfeed AUTO] Remote stop.
+2026-03-11 01:55:39 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 01:55:39 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 01:55:39 [INFO] ols.tech: [outfeed AUTO] Complete — busyFlagOutfeedBusy cleared.
+2026-03-11 02:21:18 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 02:21:18 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 02:23:09 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 02:23:09 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 02:23:27 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 02:23:27 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 02:24:53 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 02:24:53 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 02:26:03 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 02:26:03 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 02:28:43 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 02:28:43 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 02:30:46 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 02:30:46 [INFO] ols.tech: [outfeed] oil_drain thread started — vol=10.00 L
+2026-03-11 02:30:46 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:30:46 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:30:46 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 02:30:46 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 02:30:46 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 02:30:48 [INFO] ols.tech: [outfeed] Local stop signalled.
+2026-03-11 02:30:48 [INFO] ols.tech: [outfeed] Local stop.
+2026-03-11 02:30:48 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:30:48 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:30:48 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 02:37:45 [INFO] ols.tech: GPIO handler thread started.
+2026-03-11 02:37:45 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-11 02:41:30 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 02:41:30 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=10.00 L
+2026-03-11 02:41:30 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:41:30 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:41:30 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 02:41:30 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 02:41:30 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 02:41:37 [INFO] ols.tech: GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True
+2026-03-11 02:41:37 [WARNING] ols.tech: [outfeed] Remote stop.
+2026-03-11 02:41:37 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:41:37 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:41:37 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 02:41:41 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 02:41:41 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=10.00 L
+2026-03-11 02:41:41 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:41:41 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:41:41 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 02:41:41 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 02:41:41 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 02:41:45 [INFO] ols.tech: GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True
+2026-03-11 02:41:45 [WARNING] ols.tech: [outfeed] Remote stop.
+2026-03-11 02:41:45 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:41:45 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:41:45 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 02:41:58 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 02:41:58 [INFO] ols.tech: [outfeed] oil_drain thread local started — vol=10.00 L
+2026-03-11 02:41:58 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:41:58 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:41:58 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 02:41:58 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 02:41:58 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 02:42:18 [INFO] ols.tech: GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True
+2026-03-11 02:42:18 [WARNING] ols.tech: [outfeed] Remote stop.
+2026-03-11 02:42:18 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:42:18 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:42:18 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 02:42:40 [INFO] ols.tech: oil_add thread started local auto — now=50.00 kg  requested=55.00 kg
+2026-03-11 02:42:40 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 02:42:45 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 02:42:45 [INFO] ols.tech: [outfeed] oil_drain thread local started — vol=10.00 L
+2026-03-11 02:42:45 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:42:45 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:42:45 [INFO] ols.tech: [outfeed] Drain started. current=50.00 kg  requested=8.70 kg  target=41.30 kg
+2026-03-11 02:42:45 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 02:42:45 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 02:42:54 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=41.00 kg
+2026-03-11 02:42:54 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:42:54 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:42:54 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:42:54 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:42:54 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-03-11 02:43:20 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 02:43:20 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-03-11 02:43:20 [INFO] ols.tech: Oil addition started. Initial: 19.00 kg  Requested: 55.00 kg
+2026-03-11 02:43:20 [INFO] ols.tech: Infeed valve set to OPEN
+2026-03-11 02:43:20 [INFO] ols.tech: Infeed run state set to True
+2026-03-11 02:43:24 [INFO] ols.tech: [outfeed] oil_drain requested — vol=10.00 L
+2026-03-11 02:43:24 [INFO] ols.tech: [outfeed] oil_drain thread local started — vol=10.00 L
+2026-03-11 02:43:24 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:43:24 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:43:24 [WARNING] ols.tech: [outfeed] Infeed busy — outfeed waiting ...
+2026-03-11 02:43:31 [INFO] ols.tech: Required weight reached. initial=19.00 requested=55.00 final=55.00
+2026-03-11 02:43:31 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 02:43:31 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-11 02:43:31 [INFO] ols.tech: Infeed run state set to False
+2026-03-11 02:43:31 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-03-11 02:43:31 [INFO] ols.tech: Auto fill sequence completed in auto control loop.
+2026-03-11 02:43:32 [INFO] ols.tech: [outfeed] Infeed cleared — proceeding.
+2026-03-11 02:43:32 [INFO] ols.tech: [outfeed] Drain started. current=56.00 kg  requested=8.70 kg  target=47.30 kg
+2026-03-11 02:43:32 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-03-11 02:43:32 [INFO] ols.tech: Outfeed run state set to True
+2026-03-11 02:43:42 [INFO] ols.tech: [outfeed] Target reached. requested=8.70 kg  final=47.00 kg
+2026-03-11 02:43:42 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:43:42 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:43:42 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-03-11 02:43:42 [INFO] ols.tech: Outfeed run state set to False
+2026-03-11 02:43:43 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=OLS Monitor
+Comment=Start OLS Monitor System
+Icon=chromium-browser
+Exec=/bin/bash /home/palmoil/stuff/startup.sh
+Terminal=false
+Categories=Application;

@@ -39,12 +39,13 @@ import os, json, time, logging, logging.handlers, threading
 from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory
 import yaml
- 
+from production_logger import ProductionLogger
 
 import gpio_reader as gpio
  
 
 inputs = {}
+
 
 with open("config.yml") as f:
     CONFIG = yaml.safe_load(f)
@@ -82,6 +83,10 @@ MQTT_PASS   = os.getenv("MQTT_PASS",   "")
 # ══════════════════════════════════════════════════════════════════
 LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
 os.makedirs(LOG_DIR, exist_ok=True)
+
+
+prod_logger = ProductionLogger(LOG_DIR)
+
 
 _log_fmt     = logging.Formatter(
     "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -134,24 +139,32 @@ _lock = threading.Lock()
 def _now():
     return datetime.now().isoformat(timespec="seconds")
 
- 
+
 state = {
-    "product":      "Crude Oil",
-    "product_code": "OIL-001",
+    "product":      CONFIG.get("product", "Crude Oil"),
+    "product_code": CONFIG.get("product_code", "OIL-001"),
     "timestamp":    _now(),
+
+    "serial": {
+        "port":     CONFIG.get("serial", {}).get("port",     "/dev/ttyUSB0"),
+        "baudrate": CONFIG.get("serial", {}).get("baudrate", 9600),
+    },
 
     "tank": {
         "weight_kg":         0.0,
-        "tare_kg":           0.0,
-        "max_kg":            100.0,
+        "tare_kg":           CONFIG["tank"].get("tare_kg", 0.0),
+        "max_kg":            CONFIG["tank"].get("max_kg", 100.0),
         "level_pct":         0.0,
-        "density_kgl":       0.87,
-        "hi_threshold_pct":  80,
-        "lo_threshold_pct":  20,
+        "density_kgl":       CONFIG["tank"].get("density_kgl", 0.87),
+        "infeed_valve":      CONFIG["tank"].get("infeed_valve", 5.0),
+        "hi_threshold_pct":  CONFIG["tank"].get("hi_threshold_pct", 80),
+        "lo_threshold_pct":  CONFIG["tank"].get("lo_threshold_pct", 20),
+        "hi_level_kg":       CONFIG["tank"].get("hi_level_kg", 850.0),
+        "lo_level_kg":       CONFIG["tank"].get("lo_level_kg", 10.0),
         "hi_alarm":          False,
         "lo_alarm":          False,
-        "lo_level":          20.0,
-        "hi_level":          85.0,
+        "lo_level":          CONFIG["tank"].get("lo_level_kg", 20.0),
+        "hi_level":          CONFIG["tank"].get("hi_level_kg", 85.0),
     },
 
 # ── Physical sensor states ──────────────────────────────
@@ -217,7 +230,7 @@ busyFlagOutfeedBusy = False
 # Interrupt flags — any of these being True aborts the oil_add loop
 infeed_local_remote_change = False
 infeed_mode_change         = False
-remote_stop                = False
+infeed_remote_stop                = False
 local_stop                 = False
 
 
@@ -234,7 +247,7 @@ outfeed_mode_change           = False
 
 def gpio_handler():
     tech_log.info("GPIO handler thread started.")
-    global inputs, local_stop, remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change
+    global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
 
     gpio.update() 
     if gpio.state("intake_mode") and state["infeed"]["operation"] == "REMOTE" :
@@ -248,6 +261,7 @@ def gpio_handler():
             time.sleep(0.1)   # brief sleep to allow graceful shutdown (not implemented here, but good practice)
             gpio.update()  # read all GPIO pins and update internal state for edge detection
             
+
             # Rising edge — fires ONCE when button pressed, not every poll
             if gpio.rising("intke_start") and state["infeed"]["mode"]=="MANUAL" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"]:
                     _now_w = weiVal
@@ -282,7 +296,25 @@ def gpio_handler():
             if gpio.rising("intke_stop")  :
                 tech_log.info("GPIO: intke_stop_pin triggered — setting remote_stop=True")
                 print("[GPIO] intke_stop_pin triggered — setting remote_stop=True")
-                remote_stop = True
+                infeed_remote_stop = True
+
+            if gpio.rising("outtk_stop"):
+                outfeed_remote_stop=True
+                tech_log.info("GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True")
+
+            if gpio.rising("outtk_start") and state["outfeed"]["operation"]=="REMOTE":
+                _req_vol = state["outfeed"]["manual_vol_L"]
+                _req_vol = state["outfeed"]["manual_vol_L"]
+                t = threading.Thread(
+                        target=oil_drain,
+                        args=(_req_vol,),
+                        daemon=True,
+                        name="outfeed_AUTO",
+                    )
+                t.start()
+                tech_log.info("[outfeed] oil_drain thread REMOTE started — vol=%.2f L", _req_vol)
+                print(f"[outfeed] oil_drain thread REMOTE started  vol={_req_vol:.2f} L")
+                
 
             if gpio.changed("intake_mode") and state["infeed"]["operation"] == "REMOTE":
                  
@@ -295,13 +327,7 @@ def gpio_handler():
 
                 #tech_log.info("GPIO: intke_stop_pin triggered — setting local_stop=True")
 
-            
-            
-                
-                 
-
-
-
+  
                 #tech_log.info("GPIO: intke_remot_pin triggered — setting remote_stop=True")
             state["sensors"]["lo_level"] = not gpio.state("lowr_sns")   # assuming active LOW sensor (0 when triggered)
             state["sensors"]["hi_level"] = gpio.state("up_sns")      # assuming active HIGH sensor (1 when triggered)
@@ -322,7 +348,18 @@ def gpio_handler():
 #  HELPERS
 # ══════════════════════════════════════════════════════════════════
 def _log(event, **extras):
-    entry = {"ts": _now(), "evt": event, **extras}
+    """Append a log entry. Always snapshots current tank weight & level_pct
+    so every row in the UI table has numbers to display."""
+    tk = state["tank"]
+    net_kg  = round(max(0.0, tk["weight_kg"] - tk.get("tare_kg", 0.0)), 2)
+    lvl_pct = round(tk.get("level_pct", 0.0), 1)
+    entry = {
+        "ts":     _now(),
+        "evt":    event,
+        "weight": net_kg,
+        "level":  lvl_pct,
+        **extras,
+    }
     state["log"].insert(0, entry)
     state["log"] = state["log"][:200]
 
@@ -368,37 +405,55 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
     Does not implement any of the interrupt or safety checks of oil_add().
     """
     global weiVal
-    global local_stop, remote_stop
+    global local_stop, infeed_remote_stop,serial_error
     infeed_open(False)
     done=False
      
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
     state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
     local_stop=False
+    result=False
     while True:
         
          
         #print("wait for tank empty")
          
         if(local_stop ):
+            tech_log.error("Local stop received in auto control loop.")
             print("Local stop received, exiting auto control. 1")
             state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
             state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
             local_stop=False
             break
-        elif remote_stop:
+        elif infeed_remote_stop:
+            tech_log.error("Remote stop received in auto control loop.")
             print("Remote stop received, exiting auto control.")
             state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
             state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
-            remote_stop=False
+            infeed_remote_stop=False
+            break
+        elif serial_error:
+            tech_log.error("Serial error detected in auto control loop.")
+            print("Serial error detected, exiting auto control.")
+            state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+            state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+            serial_error=False
             break
 
         if (weiVal<state["tank"]["lo_level"]) :
                         
-            oil_add(weiVal, required_weight,True)
-            print("Auto fill done")
-            state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
-            state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
+            result=oil_add(weiVal, required_weight,True)
+            if result:
+                tech_log.info("Auto fill sequence completed in auto control loop.")
+                print("Auto fill done")
+                state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
+                state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
+            else:
+                tech_log.warning("Auto fill sequence failed or aborted in auto control loop.")
+                print("Auto fill failed or aborted.")
+                state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+                state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+                break
               
 
         '''while(True):
@@ -432,7 +487,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     global weiVal, serial_error
     global busyFlagInfeedBusy, busyFlagOutfeedBusy
     global infeed_local_remote_change, infeed_mode_change
-    global remote_stop, local_stop
+    global infeed_remote_stop, local_stop
     global low_level_sensor
     infeed_open(False)
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
@@ -443,11 +498,13 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     _waited = False
     while busyFlagOutfeedBusy:
         if not _waited:
+            gpio.output_on("in_wei_led")
             tech_log.warning("Outfeed busy — infeed waiting ...")
             print("[oil_add] Outfeed busy — waiting for outfeed to finish ...")
             _waited = True
         time.sleep(0.5)
     if _waited:
+        gpio.output_off("in_wei_led")
         tech_log.info("Outfeed cleared — proceeding with oil addition.")
         print("[oil_add] Outfeed cleared — starting.")
 
@@ -455,7 +512,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     busyFlagInfeedBusy         = True
     infeed_local_remote_change = False
     local_stop                 = False
-    remote_stop                = False
+    infeed_remote_stop                = False
     infeed_mode_change         = False
     # Note: do NOT reset serial_error — it reflects live MQTT state
 
@@ -468,19 +525,25 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
           % (intial_weight, required_weight))
 
     start_time = time.time()
-    infeed_open(True)
-    infeed_run_state(True)
+    
     _log("Infeed oil addition started",
          weight=round(intial_weight, 2), requested=round(required_weight, 2))
 
     # ── STEP 3: Weight-tracking loop ───────────────────────────────
     done = False
+    result=False
+
+    infeed_open(True)
+    infeed_run_state(True)
+    gpio.output_on("in_solv")
+
     while not done:
         elapsed = time.time() - start_time
-        print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg", end="\r")
+        print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg serial_error: {serial_error}", end="\r")
         # Timeout
         if elapsed > INFEED_TIMEOUT:
             done = True
+            result=False
             tech_log.warning(
                 "Oil add TIMEOUT after %ds. initial=%.2f requested=%.2f final=%.2f",
                 INFEED_TIMEOUT, intial_weight, required_weight, weiVal)
@@ -489,25 +552,46 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("⚠ Infeed timeout", elapsed_s=round(elapsed, 1),
                  initial=round(intial_weight, 2), requested=round(required_weight, 2),
                  final=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "Oil add TIMEOUT"
+            )
+             
+                
             if infeed_auto:
                 infeed_run_state(False)
                 local_stop=True
             break
+
         
-        elif low_level_sensor:
+        elif state["sensors"]["hi_level"]:
             done = True
+            result=False
             tech_log.warning(
-                "Oil add stopped: low level sensor triggered. initial=%.2f requested=%.2f final=%.2f",
+                "Oil add stopped: high level sensor triggered. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
-            print("[oil_add] Stopped: low level sensor triggered — initial %.2f requested %.2f final %.2f"
+            print("[oil_add] Stopped: high level sensor triggered — initial %.2f requested %.2f final %.2f"
                   % (intial_weight, required_weight, weiVal))
-            _log("⚠ Infeed stopped: low level sensor",
+            _log("⚠ Infeed stopped: high level sensor",
                  initial=round(intial_weight, 2), requested=round(required_weight, 2),
                  final=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "high level sensor"
+            )
             break
 
         elif weiVal > state["tank"]["hi_level"]:
             done = True
+            result=False
             tech_log.warning(
                 "Oil add stopped: weight exceeded hi level. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
@@ -516,17 +600,34 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("⚠ Infeed stopped: weight exceeded hi level",
                  initial=round(intial_weight, 2), requested=round(required_weight, 2),
                  final=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "weight exceeded hi level"
+            )
             break
 
         # Target reached — normal completion
-        elif weiVal >= required_weight :
+        elif weiVal >= required_weight + state["tank"]["infeed_valve"] :
             done = True
+            result=True
             tech_log.info(
                 "Required weight reached. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] Target reached — initial %.2f requested %.2f final %.2f"
                   % (intial_weight, required_weight, weiVal))
-            
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "Sucess",
+            "Required weight reached"
+            )
+
             infeed_open(False)
 
             if not infeed_auto:
@@ -539,57 +640,114 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
         # Serial / MQTT sensor error
         elif serial_error:
             done = True
+            result=False
+            serial_error=False
             tech_log.error("Serial error during oil addition — aborting.")
             print("[oil_add] Serial error — aborting.")
             _log("⚠ Infeed aborted: serial error", final=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "serial error"
+            )
+
             break
 
         # Remote stop signal
-        elif remote_stop:
+        elif infeed_remote_stop:
             done = True
+            result=False
+            infeed_run_state(False)
             tech_log.warning(
                 "Remote stop. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] Remote stop.")
             _log("Infeed remote stop",
                  initial=round(intial_weight, 2), final=round(weiVal, 2))
+            
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "Infeed remote stop"
+            )
+
             break
 
         # Local stop (operator pressed STOP on UI)
         elif local_stop:
             done = True
+            result=False
             tech_log.warning(
                 "Local stop. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] Local stop.")
             _log("Infeed local stop",
                  initial=round(intial_weight, 2), final=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "oil_add Local stop"
+            )
+
+
             break
 
         # Mode changed mid-sequence
-        elif infeed_mode_change:
+        elif infeed_mode_change:                
             done = True
+            result=False
             tech_log.warning(
                 "Mode change during oil addition. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] Mode changed — aborting.")
             _log("Infeed aborted: mode change", final=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "mode change"
+            )
             break
 
         # Operation (LOCAL/REMOTE) changed mid-sequence
         elif infeed_local_remote_change:
             done = True
+            result=False
             tech_log.warning(
                 "Local/Remote change during oil addition. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] LOCAL/REMOTE changed — aborting.")
             _log("Infeed aborted: operation change", final=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "operation change"
+            )
+
             break
 
         time.sleep(0.1)   # poll interval — avoids 100 % CPU spin
 
     # ── STEP 4: Always clean up valve + run state ──────────────────
     infeed_open(False)
+    infeed_run_state(False)
+    gpio.output_off("in_solv")
+    print("---- End filling ----")  # newline after progress line
+    
 
     if not infeed_auto:
         infeed_run_state(False)
@@ -601,6 +759,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     busyFlagInfeedBusy = False
     tech_log.info("oil_add complete — busyFlagInfeedBusy cleared.")
     print("[oil_add] Sequence complete.")
+    return result
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -636,23 +795,28 @@ def oil_drain(requested_vol_L: float):
     global busyFlagInfeedBusy, busyFlagOutfeedBusy
     global outfeed_local_stop, outfeed_remote_stop
     global outfeed_local_remote_change, outfeed_mode_change
-    global low_level_sensor
+    global low_level_sensor,outfeed_remote_stop
 
     tech_log.info("[outfeed] oil_drain requested — vol=%.2f L", requested_vol_L)
 
     # Lock buttons while sequence runs
     state["ui"]["buttons"]["out-mode-btn"]["disabled"] = True
     state["ui"]["buttons"]["out-op-btn"]["disabled"]   = True
+     
+    outfeed_open(False)
+    outfeed_run_state(False)
 
     # ── STEP 1: Wait until infeed finishes ─────────────────────────
     _waited = False
     while busyFlagInfeedBusy:
         if not _waited:
+            gpio.output_on("out_wei_led")
             tech_log.warning("[outfeed] Infeed busy — outfeed waiting ...")
             print("[oil_drain] Infeed busy — waiting for infeed to finish ...")
             _waited = True
         time.sleep(0.5)
     if _waited:
+        gpio.output_off("out_wei_led")
         tech_log.info("[outfeed] Infeed cleared — proceeding.")
         print("[oil_drain] Infeed cleared — starting drain.")
 
@@ -706,7 +870,8 @@ def oil_drain(requested_vol_L: float):
          target_kg=round(target_kg, 2))
 
     outfeed_open(True)
-
+    outfeed_run_state(True)
+    gpio.output_on("out_solv")
     # ── STEP 4: Drain loop ──────────────────────────────────────────
     done = False
     while not done:
@@ -722,15 +887,48 @@ def oil_drain(requested_vol_L: float):
                  elapsed_s=round(elapsed, 1),
                  target_kg=round(target_kg, 2),
                  final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "FAIL",
+            "[oil_drain] TIMEOUT"
+            )
+
             break
 
         # Tank too low — stop draining
-        elif state["tank"]["level_pct"] <= lo_level or low_level_sensor:
+        elif weiVal<= lo_level or low_level_sensor:
             done = True
             reason = "low level sensor" if low_level_sensor else "lo_level threshold"
             tech_log.warning("[outfeed] Stopped: %s. final=%.2f kg", reason, weiVal)
             print("[oil_drain] Stopped: %s" % reason)
             _log(f"⚠ Outfeed stopped: {reason}", final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "FAIL",
+            reason
+            )
+            break
+
+        elif outfeed_remote_stop:
+            done = True
+            outfeed_remote_stop=False
+            tech_log.warning("[outfeed] Remote stop.")
+            print("[oil_drain] Remote stop.")
+            _log("Outfeed remote stop", final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "FAIL",
+            "[outfeed] Remote stop"
+            )
             break
 
         # Target reached — normal completion
@@ -746,13 +944,30 @@ def oil_drain(requested_vol_L: float):
                  requested_kg=round(requested_kg, 2),
                  drained_kg=round(current_kg - weiVal, 2),
                  final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Sucess",
+            "Outfeed target reached"
+            )
             break
 
         elif serial_error:
+            serial_error=False
             done = True
             tech_log.error("[outfeed] Serial error — aborting.")
             print("[oil_drain] Serial error — aborting.")
             _log("⚠ Outfeed aborted: serial error", final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "[oil_drain] Serial error"
+            )
             break
 
         elif outfeed_local_stop:
@@ -762,24 +977,44 @@ def oil_drain(requested_vol_L: float):
             _log("Outfeed local stop",
                  drained_kg=round(current_kg - weiVal, 2),
                  final_kg=round(weiVal, 2))
+            
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "[oil_drain] Local stop"
+            )
             break
 
-        elif outfeed_remote_stop:
-            done = True
-            tech_log.info("[outfeed] Remote stop.")
-            _log("Outfeed remote stop", final_kg=round(weiVal, 2))
-            break
-
+         
         elif outfeed_mode_change:
             done = True
             tech_log.warning("[outfeed] Mode changed mid-sequence — aborting.")
             _log("Outfeed aborted: mode change", final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "Outfeed aborted: mode change"
+            )
             break
 
         elif outfeed_local_remote_change:
             done = True
             tech_log.warning("[outfeed] Operation changed mid-sequence — aborting.")
             _log("Outfeed aborted: operation change", final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "Outfeed aborted: operation change"
+            )
             break
 
         time.sleep(0.1)
@@ -787,6 +1022,7 @@ def oil_drain(requested_vol_L: float):
     # ── STEP 5: Always clean up ─────────────────────────────────────
     outfeed_open(False)
     outfeed_run_state(False)
+    gpio.output_off("out_solv")
     time.sleep(0.1)
 
     busyFlagOutfeedBusy = False
@@ -821,6 +1057,7 @@ def auto_outfeed_control():
     _waited = False
     while busyFlagInfeedBusy:
         if not _waited:
+            gpio.output_on("out_wei_led")
             tech_log.warning("[outfeed AUTO] Infeed busy — waiting ...")
             print("[auto_outfeed] Infeed busy — waiting ...")
             _waited = True
@@ -834,6 +1071,7 @@ def auto_outfeed_control():
             return
         time.sleep(0.5)
     if _waited:
+        gpio.output_off("out_wei_led")
         tech_log.info("[outfeed AUTO] Infeed cleared — proceeding.")
 
     busyFlagOutfeedBusy         = True
@@ -850,8 +1088,10 @@ def auto_outfeed_control():
     _log("Outfeed AUTO sequence started", current_kg=round(start_kg, 2))
 
     start_time = time.time()
-
+    
     # ── AUTO drain loop — add your logic inside here ────────────────
+    gpio.output_on("out_solv")
+
     done = False
     while not done:
         elapsed = time.time() - start_time
@@ -861,9 +1101,17 @@ def auto_outfeed_control():
             tech_log.warning("[outfeed AUTO] TIMEOUT after %ds.", OUTFEED_TIMEOUT)
             print("[auto_outfeed] TIMEOUT after %ds" % OUTFEED_TIMEOUT)
             _log("⚠ Outfeed AUTO timeout", elapsed_s=round(elapsed, 1))
+            prod_logger.log(
+            state["product"],
+            start_kg,
+            weiVal,
+            weiVal,
+            "Fail",
+            "this cannot happen"
+            )
             break
 
-        elif state["tank"]["level_pct"] <= lo_level or low_level_sensor:
+        elif weiVal<= lo_level or low_level_sensor:
             done = True
             reason = "low level sensor" if low_level_sensor else "lo_level threshold"
             tech_log.warning("[outfeed AUTO] Stopped: %s", reason)
@@ -908,6 +1156,7 @@ def auto_outfeed_control():
     # ── Cleanup ─────────────────────────────────────────────────────
     outfeed_open(False)
     outfeed_run_state(False)
+    gpio.output_off("out_solv")
     time.sleep(0.1)
 
     busyFlagOutfeedBusy = False
@@ -962,7 +1211,7 @@ def on_message_weight(client, userdata, msg):
         else:
             # ── Good numeric reading ─────────────────────────────
             weiVal       = float(payload_str)
-            serial_error = False
+            #serial_error = False
 
             with _lock:
                 # Push weight into tank state
@@ -1055,7 +1304,7 @@ def api_control():
     body   = request.get_json(force=True)
     side   = body.get("side")
     action = body.get("action")
-    global local_stop, remote_stop, infeed_mode_change, infeed_local_remote_change
+    global local_stop, infeed_remote_stop, infeed_mode_change, infeed_local_remote_change
     global outfeed_local_stop, outfeed_remote_stop, outfeed_mode_change, outfeed_local_remote_change
 
     with _lock:
@@ -1096,6 +1345,10 @@ def api_control():
 
         elif action == "operation":
             s["operation"] = "REMOTE" if s["operation"] == "LOCAL" else "LOCAL"
+            if side =="outfeed" and s["operation"] == "REMOTE":
+                s["mode"]="AUTO"
+            else:
+                s["mode"]="MANUAL"
             _print_event({"side": side, "button": "operation", "value": s["operation"]})
             _log(f"{side.capitalize()} operation -> {s['operation']}")
             # Signal oil_add loop if infeed sequence is running
@@ -1161,6 +1414,9 @@ def api_control():
 
             # ── Outfeed run handling ────────────────────────────────
             if side == "outfeed":
+                
+                
+                
                 if s["running"] and s["mode"] == "MANUAL" and s["operation"] == "LOCAL":
                     _req_vol = state["outfeed"]["manual_vol_L"]
                     t = threading.Thread(
@@ -1170,8 +1426,8 @@ def api_control():
                         name="outfeed_manual",
                     )
                     t.start()
-                    tech_log.info("[outfeed] oil_drain thread started — vol=%.2f L", _req_vol)
-                    print(f"[outfeed] oil_drain thread started  vol={_req_vol:.2f} L")
+                    tech_log.info("[outfeed] oil_drain thread local started — vol=%.2f L", _req_vol)
+                    print(f"[outfeed] oil_drain local thread started  vol={_req_vol:.2f} L")
 
                 elif s["running"] and s["mode"] == "AUTO" and s["operation"] == "LOCAL":
                     t = threading.Thread(
@@ -1293,6 +1549,166 @@ def api_log_clear():
     return jsonify({"ok": True})
 
 
+# ─────────────────────────────────────────────────────────────────
+# GET /api/log/csv  — last 20 rows from the latest production CSV
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/log/csv", methods=["GET"])
+def api_log_csv():
+    import csv, glob
+    # Find all CSV files in LOG_DIR, pick the newest by filename (date-sorted)
+    pattern = os.path.join(LOG_DIR, "*.csv")
+    files   = sorted(glob.glob(pattern))
+    if not files:
+        return jsonify([])
+    latest = files[-1]   # alphabetical sort works for YYYY-MM-DD filenames
+    rows = []
+    try:
+        with open(latest, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                rows.append(row)
+    except Exception as e:
+        tech_log.error("Failed to read CSV log %s: %s", latest, e)
+        return jsonify([])
+    # Return last 20 rows, newest first
+    return jsonify(list(reversed(rows[-20:])))
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /api/products  — read products.csv beside config.yml
+#   Returns: [{"code": "OIL-001", "name": "Crude Oil"}, ...]
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/products", methods=["GET"])
+def api_products():
+    import csv
+    cfg_dir      = os.path.dirname(os.path.abspath(__file__))
+    products_csv = os.path.join(cfg_dir, "products.csv")
+    products     = []
+    try:
+        with open(products_csv, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                code = (row.get("code") or "").strip()
+                name = (row.get("name") or "").strip()
+                if code and name:
+                    products.append({"code": code, "name": name})
+    except FileNotFoundError:
+        tech_log.warning("products.csv not found at %s", products_csv)
+    return jsonify(products)
+
+
+# ─────────────────────────────────────────────────────────────────
+# POST /api/settings  — save all settings to config.yml + update state
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/settings", methods=["POST"])
+def api_settings():
+    body = request.get_json(force=True)
+
+    cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
+    try:
+        with open(cfg_path) as f:
+            cfg = yaml.safe_load(f) or {}
+    except Exception:
+        cfg = {}
+
+    if "product_code" in body:
+        cfg["product_code"] = body["product_code"]
+        state["product_code"] = body["product_code"]
+    if "product" in body:
+        cfg["product"] = body["product"]
+        state["product"] = body["product"]
+
+    if "serial" in body:
+        cfg.setdefault("serial", {})
+        cfg["serial"]["port"]     = body["serial"].get("port", cfg["serial"].get("port", "/dev/ttyUSB0"))
+        cfg["serial"]["baudrate"] = int(body["serial"].get("baudrate", cfg["serial"].get("baudrate", 9600)))
+        state.setdefault("serial", {})
+        state["serial"]["port"]     = cfg["serial"]["port"]
+        state["serial"]["baudrate"] = cfg["serial"]["baudrate"]
+
+    if "tank" in body:
+        t  = body["tank"]
+        cfg.setdefault("tank", {})
+        tk = state["tank"]
+        for key in ("max_kg", "density_kgl", "tare_kg", "infeed_valve",
+                    "hi_level_kg", "hi_threshold_pct", "lo_level_kg", "lo_threshold_pct"):
+            if key in t:
+                val = float(t[key])
+                cfg["tank"][key] = val
+                if key in tk:
+                    tk[key] = val
+        _recalc_alarms()
+
+    if "infeed" in body:
+        i = body["infeed"]
+        cfg.setdefault("infeed", {})
+        if "filling_time" in i: cfg["infeed"]["filling_time"] = int(i["filling_time"])
+        if "manual_vol_L" in i:
+            cfg["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
+            state["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
+
+    if "outfeed" in body:
+        o = body["outfeed"]
+        cfg.setdefault("outfeed", {})
+        if "draining_time" in o: cfg["outfeed"]["draining_time"] = int(o["draining_time"])
+        if "manual_vol_L"  in o:
+            cfg["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
+            state["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
+
+    try:
+        with open(cfg_path, "w") as f:
+            yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
+        tech_log.info("[SETTINGS] saved to config.yml")
+        print("[SETTINGS] config.yml updated")
+    except Exception as e:
+        tech_log.error("[SETTINGS] Failed to write config.yml: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"ok": True})
+
+# ── DAILY 6 AM SCHEDULER THREAD ────────────────────────────────────
+def daily_6am_scheduler():
+    """Polls time. Runs job once at/after 6 AM (flag=0), resets flag at 7 AM."""
+    while True:
+        now = datetime.now()
+        hour = now.hour
+
+        # Read current flag from config
+        try:
+            with open("config.yml") as f:
+                cfg = yaml.safe_load(f) or {}
+        except Exception as e:
+            tech_log.error("[SCHEDULER] Failed to read config.yml: %s", e)
+            time.sleep(60)
+            continue
+
+        job_done = cfg.get("daily_job_done", 0)
+
+        # 6 AM or later AND job not done yet → run it
+        if hour >= 6 and job_done == 0:
+            tech_log.info("[SCHEDULER] Running daily 6 AM job...")
+            print("[SCHEDULER] Running daily 6 AM job —", now.strftime("%Y-%m-%d %H:%M:%S"))
+
+            # ── YOUR JOB CODE HERE ──────────────────────
+            
+            # ───────────────────────────────────────────
+
+            # Write flag = 1 to config
+            cfg["daily_job_done"] = 1
+            with open("config.yml", "w") as f:
+                yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
+            tech_log.info("[SCHEDULER] Job done. Flag set to 1.")
+
+        # 7 AM or later AND flag is 1 → reset it
+        elif hour >= 7 and job_done == 1:
+            cfg["daily_job_done"] = 0
+            with open("config.yml", "w") as f:
+                yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
+            tech_log.info("[SCHEDULER] Flag reset to 0.")
+
+        time.sleep(5)  # check every minute
+
+
 # ══════════════════════════════════════════════════════════════════
 #  ENTRY POINT
 # ══════════════════════════════════════════════════════════════════
@@ -1303,6 +1719,9 @@ if __name__ == "__main__":
     print(f"  Broker ->  {MQTT_BROKER}:{MQTT_PORT}")
     print(f"  Topic  ->  {MQTT_TOPIC}")
     print("=" * 60)
+
+    t = threading.Thread(target=daily_6am_scheduler, name="daily-scheduler", daemon=True)
+    t.start()
 
     # Start MQTT in its own daemon thread BEFORE Flask
     t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)

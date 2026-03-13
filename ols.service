@@ -1,0 +1,15 @@
+[Unit]
+Description=OLS Monitor Startup
+After=network.target graphical.target
+
+[Service]
+Type=forking
+User=palmoil
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/palmoil/.Xauthority
+ExecStart=/bin/bash /home/palmoil/stuff/startup.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target

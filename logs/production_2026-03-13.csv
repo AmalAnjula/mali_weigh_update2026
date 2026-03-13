@@ -1,0 +1,22 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-03-13,13:20:04,Crude Oil,0.0,55.0,0.0,FAIL,oil_add Local stop
+2026-03-13,14:04:25,Crude Oil,49.71,55.0,49.7,FAIL,oil_add Local stop
+2026-03-13,14:05:56,Sunflower Oil,51.55,55.0,49.9,FAIL,oil_add Local stop
+2026-03-13,14:22:51,Hydraulic Fluid,50.87,70.0,71.2,TRUE,Required weight reached
+2026-03-13,14:25:54,Hydraulic Fluid,46.3,75.0,75.69,TRUE,Required weight reached
+2026-03-13,14:27:10,Hydraulic Fluid,46.1,75.0,60.42,FAIL,weight exceeded hi level
+2026-03-13,23:05:07,Hydraulic Fluid,63.98,75.0,63.98,FAIL,weight exceeded hi level
+2026-03-13,23:05:08,Hydraulic Fluid,64.78,75.0,64.78,FAIL,weight exceeded hi level
+2026-03-13,23:06:27,Hydraulic Fluid,63.18,75.0,63.18,FAIL,weight exceeded hi level
+2026-03-13,23:08:15,Hydraulic Fluid,64.03,75.0,64.03,FAIL,weight exceeded hi level
+2026-03-13,23:09:27,Hydraulic Fluid,62.68,75.0,62.68,FAIL,weight exceeded hi level
+2026-03-13,23:32:22,Hydraulic Fluid,61.31,75.0,61.31,FAIL,weight exceeded hi level
+2026-03-13,23:47:14,Hydraulic Fluid,61.73,75.0,61.73,FAIL,weight exceeded hi level
+2026-03-13,23:48:22,Hydraulic Fluid,63.16,65.0,63.16,FAIL,weight exceeded hi level
+2026-03-13,23:54:26,Hydraulic Fluid,32.88,10.0,29.6,FAIL,lo_level threshold
+2026-03-13,23:54:56,Hydraulic Fluid,29.78,10.0,26.19,FAIL,lo_level threshold
+2026-03-13,23:55:03,Hydraulic Fluid,27.56,10.0,27.56,FAIL,lo_level threshold
+2026-03-13,23:55:23,Hydraulic Fluid,29.57,10.0,29.57,FAIL,lo_level threshold
+2026-03-13,23:55:23,Hydraulic Fluid,29.38,10.0,29.38,FAIL,lo_level threshold
+2026-03-14,00:01:25,Hydraulic Fluid,52.84,10.0,42.11,Sucess,Outfeed target reached
+2026-03-14,00:02:53,Hydraulic Fluid,15.1,10.0,4.69,FAIL,lo_level threshold

@@ -51,7 +51,7 @@ header {
 }
 .hdr-left h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: .3px; }
 .hdr-left p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.hdr-right   { display: flex; align-items: center; gap: 16px; }
+ 
 #clock        { font-size: 15px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
 .badge {
   display: inline-flex; align-items: center; gap: 5px;
@@ -395,20 +395,7 @@ td.cwt { color: var(--green); }
 <body>
 <div class="page">
 
-<!-- HEADER -->
-<header>
-  <div class="hdr-left">
-    <h1>OLS &mdash; Monitor</h1>
-    <p>Oil Level System</p>
-  </div>
-  <div class="hdr-right">
-    <span id="clock">--:--:--</span>
-    <span class="badge badge-green" id="conn-badge">
-      <span class="dot pulse"></span>ONLINE
-    </span>
-  </div>
-</header>
-
+ 
 <!-- TABS -->
 <div class="tabs">
   <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
@@ -563,8 +550,29 @@ td.cwt { color: var(--green); }
 <!-- ═══ SETTINGS ═══ -->
 <div id="tab-setting" class="tab-panel">
 <div class="settings-page">
+
+  <!-- ── Product card — always accessible, no password ── -->
+  <div style="margin-bottom:14px;">
+    <div class="settings-grid" style="grid-template-columns:minmax(240px,340px);">
+      <div class="sc">
+        <h4>Product</h4>
+        <div class="sr">
+          <label>Select Product</label>
+          <select class="si" id="s-product-select" onchange="onProductSelect()">
+            <option value="">— loading… —</option>
+          </select>
+        </div>
+        <div class="sr"><label>Product Code</label><input type="text" class="si" id="s-code" readonly style="background:var(--bg);color:var(--muted);"></div>
+        <div class="sr"><label>Product Name</label><input type="text" class="si" id="s-name" readonly style="background:var(--bg);color:var(--muted);"></div>
+        <button class="save-btn" style="margin-top:8px;" onclick="saveProductOnly()">💾 Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Admin gate — shown when locked ── -->
   <div class="admin-lock" id="admin-gate">
     <h3>🔒 Admin Login Required</h3>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Enter password to edit system settings</p>
     <div class="pr">
       <input type="password" id="pass-in" placeholder="Password" maxlength="20"
              onkeydown="if(event.key==='Enter')checkPass()">
@@ -572,58 +580,95 @@ td.cwt { color: var(--green); }
     </div>
     <div class="admin-err" id="admin-err"></div>
   </div>
+
+  <!-- ── Admin open bar — shown when unlocked ── -->
   <div id="admin-open" style="display:none;">
     <div class="admin-open-bar">
-      🔓 Admin Mode Active
-      <button class="lock-btn" onclick="lockAdmin()">Lock</button>
+      🔓 Admin Mode Active — system settings unlocked
+      <button class="lock-btn" onclick="lockAdmin()">🔒 Lock</button>
     </div>
   </div>
-  <div class="settings-grid">
+
+  <!-- ── Protected settings grid ── -->
+  <div class="settings-grid" id="admin-settings-grid" style="opacity:.45;pointer-events:none;filter:blur(1px);transition:all .25s;">
+
+    <!-- Serial / Comms -->
     <div class="sc">
-      <h4>Product Info</h4>
-      <div class="sr"><label>Product Code</label><input type="text" class="si af" id="s-code" disabled></div>
-      <div class="sr"><label>Product Name</label><input type="text" class="si af" id="s-name" disabled></div>
+      <h4>Serial / Comms</h4>
+      <div class="sr"><label>Serial Port</label><input type="text" class="si af" id="s-serial-port" placeholder="/dev/ttyUSB0" disabled></div>
+      <div class="sr">
+        <label>Baud Rate</label>
+        <select class="si af" id="s-baudrate" disabled>
+          <option value="1200">1200</option>
+          <option value="2400">2400</option>
+          <option value="4800">4800</option>
+          <option value="9600" selected>9600</option>
+          <option value="19200">19200</option>
+          <option value="38400">38400</option>
+          <option value="57600">57600</option>
+          <option value="115200">115200</option>
+        </select>
+      </div>
     </div>
+
+    <!-- Tank Parameters -->
     <div class="sc">
       <h4>Tank Parameters</h4>
       <div class="sr"><label>Max Capacity (kg)</label><input type="number" class="si af" id="s-maxkg" disabled></div>
-      <div class="sr"><label>Oil Density (kg/L)</label><input type="number" class="si af" id="s-density" step="0.01" disabled></div>
+      <div class="sr"><label>Oil Density (kg/L)</label><input type="number" class="si af" id="s-density" step="0.001" disabled></div>
       <div class="sr"><label>Tare Weight (kg)</label><input type="number" class="si af" id="s-tare" step="0.01" disabled></div>
+      <div class="sr"><label>Infeed Valve (L)</label><input type="number" class="si af" id="s-infeed-valve" step="0.1" disabled></div>
     </div>
+
+    <!-- Level Alarms -->
     <div class="sc">
-      <h4>Alarm Thresholds</h4>
-      <div class="sr"><label>Hi Level (%)</label><input type="number" class="si af" id="s-hi" min="0" max="100" disabled></div>
-      <div class="sr"><label>Lo Level (%)</label><input type="number" class="si af" id="s-lo" min="0" max="100" disabled></div>
+      <h4>Level Alarms</h4>
+      <div class="sr"><label>Hi Level (kg)</label><input type="number" class="si af" id="s-hi-kg" step="0.1" disabled></div>
+      <div class="sr"><label>Hi Threshold (%)</label><input type="number" class="si af" id="s-hi" min="0" max="100" disabled></div>
+      <div class="sr"><label>Lo Level (kg)</label><input type="number" class="si af" id="s-lo-kg" step="0.1" disabled></div>
+      <div class="sr"><label>Lo Threshold (%)</label><input type="number" class="si af" id="s-lo" min="0" max="100" disabled></div>
     </div>
+
+    <!-- Infeed Settings -->
     <div class="sc">
       <h4>Infeed Settings</h4>
+      <div class="sr"><label>Filling Time (s)</label><input type="number" class="si af" id="s-fill-time" step="1" min="0" disabled></div>
       <div class="sr"><label>Default Volume (L)</label><input type="number" class="si af" id="s-inf-def" step="0.01" disabled></div>
-      <div class="sr"><label>Max Volume (L)</label><input type="number" class="si af" id="s-inf-max" step="0.01" disabled></div>
-      <button class="save-btn af-btn" id="save-btn" onclick="saveSettings()" disabled>Save Settings</button>
     </div>
-  </div>
+
+    <!-- Outfeed Settings -->
+    <div class="sc">
+      <h4>Outfeed Settings</h4>
+      <div class="sr"><label>Draining Time (s)</label><input type="number" class="si af" id="s-drain-time" step="1" min="0" disabled></div>
+      <div class="sr"><label>Default Volume (L)</label><input type="number" class="si af" id="s-out-def" step="0.01" disabled></div>
+      <div style="margin-top:auto;padding-top:12px;">
+        <button class="save-btn af" id="save-btn" onclick="saveSettings()" disabled>💾 Save Settings</button>
+      </div>
+    </div>
+
+  </div><!-- /admin-settings-grid -->
+
 </div>
 </div>
 
 <!-- ═══ LOG ═══ -->
 <div id="tab-log" class="tab-panel">
   <div class="log-toolbar">
-    <button class="ltb" onclick="exportJSON()">↓ Export JSON</button>
-    <button class="ltb danger" onclick="clearLog()">✕ Clear Log</button>
-    <span class="log-ct" id="log-ct">0 events</span>
+    <button class="ltb" onclick="fetchCsvLog()">↻ Refresh</button>
+    <span class="log-ct" id="log-ct">— records</span>
   </div>
   <div class="log-tw">
     <div class="log-scroll">
       <table>
         <thead>
           <tr>
-            <th>Timestamp</th><th>Event</th>
-            <th>Infeed (L)</th><th>Outfeed (L)</th>
-            <th>Weight (kg)</th><th>Level (%)</th>
+            <th>Date</th><th>Time</th><th>Product</th>
+            <th>Now Wt (kg)</th><th>Req Wt (kg)</th><th>Final Wt (kg)</th>
+            <th>State</th><th>Reason</th>
           </tr>
         </thead>
         <tbody id="log-tbody">
-          <tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;">No events yet</td></tr>
+          <tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No events yet</td></tr>
         </tbody>
       </table>
     </div>
@@ -650,8 +695,6 @@ td.cwt { color: var(--green); }
 // STATE (local cache — refreshed from server at 1Hz)
 // ═════════════════════════════════════════════════
 let D = null;          // last data snapshot
-let adminOn = false;
-const PASS = "1234";
 
 // ── Dirty flags — set when user is typing in vol inputs ───────────
 // Prevents the 1Hz poll from overwriting what the user is typing
@@ -682,6 +725,7 @@ function setConn(ok) {
 // Start 1 Hz poll
 poll();
 setInterval(poll, 1000);
+loadProducts();
 
 // ── Attach dirty-flag listeners once DOM is ready ─────────────────
 document.getElementById("in-vol").addEventListener("input",  () => { inVolDirty  = true; });
@@ -782,9 +826,6 @@ loL.className = "slbl" + (loSns ? " lo-alm" : "");
   if (!inVolDirty)  document.getElementById("in-vol").value  = (d.infeed?.manual_vol_L  || 0).toFixed(2);
   if (!outVolDirty) document.getElementById("out-vol").value = (d.outfeed?.manual_vol_L || 0).toFixed(2);
 
-  // Log
-  renderLog(d.log || []);
-
   // Sync settings inputs (once)
   syncSettings(d);
 }
@@ -871,31 +912,74 @@ async function applyVol(side) {
 }
 
 // ═════════════════════════════════════════════════
-// ADMIN / SETTINGS
+// SETTINGS
 // ═════════════════════════════════════════════════
 let settingsSynced = false;
-function syncSettings(d) {
-  if (settingsSynced) return;
-  settingsSynced = true;
-  const tk = d.tank;
-  document.getElementById("s-code").value    = d.product_code || "";
-  document.getElementById("s-name").value    = d.product || "";
-  document.getElementById("s-maxkg").value   = tk.max_kg;
-  document.getElementById("s-density").value = tk.density_kgl || 0.87;
-  document.getElementById("s-tare").value    = tk.tare_kg || 0;
-  document.getElementById("s-hi").value      = tk.hi_threshold_pct;
-  document.getElementById("s-lo").value      = tk.lo_threshold_pct;
-  document.getElementById("s-inf-def").value = d.infeed?.manual_vol_L || 25;
-  document.getElementById("s-inf-max").value = 200;
+let adminOn = false;
+const PASS = "1234";   // ← change password here
+
+let _products = [];   // [{code, name}, ...]
+
+// Load product list from server (products.csv)
+async function loadProducts() {
+  try {
+    const r = await fetch("/api/products", { cache: "no-store" });
+    if (!r.ok) return;
+    _products = await r.json();
+    const sel = document.getElementById("s-product-select");
+    sel.innerHTML = _products.map(p =>
+      `<option value="${p.code}">${p.name}</option>`
+    ).join("");
+    if (D) _selectCurrentProduct();
+  } catch(e) {
+    console.warn("Could not load products:", e);
+  }
 }
 
+function _selectCurrentProduct() {
+  const sel = document.getElementById("s-product-select");
+  if (!D) return;
+  const opt = [...sel.options].find(o => o.value === D.product_code);
+  if (opt) sel.value = opt.value;
+  onProductSelect();
+}
+
+function onProductSelect() {
+  const sel  = document.getElementById("s-product-select");
+  const code = sel.value;
+  const prod = _products.find(p => p.code === code);
+  document.getElementById("s-code").value = code;
+  document.getElementById("s-name").value = prod ? prod.name : "";
+}
+
+// Save product only (no password needed)
+async function saveProductOnly() {
+  if (!D) return;
+  const payload = {
+    product_code: document.getElementById("s-code").value,
+    product:      document.getElementById("s-name").value,
+  };
+  await fetch("/api/settings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  showToast("Product saved ✓", "ok");
+  settingsSynced = false;
+  poll();
+}
+
+// Admin unlock
 function checkPass() {
   if (document.getElementById("pass-in").value === PASS) {
     adminOn = true;
-    document.getElementById("admin-gate").style.display = "none";
-    document.getElementById("admin-open").style.display = "";
+    document.getElementById("admin-gate").style.display  = "none";
+    document.getElementById("admin-open").style.display  = "";
+    const grid = document.getElementById("admin-settings-grid");
+    grid.style.opacity        = "1";
+    grid.style.pointerEvents  = "auto";
+    grid.style.filter         = "none";
     document.querySelectorAll(".af").forEach(el => el.disabled = false);
-    document.getElementById("save-btn").disabled = false;
     document.getElementById("admin-err").textContent = "";
   } else {
     document.getElementById("admin-err").textContent = "Incorrect password";
@@ -903,76 +987,133 @@ function checkPass() {
   }
 }
 
+// Admin lock
 function lockAdmin() {
   adminOn = false;
-  document.getElementById("admin-gate").style.display = "";
-  document.getElementById("admin-open").style.display = "none";
+  document.getElementById("admin-gate").style.display  = "";
+  document.getElementById("admin-open").style.display  = "none";
   document.getElementById("pass-in").value = "";
+  const grid = document.getElementById("admin-settings-grid");
+  grid.style.opacity        = ".45";
+  grid.style.pointerEvents  = "none";
+  grid.style.filter         = "blur(1px)";
   document.querySelectorAll(".af").forEach(el => el.disabled = true);
-  document.getElementById("save-btn").disabled = true;
   settingsSynced = false;
+}
+
+function syncSettings(d) {
+  if (settingsSynced) return;
+  settingsSynced = true;
+  const tk = d.tank;
+  document.getElementById("s-maxkg").value        = tk.max_kg;
+  document.getElementById("s-density").value      = tk.density_kgl || 0.87;
+  document.getElementById("s-tare").value         = tk.tare_kg || 0;
+  document.getElementById("s-infeed-valve").value = tk.infeed_valve || 5.0;
+  document.getElementById("s-hi-kg").value        = tk.hi_level_kg || tk.hi_level || 850;
+  document.getElementById("s-hi").value           = tk.hi_threshold_pct;
+  document.getElementById("s-lo-kg").value        = tk.lo_level_kg || tk.lo_level || 10;
+  document.getElementById("s-lo").value           = tk.lo_threshold_pct;
+  document.getElementById("s-fill-time").value    = d.infeed?.filling_time || 300;
+  document.getElementById("s-inf-def").value      = d.infeed?.manual_vol_L || 25;
+  document.getElementById("s-drain-time").value   = d.outfeed?.draining_time || 300;
+  document.getElementById("s-out-def").value      = d.outfeed?.manual_vol_L || 10;
+  if (d.serial) {
+    document.getElementById("s-serial-port").value = d.serial.port || "";
+    document.getElementById("s-baudrate").value    = d.serial.baudrate || 9600;
+  }
+  if (_products.length) _selectCurrentProduct();
 }
 
 async function saveSettings() {
   if (!adminOn || !D) return;
-  D.product_code = document.getElementById("s-code").value;
-  D.product      = document.getElementById("s-name").value;
-  D.tank.max_kg              = parseFloat(document.getElementById("s-maxkg").value)   || D.tank.max_kg;
-  D.tank.density_kgl         = parseFloat(document.getElementById("s-density").value) || D.tank.density_kgl;
-  D.tank.tare_kg             = parseFloat(document.getElementById("s-tare").value)    || 0;
-  D.tank.hi_threshold_pct    = parseFloat(document.getElementById("s-hi").value)      || D.tank.hi_threshold_pct;
-  D.tank.lo_threshold_pct    = parseFloat(document.getElementById("s-lo").value)      || D.tank.lo_threshold_pct;
-  D.infeed.manual_vol_L      = parseFloat(document.getElementById("s-inf-def").value) || D.infeed.manual_vol_L;
+  const payload = {
+    product_code: document.getElementById("s-code").value,
+    product:      document.getElementById("s-name").value,
+    serial: {
+      port:     document.getElementById("s-serial-port").value,
+      baudrate: parseInt(document.getElementById("s-baudrate").value) || 9600,
+    },
+    tank: {
+      max_kg:           parseFloat(document.getElementById("s-maxkg").value)        || D.tank.max_kg,
+      density_kgl:      parseFloat(document.getElementById("s-density").value)      || D.tank.density_kgl,
+      tare_kg:          parseFloat(document.getElementById("s-tare").value)         || 0,
+      infeed_valve:     parseFloat(document.getElementById("s-infeed-valve").value) || 5.0,
+      hi_level_kg:      parseFloat(document.getElementById("s-hi-kg").value)        || D.tank.hi_level_kg,
+      hi_threshold_pct: parseFloat(document.getElementById("s-hi").value)           || D.tank.hi_threshold_pct,
+      lo_level_kg:      parseFloat(document.getElementById("s-lo-kg").value)        || D.tank.lo_level_kg,
+      lo_threshold_pct: parseFloat(document.getElementById("s-lo").value)           || D.tank.lo_threshold_pct,
+    },
+    infeed: {
+      filling_time: parseInt(document.getElementById("s-fill-time").value) || 300,
+      manual_vol_L: parseFloat(document.getElementById("s-inf-def").value) || D.infeed.manual_vol_L,
+    },
+    outfeed: {
+      draining_time: parseInt(document.getElementById("s-drain-time").value) || 300,
+      manual_vol_L:  parseFloat(document.getElementById("s-out-def").value)  || D.outfeed.manual_vol_L,
+    },
+  };
 
-  await fetch("/api/control", {
+  await fetch("/api/settings", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ side: "_settings", action: "save_settings", data: D })
+    body: JSON.stringify(payload)
   });
-  showToast("Settings saved", "ok");
+  showToast("Settings saved ✓", "ok");
   settingsSynced = false;
   poll();
 }
 
 // ═════════════════════════════════════════════════
-// LOG
+// LOG — reads last 20 rows from latest CSV file
 // ═════════════════════════════════════════════════
+async function fetchCsvLog() {
+  try {
+    const r = await fetch("/api/log/csv", { cache: "no-store" });
+    if (!r.ok) return;
+    const rows = await r.json();
+    renderLog(rows);
+  } catch(e) {
+    console.warn("CSV log fetch failed:", e);
+  }
+}
+
 function renderLog(rows) {
-  document.getElementById("log-ct").textContent = rows.length + " events";
+  document.getElementById("log-ct").textContent =
+    rows.length + " record" + (rows.length !== 1 ? "s" : "") + " (latest 20)";
   const tbody = document.getElementById("log-tbody");
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#9ca3af;">No events yet</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No records in CSV yet</td></tr>';
     return;
   }
   tbody.innerHTML = rows.map(r => {
-    const alarm = r.evt && (r.evt.includes("⚠") || r.evt.includes("ALARM"));
+    const stateOk  = (r.task_state || "").toUpperCase() === "OK"
+                  || (r.task_state || "").toLowerCase().startsWith("su"); // "Sucess"/"Success"
+    const stateFail = (r.task_state || "").toUpperCase() === "FAIL";
+    const stateCls  = stateOk   ? "color:var(--green);font-weight:700;"
+                    : stateFail ? "color:var(--red);font-weight:700;" : "";
+    const alarm = (r.reason || "").includes("⚠") || (r.reason || "").toUpperCase().includes("ALARM");
+    const fmt = v => (v != null && v !== "") ? parseFloat(v).toFixed(2) : "—";
     return `<tr>
-      <td style="color:#9ca3af;font-size:11px;">${(r.ts||"").replace("T"," ").slice(0,19)}</td>
-      <td class="${alarm?"ca":"ev"}">${r.evt||""}</td>
-      <td class="cin">${r.inVol  != null ? r.inVol.toFixed(2)+"L" : "—"}</td>
-      <td class="cout">${r.outVol != null ? r.outVol.toFixed(2)+"L" : "—"}</td>
-      <td class="cwt">${r.weight != null ? r.weight+" kg" : "—"}</td>
-      <td class="cin">${r.level  != null ? r.level+"%" : "—"}</td>
+      <td style="color:#9ca3af;font-size:11px;white-space:nowrap;">${r.date || "—"}</td>
+      <td style="color:#9ca3af;font-size:11px;white-space:nowrap;">${r.time || "—"}</td>
+      <td style="font-weight:500;">${r.product || "—"}</td>
+      <td class="cwt">${fmt(r.now_weight)}</td>
+      <td class="cin">${fmt(r.req_weight)}</td>
+      <td class="cout">${fmt(r.final_weight)}</td>
+      <td style="${stateCls}">${r.task_state || "—"}</td>
+      <td class="${alarm ? "ca" : "ev"}">${r.reason || "—"}</td>
     </tr>`;
   }).join("");
 }
 
-function exportJSON() {
-  if (!D) return;
-  const blob = new Blob([JSON.stringify(D, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "ols_" + new Date().toISOString().slice(0,10) + ".json";
-  a.click();
-  showToast("Exported", "ok");
-}
+// Poll CSV log every 5 seconds when log tab is visible
+setInterval(() => {
+  const logTab = document.getElementById("tab-log");
+  if (logTab && logTab.classList.contains("active")) fetchCsvLog();
+}, 5000);
 
-async function clearLog() {
-  if (!confirm("Clear all log entries?")) return;
-  await fetch("/api/log", { method: "DELETE" });
-  showToast("Log cleared", "ok");
-  poll();
-}
+// Initial fetch when page loads
+fetchCsvLog();
 
 // ═════════════════════════════════════════════════
 // TABS / TOAST / CLOCK
@@ -982,6 +1123,7 @@ function switchTab(name, btn) {
   document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
   document.getElementById("tab-" + name).classList.add("active");
   btn.classList.add("active");
+  if (name === "log") fetchCsvLog();
 }
 
 let _tt;
