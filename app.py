@@ -611,7 +611,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             break
 
         # Target reached — normal completion
-        elif weiVal >= required_weight + state["tank"]["infeed_valve"] :
+        elif weiVal >= required_weight - state["tank"]["infeed_valve"] :
             done = True
             result=True
             tech_log.info(
@@ -1685,9 +1685,21 @@ def daily_6am_scheduler():
         job_done = cfg.get("daily_job_done", 0)
 
         # 6 AM or later AND job not done yet → run it
-        if hour >= 6 and job_done == 0:
-            tech_log.info("[SCHEDULER] Running daily 6 AM job...")
+        if hour == 6 and job_done == 0:
+            import  emailsend  as em
+
+            latest_file = em.get_latest_csv("/home/palmoil/stuff/logs")
+            print("Latest file:", latest_file)
+            tech_log.info("[SCHEDULER] Running daily 6 AM job...{latest_file}")
             print("[SCHEDULER] Running daily 6 AM job —", now.strftime("%Y-%m-%d %H:%M:%S"))
+            
+            em.send_email(
+            "Production Report",
+            "Daily production report attached.",
+            "amalanjula@gmail.com",
+            latest_file
+            )
+
 
             # ── YOUR JOB CODE HERE ──────────────────────
             
@@ -1719,7 +1731,7 @@ if __name__ == "__main__":
     print(f"  Broker ->  {MQTT_BROKER}:{MQTT_PORT}")
     print(f"  Topic  ->  {MQTT_TOPIC}")
     print("=" * 60)
-
+    
     t = threading.Thread(target=daily_6am_scheduler, name="daily-scheduler", daemon=True)
     t.start()
 

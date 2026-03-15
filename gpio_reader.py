@@ -31,6 +31,7 @@ outtk_stop_pin       = 5
 outk_remot_pin       = 6
 relay_normal_off_pin = 12
 pwr_pin              = 16
+ 
 
 OUTPUT_PINS = {
     "timer": timer_pin,

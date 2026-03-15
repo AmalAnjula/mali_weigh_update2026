@@ -1,11 +1,26 @@
 import smtplib
 from email.message import EmailMessage
 import os
+import glob
+
+
+
+
+def get_latest_csv(log_dir):
+
+    files = glob.glob(os.path.join(log_dir, "*.csv"))
+
+    if not files:
+        return None
+
+    latest_file = max(files, key=os.path.getmtime)
+
+    return latest_file
 
 
 def send_email(subject, body, to_email, attachment_path=None):
 
-    sender_email = "mailamalanjula@gmail.com"
+    sender_email = "amalanjula@gmail.com"
     sender_password = "ozzupunfywzbqqdp"
 
     msg = EmailMessage()
@@ -38,4 +53,4 @@ def send_email(subject, body, to_email, attachment_path=None):
     print("Email sent successfully")
 
 
-send_email("dsds","bdy","amalanjula@gmail.com")
+send_email("dfgrgsds","ddfgdgbdy","amalanjula@gmail.com")

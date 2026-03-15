@@ -1,3 +1,4 @@
+daily_job_done: 0
 infeed:
   filling_time: 300
   manual_vol_L: 75.0
@@ -9,8 +10,8 @@ product: Hydraulic Fluid
 product_code: OIL-005
 serial:
   baudrate: 1200
-  port: /dev/ttyUSB0
   diff: 3
+  port: /dev/ttyUSB0
 tank:
   density_kgl: 1.0
   hi_level_kg: 90.0

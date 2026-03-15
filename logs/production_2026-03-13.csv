@@ -20,3 +20,6 @@ date,time,product,now_weight,req_weight,final_weight,task_state,reason
 2026-03-13,23:55:23,Hydraulic Fluid,29.38,10.0,29.38,FAIL,lo_level threshold
 2026-03-14,00:01:25,Hydraulic Fluid,52.84,10.0,42.11,Sucess,Outfeed target reached
 2026-03-14,00:02:53,Hydraulic Fluid,15.1,10.0,4.69,FAIL,lo_level threshold
+2026-03-13,23:22:21,Hydraulic Fluid,50.4,75.0,49.64,FAIL,oil_add Local stop
+2026-03-13,23:27:37,Hydraulic Fluid,48.48,75.0,51.2,FAIL,Oil add TIMEOUT
+2026-03-13,23:32:37,Hydraulic Fluid,51.53,10.0,51.56,FAIL,[oil_drain] TIMEOUT
