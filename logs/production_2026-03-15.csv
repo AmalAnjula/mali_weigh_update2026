@@ -228,3 +228,147 @@ date,time,product,now_weight,req_weight,final_weight,task_state,reason
 2026-03-15,18:56:38,Hydraulic Fluid,92.0,65.0,92.8,Sucess,Outfeed Oven request to stop
 2026-03-15,18:57:48,Hydraulic Fluid,95.4,65.0,92.0,Sucess,Outfeed Oven request to stop
 2026-03-15,18:58:56,Hydraulic Fluid,92.8,65.0,84.4,Sucess,Outfeed Oven request to stop
+2026-03-15,19:04:20,Hydraulic Fluid,84.4,65.0,75.4,Sucess,Outfeed Oven request to stop
+2026-03-15,19:09:18,Hydraulic Fluid,75.4,100.0,75.4,FAIL,Infeed remote stop
+2026-03-15,19:10:55,Hydraulic Fluid,76.0,100.0,76.0,FAIL,Infeed remote stop
+2026-03-15,19:12:15,Hydraulic Fluid,76.0,100.0,76.2,FAIL,Infeed remote stop
+2026-03-15,19:13:48,Hydraulic Fluid,69.6,100.0,99.0,Sucess,Required weight reached
+2026-03-15,19:15:02,Hydraulic Fluid,99.0,65.0,81.0,Sucess,Outfeed Oven request to stop
+2026-03-15,19:21:19,Hydraulic Fluid,81.0,65.0,71.0,Sucess,Outfeed Oven request to stop
+2026-03-15,19:25:56,Hydraulic Fluid,71.0,65.0,63.4,Sucess,Outfeed Oven request to stop
+2026-03-15,19:27:39,Hydraulic Fluid,69.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,19:30:28,Hydraulic Fluid,99.8,65.0,91.4,Sucess,Outfeed Oven request to stop
+2026-03-15,19:35:22,Hydraulic Fluid,91.0,65.0,83.4,Sucess,Outfeed Oven request to stop
+2026-03-15,19:42:20,Hydraulic Fluid,83.4,65.0,74.0,FAIL,[outfeed] Remote stop
+2026-03-15,19:44:01,Hydraulic Fluid,73.4,65.0,73.4,FAIL,[outfeed] Remote stop
+2026-03-15,19:47:20,Hydraulic Fluid,73.0,65.0,73.0,Sucess,Outfeed Oven request to stop
+2026-03-15,19:47:22,Hydraulic Fluid,73.0,65.0,73.0,Sucess,Outfeed Oven request to stop
+2026-03-15,19:50:37,Hydraulic Fluid,72.8,65.0,60.0,FAIL,lo_level threshold
+2026-03-15,19:52:42,Hydraulic Fluid,60.4,100.0,99.0,Sucess,Required weight reached
+2026-03-15,19:52:44,Hydraulic Fluid,99.0,65.0,99.4,Sucess,Outfeed Oven request to stop
+2026-03-15,19:53:59,Hydraulic Fluid,99.0,65.0,91.0,Sucess,Outfeed Oven request to stop
+2026-03-15,19:54:59,Hydraulic Fluid,90.8,65.0,90.0,FAIL,[outfeed] Remote stop
+2026-03-15,19:55:15,Hydraulic Fluid,90.8,65.0,90.8,FAIL,[outfeed] Remote stop
+2026-03-15,19:58:46,Hydraulic Fluid,90.0,65.0,82.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:03:34,Hydraulic Fluid,82.4,65.0,74.4,Sucess,Outfeed Oven request to stop
+2026-03-15,20:09:01,Hydraulic Fluid,74.2,65.0,65.2,Sucess,Outfeed Oven request to stop
+2026-03-15,20:10:38,Hydraulic Fluid,69.8,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:10:38,Hydraulic Fluid,65.2,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:13:20,Hydraulic Fluid,99.0,65.0,92.2,Sucess,Outfeed Oven request to stop
+2026-03-15,20:13:42,Hydraulic Fluid,92.2,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:19:07,Hydraulic Fluid,99.6,65.0,99.6,Sucess,Outfeed Oven request to stop
+2026-03-15,20:19:07,Hydraulic Fluid,99.6,100.0,99.6,Sucess,Required weight reached
+2026-03-15,20:20:55,Hydraulic Fluid,99.6,65.0,99.6,Sucess,Outfeed Oven request to stop
+2026-03-15,20:20:57,Hydraulic Fluid,99.6,65.0,99.6,Sucess,Outfeed Oven request to stop
+2026-03-15,20:21:00,Hydraulic Fluid,99.6,100.0,99.6,Sucess,Required weight reached
+2026-03-15,20:21:24,Hydraulic Fluid,99.0,65.0,92.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:21:31,Hydraulic Fluid,91.0,100.0,100.0,Sucess,Required weight reached
+2026-03-15,20:21:31,Hydraulic Fluid,92.0,100.0,100.0,Sucess,Required weight reached
+2026-03-15,20:22:06,Hydraulic Fluid,102.2,65.0,92.2,Sucess,Outfeed Oven request to stop
+2026-03-15,20:22:10,Hydraulic Fluid,92.2,100.0,99.2,Sucess,Required weight reached
+2026-03-15,20:22:10,Hydraulic Fluid,100.6,100.0,100.6,Sucess,Required weight reached
+2026-03-15,20:22:10,Hydraulic Fluid,100.6,100.0,100.6,Sucess,Required weight reached
+2026-03-15,20:22:11,Hydraulic Fluid,101.0,100.0,101.0,Sucess,Required weight reached
+2026-03-15,20:22:11,Hydraulic Fluid,101.0,100.0,101.0,Sucess,Required weight reached
+2026-03-15,20:22:11,Hydraulic Fluid,102.2,100.0,102.2,FAIL,weight exceeded hi level
+2026-03-15,20:23:07,Hydraulic Fluid,103.0,65.0,95.4,Sucess,Outfeed Oven request to stop
+2026-03-15,20:23:10,Hydraulic Fluid,95.4,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:23:10,Hydraulic Fluid,99.0,100.0,100.0,Sucess,Required weight reached
+2026-03-15,20:23:10,Hydraulic Fluid,100.0,100.0,100.0,Sucess,Required weight reached
+2026-03-15,20:23:10,Hydraulic Fluid,101.0,100.0,101.0,Sucess,Required weight reached
+2026-03-15,20:23:10,Hydraulic Fluid,101.0,100.0,101.0,Sucess,Required weight reached
+2026-03-15,20:23:11,Hydraulic Fluid,101.4,100.0,101.4,FAIL,weight exceeded hi level
+2026-03-15,20:23:11,Hydraulic Fluid,102.4,100.0,102.4,FAIL,weight exceeded hi level
+2026-03-15,20:23:11,Hydraulic Fluid,102.4,100.0,102.4,FAIL,weight exceeded hi level
+2026-03-15,20:23:11,Hydraulic Fluid,103.2,100.0,103.2,FAIL,weight exceeded hi level
+2026-03-15,20:23:11,Hydraulic Fluid,103.8,100.0,103.8,FAIL,weight exceeded hi level
+2026-03-15,20:23:12,Hydraulic Fluid,103.8,100.0,103.8,FAIL,weight exceeded hi level
+2026-03-15,20:23:12,Hydraulic Fluid,104.0,100.0,104.0,FAIL,weight exceeded hi level
+2026-03-15,20:23:12,Hydraulic Fluid,104.0,100.0,104.0,FAIL,weight exceeded hi level
+2026-03-15,20:23:12,Hydraulic Fluid,104.4,100.0,104.4,FAIL,weight exceeded hi level
+2026-03-15,20:23:12,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:13,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:13,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:13,Hydraulic Fluid,104.0,100.0,104.0,FAIL,weight exceeded hi level
+2026-03-15,20:23:13,Hydraulic Fluid,104.0,100.0,104.0,FAIL,weight exceeded hi level
+2026-03-15,20:23:13,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:14,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:14,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:14,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:14,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:14,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:15,Hydraulic Fluid,104.0,100.0,104.0,FAIL,weight exceeded hi level
+2026-03-15,20:23:15,Hydraulic Fluid,104.0,100.0,104.0,FAIL,weight exceeded hi level
+2026-03-15,20:23:15,Hydraulic Fluid,104.6,100.0,104.6,FAIL,weight exceeded hi level
+2026-03-15,20:23:57,Hydraulic Fluid,103.0,65.0,94.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:24:01,Hydraulic Fluid,94.2,100.0,100.0,Sucess,Required weight reached
+2026-03-15,20:27:04,Hydraulic Fluid,105.4,65.0,97.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:27:06,Hydraulic Fluid,97.6,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:27:48,Hydraulic Fluid,106.4,65.0,97.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:29:10,Hydraulic Fluid,106.4,65.0,97.8,Sucess,Outfeed Oven request to stop
+2026-03-15,20:29:12,Hydraulic Fluid,97.8,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:32:18,Hydraulic Fluid,107.0,65.0,96.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:32:21,Hydraulic Fluid,96.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:34:22,Hydraulic Fluid,107.8,65.0,97.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:34:24,Hydraulic Fluid,97.0,100.0,99.4,Sucess,Required weight reached
+2026-03-15,20:35:18,Hydraulic Fluid,108.4,65.0,97.2,Sucess,Outfeed Oven request to stop
+2026-03-15,20:35:20,Hydraulic Fluid,97.2,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:36:33,Hydraulic Fluid,105.0,65.0,98.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:36:33,Hydraulic Fluid,98.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:37:10,Hydraulic Fluid,105.6,65.0,104.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:37:10,Hydraulic Fluid,103.0,100.0,103.0,FAIL,weight exceeded hi level
+2026-03-15,20:37:23,Hydraulic Fluid,109.0,65.0,95.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:37:27,Hydraulic Fluid,95.4,100.0,99.4,Sucess,Required weight reached
+2026-03-15,20:38:19,Hydraulic Fluid,110.0,65.0,94.4,Sucess,Outfeed Oven request to stop
+2026-03-15,20:38:23,Hydraulic Fluid,94.4,100.0,99.4,Sucess,Required weight reached
+2026-03-15,20:42:10,Hydraulic Fluid,84.2,100.0,100.2,Sucess,Required weight reached
+2026-03-15,20:43:04,Hydraulic Fluid,84.8,100.0,86.0,FAIL,high level sensor
+2026-03-15,20:43:04,Hydraulic Fluid,84.8,100.0,86.0,FAIL,high level sensor
+2026-03-15,20:47:38,Hydraulic Fluid,114.0,65.0,99.8,FAIL,[outfeed] Remote stop
+2026-03-15,20:48:17,Hydraulic Fluid,99.0,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:48:25,Hydraulic Fluid,99.0,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:49:28,Hydraulic Fluid,99.0,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:49:29,Hydraulic Fluid,91.2,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:49:29,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:50:06,Hydraulic Fluid,99.0,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:06,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:50:13,Hydraulic Fluid,99.0,65.0,98.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:16,Hydraulic Fluid,98.4,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:50:21,Hydraulic Fluid,99.0,65.0,98.4,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:24,Hydraulic Fluid,97.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:50:26,Hydraulic Fluid,99.0,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:26,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:50:31,Hydraulic Fluid,99.0,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:31,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:50:34,Hydraulic Fluid,98.6,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:34,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:50:45,Hydraulic Fluid,99.0,65.0,91.6,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:54,Hydraulic Fluid,91.6,100.0,99.2,Sucess,Required weight reached
+2026-03-15,20:50:58,Hydraulic Fluid,99.6,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:50:58,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:51:11,Hydraulic Fluid,99.0,65.0,99.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:51:11,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:51:39,Hydraulic Fluid,99.0,65.0,92.8,Sucess,Outfeed Oven request to stop
+2026-03-15,20:51:44,Hydraulic Fluid,92.6,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:52:03,Hydraulic Fluid,84.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:52:15,Hydraulic Fluid,84.6,100.0,99.2,Sucess,Required weight reached
+2026-03-15,20:53:35,Hydraulic Fluid,99.0,65.0,93.0,Sucess,Outfeed Oven request to stop
+2026-03-15,20:53:41,Hydraulic Fluid,93.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:53:54,Hydraulic Fluid,84.2,100.0,99.4,Sucess,Required weight reached
+2026-03-15,20:55:04,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:55:10,Hydraulic Fluid,94.0,100.0,93.2,FAIL,Infeed remote stop
+2026-03-15,20:57:12,Hydraulic Fluid,99.2,100.0,99.2,Sucess,Required weight reached
+2026-03-15,20:57:44,Hydraulic Fluid,99.2,100.0,99.2,Sucess,Required weight reached
+2026-03-15,20:57:53,Hydraulic Fluid,90.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:58:05,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:58:14,Hydraulic Fluid,90.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:58:49,Hydraulic Fluid,84.6,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:59:11,Hydraulic Fluid,84.8,100.0,99.0,Sucess,Required weight reached
+2026-03-15,20:59:20,Hydraulic Fluid,84.0,100.0,82.0,FAIL,Infeed remote stop
+2026-03-15,20:59:54,Hydraulic Fluid,99.0,65.0,88.6,Sucess,Outfeed Oven request to stop
+2026-03-15,20:59:58,Hydraulic Fluid,89.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,21:00:15,Hydraulic Fluid,84.4,100.0,99.0,Sucess,Required weight reached
+2026-03-15,21:00:21,Hydraulic Fluid,99.2,65.0,99.0,FAIL,[outfeed] Remote stop
+2026-03-15,21:00:21,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached
+2026-03-15,21:00:25,Hydraulic Fluid,99.0,65.0,99.0,FAIL,[outfeed] Remote stop
+2026-03-15,21:00:25,Hydraulic Fluid,99.0,100.0,99.0,Sucess,Required weight reached

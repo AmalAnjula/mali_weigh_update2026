@@ -3,7 +3,7 @@ infeed:
   filling_time: 300
   manual_vol_L: 100.0
   min_level_kg: 100.0
-  auto_start_level: 70
+  auto_start_level: 85
 outfeed:
   draining_time: 300
   manual_vol_L: 65.0
