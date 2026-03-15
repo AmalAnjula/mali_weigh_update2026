@@ -165,6 +165,8 @@ state = {
         "lo_alarm":          False,
         "lo_level":          CONFIG["tank"].get("lo_level_kg", 20.0),
         "hi_level":          CONFIG["tank"].get("hi_level_kg", 85.0),
+        
+
     },
 
 # ── Physical sensor states ──────────────────────────────
@@ -179,6 +181,10 @@ state = {
         "running":      False,
         "valve_open":   False,
          "manual_vol_L": CONFIG["infeed"].get("manual_vol_L", 25.0),
+         "auto_start_level": CONFIG["infeed"].get("auto_start_level", 60.0),
+         
+         
+
     },
 
     "outfeed": {
@@ -217,7 +223,7 @@ state = {
 # ── Global MQTT value (also mirrored into state under lock) ────────
 weiVal       = 0.0
 serial_error = False
-
+out_feed_sucess=False
 
  
 # ── Infeed sequence control flags ──────────────────────────────────
@@ -235,7 +241,7 @@ local_stop                 = False
 
 
 low_level_sensor = False
-
+hi_level_sensor=False
 # ── Outfeed sequence control flags ─────────────────────────────────
 outfeed_local_stop            = False
 outfeed_remote_stop           = False
@@ -248,12 +254,31 @@ outfeed_mode_change           = False
 def gpio_handler():
     tech_log.info("GPIO handler thread started.")
     global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
-
+    global hi_level_sensor,out_feed_sucess
     gpio.update() 
     if gpio.state("intake_mode") and state["infeed"]["operation"] == "REMOTE" :
         state["infeed"]["mode"] = "AUTO"
     elif gpio.state("intake_mode") and state["infeed"]["operation"] == "MANUAL"  :
         state["infeed"]["mode"] = "MANUAL"
+
+
+
+    if gpio.state("outk_remot") :
+                if  not gpio.state("outk_remot"):
+                    print("[GPIO] outfeed pin HIGH — setting outfeed mode to AUTO")
+                    state["outfeed"]["mode"] = "AUTO"
+                else:
+                    print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
+                    state["outfeed"]["mode"] = "MANUAL"
+    if gpio.state("intake_mode") :
+                 
+                if  not gpio.state("intake_mode"):
+                    print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
+                    state["infeed"]["mode"] = "AUTO"
+                else:   
+                    print("[GPIO] intake_mode_pin LOW — setting infeed mode to MANUAL")
+                    state["infeed"]["mode"] = "MANUAL"
+
 
     while True:
 
@@ -314,9 +339,29 @@ def gpio_handler():
                 t.start()
                 tech_log.info("[outfeed] oil_drain thread REMOTE started — vol=%.2f L", _req_vol)
                 print(f"[outfeed] oil_drain thread REMOTE started  vol={_req_vol:.2f} L")
+
+            elif  not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE" and state["outfeed"]["running"] and state["outfeed"]["mode"]=="AUTO" :
+                time.sleep(1)
+                print("stop wait")
+                if not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE":
+                    out_feed_sucess=True
+                    print("stop  actual wait")
+
+
+
                 
 
-            if gpio.changed("intake_mode") and state["infeed"]["operation"] == "REMOTE":
+            #if gpio.changed("intake_mode") and state["infeed"]["operation"] == "REMOTE":
+            
+
+            if gpio.changed("outk_remot") :
+                if  not gpio.state("outk_remot"):
+                    print("[GPIO] outfeed pin HIGH — setting outfeed mode to AUTO")
+                    state["outfeed"]["mode"] = "AUTO"
+                else:
+                    print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
+                    state["outfeed"]["mode"] = "MANUAL"
+            if gpio.changed("intake_mode") :
                  
                 if  not gpio.state("intake_mode"):
                     print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
@@ -329,9 +374,11 @@ def gpio_handler():
 
   
                 #tech_log.info("GPIO: intke_remot_pin triggered — setting remote_stop=True")
-            state["sensors"]["lo_level"] = not gpio.state("lowr_sns")   # assuming active LOW sensor (0 when triggered)
+            state["sensors"]["lo_level"] =  gpio.state("lowr_sns")   # assuming active LOW sensor (0 when triggered)
             state["sensors"]["hi_level"] = gpio.state("up_sns")      # assuming active HIGH sensor (1 when triggered)
-
+            low_level_sensor = not state["sensors"]["lo_level"] 
+            hi_level_sensor =not state["sensors"]["hi_level"] 
+             
  
             #print("tank low level sensor:", inputs["lowr_sns"], "  tank up level sensor:", inputs["up_sns"])
                 #tech_log.info("GPIO: lowr_sns_pin triggered — setting low_level_sensor=True")
@@ -341,7 +388,7 @@ def gpio_handler():
              
         except Exception as e:
             tech_log.error(f"Error reading GPIO states: {e}")
-        time.sleep(1)   # poll interval
+        #time.sleep(1)   # poll interval
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -383,15 +430,26 @@ def infeed_open(open_state: bool):
     """Open (True) or close (False) the infeed valve directly in state."""
     with _lock:
         state["infeed"]["valve_open"] = open_state
+    
+    
+
     print(f"[infeed] valve -> {'OPEN' if open_state else 'CLOSED'}")
     tech_log.info("Infeed valve set to %s", "OPEN" if open_state else "CLOSED")
 
 
 def infeed_run_state(run_state: bool):
+
+
     """Set infeed running state directly in state."""
     with _lock:
         state["infeed"]["running"]    = run_state
         state["infeed"]["valve_open"] = run_state
+
+    if run_state:
+         gpio.output_on("out_wei_led")
+    else:
+         gpio.output_off("out_wei_led")
+
     print(f"[infeed] running -> {run_state}")
     tech_log.info("Infeed run state set to %s", run_state)
 
@@ -407,12 +465,16 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
     global weiVal
     global local_stop, infeed_remote_stop,serial_error
     infeed_open(False)
-    done=False
+    
      
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
     state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
     local_stop=False
     result=False
+    
+    gpio.output_on("ind_led_in")
+    infeed_remote_stop=False
+    
     while True:
         
          
@@ -440,7 +502,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
             serial_error=False
             break
 
-        if (weiVal<state["tank"]["lo_level"]) :
+        if (weiVal<state["infeed"]["auto_start_level"]) :  
                         
             result=oil_add(weiVal, required_weight,True)
             if result:
@@ -475,6 +537,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
     state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
     print("Exit auto control loop.")
+    gpio.output_off("ind_led_in")
            
 
 
@@ -489,7 +552,9 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     global infeed_local_remote_change, infeed_mode_change
     global infeed_remote_stop, local_stop
     global low_level_sensor
+    global hi_level_sensor
     infeed_open(False)
+    gpio.output_on("ind_led_in") 
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
     state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
     tech_log.info("oil_add requested — checking if outfeed is busy ...")
@@ -498,13 +563,13 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     _waited = False
     while busyFlagOutfeedBusy:
         if not _waited:
-            gpio.output_on("in_wei_led")
+            #gpio.output_on("in_wei_led")
             tech_log.warning("Outfeed busy — infeed waiting ...")
             print("[oil_add] Outfeed busy — waiting for outfeed to finish ...")
             _waited = True
         time.sleep(0.5)
     if _waited:
-        gpio.output_off("in_wei_led")
+        #gpio.output_off("in_wei_led")
         tech_log.info("Outfeed cleared — proceeding with oil addition.")
         print("[oil_add] Outfeed cleared — starting.")
 
@@ -656,6 +721,30 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
 
             break
 
+
+        if not hi_level_sensor:
+            done = True
+            result=False
+            infeed_run_state(False)
+            tech_log.warning(
+                "Hi level sensor trig. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Hi level sensor trig.")
+            _log("Infeed remote stop",
+                 initial=round(intial_weight, 2), final=round(weiVal, 2))
+            
+            prod_logger.log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "Hi level sensor trig"
+            )
+
+            break
+
+
         # Remote stop signal
         elif infeed_remote_stop:
             done = True
@@ -745,6 +834,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     # ── STEP 4: Always clean up valve + run state ──────────────────
     infeed_open(False)
     infeed_run_state(False)
+    gpio.output_off("ind_led_in") 
     gpio.output_off("in_solv")
     print("---- End filling ----")  # newline after progress line
     
@@ -774,8 +864,17 @@ def outfeed_open(open_state: bool):
 
 def outfeed_run_state(run_state: bool):
     with _lock:
+
+    
+
         state["outfeed"]["running"]    = run_state
         state["outfeed"]["valve_open"] = run_state
+
+    if run_state:
+         gpio.output_on("in_wei_led")
+    else:
+         gpio.output_off("in_wei_led")
+
     print(f"[outfeed] running -> {run_state}")
     tech_log.info("Outfeed run state set to %s", run_state)
 
@@ -796,7 +895,7 @@ def oil_drain(requested_vol_L: float):
     global outfeed_local_stop, outfeed_remote_stop
     global outfeed_local_remote_change, outfeed_mode_change
     global low_level_sensor,outfeed_remote_stop
-
+    global out_feed_sucess
     tech_log.info("[outfeed] oil_drain requested — vol=%.2f L", requested_vol_L)
 
     # Lock buttons while sequence runs
@@ -805,18 +904,18 @@ def oil_drain(requested_vol_L: float):
      
     outfeed_open(False)
     outfeed_run_state(False)
-
+    gpio.output_on("ind_led_out")
     # ── STEP 1: Wait until infeed finishes ─────────────────────────
     _waited = False
     while busyFlagInfeedBusy:
         if not _waited:
-            gpio.output_on("out_wei_led")
+            #gpio.output_on("out_wei_led")
             tech_log.warning("[outfeed] Infeed busy — outfeed waiting ...")
             print("[oil_drain] Infeed busy — waiting for infeed to finish ...")
             _waited = True
         time.sleep(0.5)
     if _waited:
-        gpio.output_off("out_wei_led")
+        #gpio.output_off("out_wei_led")
         tech_log.info("[outfeed] Infeed cleared — proceeding.")
         print("[oil_drain] Infeed cleared — starting drain.")
 
@@ -854,6 +953,7 @@ def oil_drain(requested_vol_L: float):
         busyFlagOutfeedBusy = False
         state["ui"]["buttons"]["out-mode-btn"]["disabled"] = False
         state["ui"]["buttons"]["out-op-btn"]["disabled"]   = False
+        gpio.output_off("ind_led_out")
         return
 
     target_kg   = current_kg - requested_kg   # weight we expect to reach
@@ -898,6 +998,29 @@ def oil_drain(requested_vol_L: float):
 
             break
 
+ 
+        elif out_feed_sucess:
+            out_feed_sucess=False
+            done = True
+            tech_log.info(
+                "[outfeed] Oven request to stop. requested=%.2f kg  final=%.2f kg",
+                requested_kg, weiVal)
+            print("[oil_drain] Oven request to stop — drained %.2f kg" % (current_kg - weiVal))
+            outfeed_open(False)
+            outfeed_run_state(False)
+            _log("Outfeed Oven request to stop",
+                 requested_kg=round(requested_kg, 2),
+                 drained_kg=round(current_kg - weiVal, 2),
+                 final_kg=round(weiVal, 2))
+            prod_logger.log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Sucess",
+            "Outfeed Oven request to stop"
+            )
+            break
         # Tank too low — stop draining
         elif weiVal<= lo_level or low_level_sensor:
             done = True
@@ -930,6 +1053,9 @@ def oil_drain(requested_vol_L: float):
             "[outfeed] Remote stop"
             )
             break
+
+        # Target reached —external sig
+        
 
         # Target reached — normal completion
         elif weiVal <= target_kg:
@@ -1023,6 +1149,7 @@ def oil_drain(requested_vol_L: float):
     outfeed_open(False)
     outfeed_run_state(False)
     gpio.output_off("out_solv")
+    gpio.output_off("ind_led_out")
     time.sleep(0.1)
 
     busyFlagOutfeedBusy = False
@@ -1057,7 +1184,7 @@ def auto_outfeed_control():
     _waited = False
     while busyFlagInfeedBusy:
         if not _waited:
-            gpio.output_on("out_wei_led")
+            #gpio.output_on("out_wei_led")
             tech_log.warning("[outfeed AUTO] Infeed busy — waiting ...")
             print("[auto_outfeed] Infeed busy — waiting ...")
             _waited = True
@@ -1071,7 +1198,7 @@ def auto_outfeed_control():
             return
         time.sleep(0.5)
     if _waited:
-        gpio.output_off("out_wei_led")
+        #gpio.output_off("out_wei_led")
         tech_log.info("[outfeed AUTO] Infeed cleared — proceeding.")
 
     busyFlagOutfeedBusy         = True
@@ -1346,9 +1473,13 @@ def api_control():
         elif action == "operation":
             s["operation"] = "REMOTE" if s["operation"] == "LOCAL" else "LOCAL"
             if side =="outfeed" and s["operation"] == "REMOTE":
+                
+
                 s["mode"]="AUTO"
-            else:
+            elif side =="outfeed" and s["operation"] == "LOCAL":
+            
                 s["mode"]="MANUAL"
+
             _print_event({"side": side, "button": "operation", "value": s["operation"]})
             _log(f"{side.capitalize()} operation -> {s['operation']}")
             # Signal oil_add loop if infeed sequence is running
@@ -1370,6 +1501,16 @@ def api_control():
 
             # ── Infeed MANUAL + LOCAL: launch / abort oil_add sequence ──
             if side == "infeed":
+
+                if   s["operation"] == "REMOTE":
+                    if gpio.state("intake_mode"):
+                        s["mode"] == "MANUAL"
+                    else:
+                        s["mode"] == "AUTO"
+
+
+
+                
                 if s["running"] and s["mode"] == "MANUAL" and s["operation"] == "LOCAL":
                     # START → spawn oil_add in background thread
                     # Snapshot the weight and requested volume BEFORE releasing lock

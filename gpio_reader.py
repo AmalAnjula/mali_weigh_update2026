@@ -58,7 +58,7 @@ INPUT_PINS = {
     "val_up":           val_up_pin,
     "lowr_sns":         lowr_sns_pin,
     "up_sns":           up_sns_pin,
-    "intke_remot":      intke_remot_pin,   # renamed from "intake_mode"
+    "intake_mode":      intke_remot_pin,   # renamed from "intake_mode"
     "intke_start":      intke_start_pin,
     "intke_stop":       intke_stop_pin,
     "lock_btn":         lock_btn_pin,
@@ -68,6 +68,18 @@ INPUT_PINS = {
     "relay_normal_off": relay_normal_off_pin,
     "pwr":              pwr_pin,
 }
+
+
+# ── Release any leftover GPIO handles at startup ──────────────
+def gpio_cleanup(chip=0):
+    try:
+        h = lgpio.gpiochip_open(chip)
+        lgpio.gpiochip_close(h)
+        print("GPIO cleanup done")
+    except Exception as e:
+        print(f"GPIO cleanup warning: {e}")
+
+gpio_cleanup()
 
 # ── Build gpiozero device objects ──────────────────────────────────
 # InputDevice(pin, pull_up=False) → equivalent to GPIO.PUD_DOWN

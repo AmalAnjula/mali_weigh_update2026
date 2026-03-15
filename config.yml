@@ -1,11 +1,12 @@
 daily_job_done: 0
 infeed:
   filling_time: 300
-  manual_vol_L: 75.0
-  min_level_kg: 300.0
+  manual_vol_L: 100.0
+  min_level_kg: 100.0
+  auto_start_level: 70
 outfeed:
   draining_time: 300
-  manual_vol_L: 10.0
+  manual_vol_L: 65.0
 product: Hydraulic Fluid
 product_code: OIL-005
 serial:
@@ -14,10 +15,11 @@ serial:
   port: /dev/ttyUSB0
 tank:
   density_kgl: 1.0
-  hi_level_kg: 90.0
+  hi_level_kg: 101.0
   hi_threshold_pct: 85.0
-  infeed_valve: 5.0
-  lo_level_kg: 5.0
-  lo_threshold_pct: 10.0
+  infeed_valve: 1.0
+  lo_level_kg: 60.0  #low level of tanks. methanin off wenwa
+  lo_threshold_pct: 20.0
   max_kg: 100.0
   tare_kg: 0.0
+
