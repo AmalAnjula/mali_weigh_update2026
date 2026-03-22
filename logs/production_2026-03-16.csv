@@ -1,0 +1,6 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-03-16,07:52:22,Hydraulic Fluid,101.8,65.0,101.8,FAIL,[outfeed] Remote stop
+2026-03-16,07:52:42,Hydraulic Fluid,101.8,65.0,101.8,FAIL,[outfeed] Remote stop
+2026-03-16,07:53:16,Hydraulic Fluid,101.8,100.0,101.8,FAIL,weight exceeded hi level
+2026-03-16,07:53:21,Hydraulic Fluid,101.8,100.0,101.8,FAIL,weight exceeded hi level
+2026-03-16,07:53:37,Hydraulic Fluid,101.8,100.0,101.8,FAIL,weight exceeded hi level

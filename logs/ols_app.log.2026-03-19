@@ -1,0 +1,3 @@
+2026-03-19 06:00:04 [INFO] ols.tech: [SCHEDULER] Running daily 6 AM job...{latest_file}
+2026-03-19 06:00:08 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-03-19 07:00:00 [INFO] ols.tech: [SCHEDULER] Flag reset to 0.

@@ -1,0 +1,5 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-03-20,16:18:32,Palm Oil,98.8,65.0,74.6,Sucess,Outfeed Oven request to stop
+2026-03-20,16:21:09,Palm Oil,84.0,100.0,99.0,Sucess,Required weight reached
+2026-03-20,16:21:09,Palm Oil,84.0,100.0,99.0,Sucess,Required weight reached
+2026-03-20,16:21:09,Palm Oil,99.0,100.0,99.0,Sucess,Required weight reached

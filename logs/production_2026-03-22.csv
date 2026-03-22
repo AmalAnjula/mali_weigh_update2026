@@ -1,0 +1,5 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-03-22,08:42:32,Palm Oil,100.0,65.0,100.0,FAIL,[oil_drain] TIMEOUT
+2026-03-22,08:42:32,Palm Oil,100.0,100.0,100.0,Sucess,Required weight reached
+2026-03-22,12:32:56,Palm Oil,99.0,65.0,95.0,Sucess,Outfeed Oven request to stop
+2026-03-22,12:33:09,Palm Oil,95.0,100.0,99.0,Sucess,Required weight reached

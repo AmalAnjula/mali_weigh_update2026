@@ -1884,10 +1884,19 @@ def daily_6am_scheduler():
             print("Latest file:", latest_file)
             tech_log.info("[SCHEDULER] Running daily 6 AM job...{latest_file}")
             print("[SCHEDULER] Running daily 6 AM job —", now.strftime("%Y-%m-%d %H:%M:%S"))
+             
+            body=em.build_body(latest_file) 
             
             em.send_email(
-            "Production Report",
-            "Daily production report attached.",
+            "PLANT_01_PALM_OLEIN_SPRAYER",
+            body,
+            "sprayer01weighingpo@malibangroup.lk",
+            latest_file
+            )
+            time.sleep(2)
+            em.send_email(
+            "PLANT_01_PALM_OLEIN_SPRAYER",
+            body,
             "amalanjula@gmail.com",
             latest_file
             )

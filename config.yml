@@ -1,14 +1,14 @@
 daily_job_done: 0
 infeed:
+  auto_start_level: 75
   filling_time: 300
   manual_vol_L: 100.0
   min_level_kg: 100.0
-  auto_start_level: 85
 outfeed:
   draining_time: 300
   manual_vol_L: 65.0
-product: Hydraulic Fluid
-product_code: OIL-005
+product: Palm Oil
+product_code: OIL-003
 serial:
   baudrate: 1200
   diff: 3
@@ -18,8 +18,7 @@ tank:
   hi_level_kg: 101.0
   hi_threshold_pct: 85.0
   infeed_valve: 1.0
-  lo_level_kg: 60.0  #low level of tanks. methanin off wenwa
+  lo_level_kg: 60.0
   lo_threshold_pct: 20.0
   max_kg: 100.0
   tare_kg: 0.0
-
