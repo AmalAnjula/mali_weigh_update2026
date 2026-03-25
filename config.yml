@@ -7,8 +7,8 @@ infeed:
 outfeed:
   draining_time: 300
   manual_vol_L: 65.0
-product: Palm Oil
-product_code: OIL-003
+product: KRISCO
+product_code: '1'
 serial:
   baudrate: 1200
   diff: 3

@@ -42,7 +42,8 @@ import yaml
 from production_logger import ProductionLogger
 
 import gpio_reader as gpio
- 
+import queue
+
 
 inputs = {}
 
@@ -85,7 +86,19 @@ LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
 os.makedirs(LOG_DIR, exist_ok=True)
 
 
-prod_logger = ProductionLogger(LOG_DIR)
+#prod_logger = ProductionLogger(LOG_DIR)
+
+def mqtt_publish(topic: str, payload, retain: bool = False, qos: int = 0):
+    """
+    Thread-safe helper — call this from anywhere to queue a publish.
+    """
+    _publish_queue.put((topic, str(payload), qos, retain))
+
+prod_logger = ProductionLogger(
+    LOG_DIR,
+    mqtt_publish_fn = mqtt_publish,          # uses the existing queue-based publisher
+    mqtt_topic      = "ols/tx/infeed_event", # receiver subscribes to this topic
+)
 
 
 _log_fmt     = logging.Formatter(
@@ -247,6 +260,10 @@ outfeed_local_stop            = False
 outfeed_remote_stop           = False
 outfeed_local_remote_change   = False
 outfeed_mode_change           = False
+
+
+_publish_queue = queue.Queue()
+
 
 
 # ── GPIO HANDLER THREAD  (polls GPIO states and updates shared state) ───────────────────────
@@ -1858,6 +1875,94 @@ def api_settings():
 
     return jsonify({"ok": True})
 
+
+def _mqtt_state_broadcast_thread():
+    while True:
+        break
+        try:
+            with _lock:
+                weight          = weiVal
+                outfeed_running = state["outfeed"]["running"]
+                infeed_running  = state["infeed"]["running"]
+
+            payload = json.dumps({
+                "ts":      int(time.time()),
+                "weight":  round(weight, 2),
+                "infeed":  infeed_running,
+                "outfeed": outfeed_running,
+            })
+
+            _publish_queue.put(("ols/tx/status", payload, 0, False))
+
+        except Exception as exc:
+            tech_log.error("[MQTT-TX] Broadcast error: %s", exc)
+            time.sleep(10)
+
+        
+
+# ──  mqtt send ────────────────────────────────────
+
+
+
+ 
+
+def _mqtt_publish_thread():
+    """
+    Daemon thread that drains _publish_queue and publishes
+    only when the broker is connected.
+    """
+    if not MQTT_AVAILABLE:
+        print("[MQTT-PUB] Thread not started — paho-mqtt not installed.")
+        return
+
+    pub_client = mqtt_client.Client(client_id="ols-publisher", clean_session=True)
+
+    if MQTT_USER:
+        pub_client.username_pw_set(MQTT_USER, MQTT_PASS)
+
+    pub_client.reconnect_delay_set(min_delay=1, max_delay=30)
+
+    # Keep trying to connect in the background
+    while True:
+        
+        try:
+            print(f"[MQTT-PUB] Connecting to {MQTT_BROKER}:{MQTT_PORT} ...")
+            pub_client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
+            pub_client.loop_start()          # non-blocking — lets us drain the queue
+
+            while True:
+                try:
+
+                    topic, payload, qos, retain = _publish_queue.get(timeout=1)
+                    result = pub_client.publish(topic, payload, qos=qos, retain=retain)
+                    if result.rc != mqtt_client.MQTT_ERR_SUCCESS:
+                        tech_log.warning("[MQTT-PUB] Publish failed rc=%s  topic=%s", result.rc, topic)
+                    else:
+                        print(f"[MQTT-PUB] → {topic} : {payload}")
+                    _publish_queue.task_done()
+                    time.sleep(1)
+                except queue.Empty:
+                    # Nothing to send — check connection is still alive
+                    if not pub_client.is_connected():
+                        print("[MQTT-PUB] Lost connection — reconnecting …")
+                        break
+
+        except Exception as exc:
+            tech_log.error("[MQTT-PUB] Fatal: %s — retry in 5 s", exc)
+            print(f"[MQTT-PUB] Error: {exc} — retrying in 5 s")
+        finally:
+            try:
+                pub_client.loop_stop()
+            except Exception:
+                pass
+
+        time.sleep(1)
+
+
+
+
+
+
 # ── DAILY 6 AM SCHEDULER THREAD ────────────────────────────────────
 def daily_6am_scheduler():
     """Polls time. Runs job once at/after 6 AM (flag=0), resets flag at 7 AM."""
@@ -1919,7 +2024,7 @@ def daily_6am_scheduler():
                 yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
             tech_log.info("[SCHEDULER] Flag reset to 0.")
 
-        time.sleep(5)  # check every minute
+        time.sleep(10)  # check every minute
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1936,12 +2041,18 @@ if __name__ == "__main__":
     t = threading.Thread(target=daily_6am_scheduler, name="daily-scheduler", daemon=True)
     t.start()
 
+    t = threading.Thread(target=_mqtt_publish_thread, name="mqtt__send_data", daemon=True)
+    t.start()
+
     # Start MQTT in its own daemon thread BEFORE Flask
     t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
     t.start()
     print(f"[MQTT] Thread started (id={t.ident})\n")
 
     t = threading.Thread(target=gpio_handler, name="gpio-handler", daemon=True)
+    t.start()
+
+    t = threading.Thread(target=_mqtt_state_broadcast_thread, name="mqtt-tx-broadcast", daemon=True)
     t.start()
 
     # Start Flask (use_reloader=False required when using threads)
