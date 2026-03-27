@@ -29,3 +29,14 @@ chromium \
   "http://127.0.0.1:5000" &
 
 echo "[OLS] Browser launched"
+
+sleep 2
+# 5. email service 
+python emailAutoSend.py &
+echo "[OLS] emailAutoSend.py started (PID $!)"
+
+sleep 2
+# 5. speed_test service 
+python speed_test.py &
+echo "[OLS] speed_test.py started (PID $!)"
+

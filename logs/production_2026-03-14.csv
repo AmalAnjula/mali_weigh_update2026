@@ -1,5 +1,0 @@
-date,time,product,now_weight,req_weight,final_weight,task_state,reason
-2026-03-14,07:13:03,Hydraulic Fluid,51.19,10.0,48.59,FAIL,[oil_drain] TIMEOUT
-2026-03-14,07:18:03,Hydraulic Fluid,48.87,75.0,50.55,FAIL,Oil add TIMEOUT
-2026-03-14,11:30:49,Hydraulic Fluid,40.56,75.0,40.56,FAIL,Oil add TIMEOUT
-2026-03-14,11:35:49,Hydraulic Fluid,40.56,10.0,40.56,FAIL,[oil_drain] TIMEOUT

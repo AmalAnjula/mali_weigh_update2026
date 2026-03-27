@@ -362,7 +362,8 @@ def gpio_handler():
                 outfeed_remote_stop=True
                 tech_log.info("GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True")
 
-            if gpio.rising("outtk_start") and state["outfeed"]["operation"]=="REMOTE":
+            #if gpio.rising("outtk_start") and state["outfeed"]["operation"]=="REMOTE": #chnge button state amal 
+            if gpio.rising("outtk_start") : #chnge button state amal 
                 _req_vol = state["outfeed"]["manual_vol_L"]
                 _req_vol = state["outfeed"]["manual_vol_L"]
                 t = threading.Thread(
@@ -375,10 +376,15 @@ def gpio_handler():
                 tech_log.info("[outfeed] oil_drain thread REMOTE started — vol=%.2f L", _req_vol)
                 print(f"[outfeed] oil_drain thread REMOTE started  vol={_req_vol:.2f} L")
 
-            elif  not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE" and state["outfeed"]["running"] and state["outfeed"]["mode"]=="AUTO" :
+            #chnge button state amal 
+            #elif  not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE" and state["outfeed"]["running"] and state["outfeed"]["mode"]=="AUTO" :
+            elif  not gpio.state("outtk_start") and  state["outfeed"]["running"] and state["outfeed"]["mode"]=="AUTO" :
                 time.sleep(1)
                 print("stop wait")
-                if not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE":
+
+                #chnge button state amal
+                #if not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE":
+                if not gpio.state("outtk_start") :
                     out_feed_sucess=True
                     print("stop  actual wait")
 
@@ -399,7 +405,8 @@ def gpio_handler():
                 else:
                     print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
                     state["outfeed"]["mode"] = "MANUAL"
-                    state["outfeed"]["operation"] = "REMOTE"
+                    #chnge button state amal
+                    state["outfeed"]["operation"] = "LOCAL"
                     state["ui"]["buttons"]["out-op-btn"]["disabled"] = False
 
             if gpio.changed("intake_mode") :
@@ -1878,7 +1885,7 @@ def api_settings():
 
 def _mqtt_state_broadcast_thread():
     while True:
-        break
+         
         try:
             with _lock:
                 weight          = weiVal
