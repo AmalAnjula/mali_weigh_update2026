@@ -11,17 +11,17 @@
 :root {
   --bg:       #f0f2f5;
   --surface:  #ffffff;
-  --border:   #d0d5dd;
+  --border:   #00bcbf;
   --text:     #1a1d23;
-  --muted:    #6b7280;
-  --green:    #16a34a;
-  --green-bg: #dcfce7;
+  --muted:    #f30000;
+  --green:    #041a0c;  /* control mode auto text col*/
+  --green-bg: #09df4d;
   --red:      #dc2626;
-  --red-bg:   #fee2e2;
-  --amber:    #d97706;
-  --amber-bg: #fef3c7;
-  --blue:     #2563eb;
-  --blue-bg:  #dbeafe;
+  --red-bg:   #c4f003;
+  --amber:    #ecb80a;
+  --amber-bg: #2330ea;
+  --blue:     #03410b;
+  --blue-bg:  #0fe4b2;
   --radius:   8px;
   --shadow:   0 1px 3px rgba(0,0,0,0.1);
 }
@@ -412,15 +412,15 @@ td.cwt { color: var(--green); }
     <div class="card-head">◀ Infeed</div>
     <div class="card-body ctrl">
       <button class="ctrl-btn st-green" id="in-mode-btn" onclick="ctrl('infeed','mode')">
-        <span class="label">Control Mode</span>
+        <span class="label">Now Mode</span>
         <span class="value" id="in-mode-val">AUTO</span>
       </button>
       <button class="ctrl-btn" id="in-op-btn" onclick="ctrl('infeed','operation')">
-        <span class="label">Operation</span>
+        <span class="label">Now Working</span>
         <span class="value" id="in-op-val">LOCAL</span>
       </button>
       <button class="ctrl-btn st-red" id="in-run-btn" onclick="ctrl('infeed','run')">
-        <span class="label">Run State</span>
+        <span class="label">Press to</span>
         <span class="value" id="in-run-val">STOP</span>
       </button>
       <div class="vol-wrap">
@@ -509,15 +509,15 @@ td.cwt { color: var(--green); }
     <div class="card-head">Outfeed ▶</div>
     <div class="card-body ctrl">
       <button class="ctrl-btn st-green" id="out-mode-btn" onclick="ctrl('outfeed','mode')">
-        <span class="label">Control Mode</span>
+        <span class="label">Now Working</span>
         <span class="value" id="out-mode-val">AUTO</span>
       </button>
       <button class="ctrl-btn" id="out-op-btn" onclick="ctrl('outfeed','operation')">
-        <span class="label">Operation</span>
+        <span class="label">Now working</span>
         <span class="value" id="out-op-val">LOCAL</span>
       </button>
       <button class="ctrl-btn st-red" id="out-run-btn" onclick="ctrl('outfeed','run')">
-        <span class="label">Run State</span>
+        <span class="label">Press to</span>
         <span class="value" id="out-run-val">STOP</span>
       </button>
       <div class="vol-wrap">

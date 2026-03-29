@@ -220,6 +220,18 @@ state = {
 
     "log": [],
 
+
+ # ── UI label overrides — change any button sub-label via /api/update ──
+    # Example:  {"path": "labels.in_op_label", "value": "Operation Mode"}
+    "labels": {
+        "in_mode_label":  "Now Mode",
+        "in_op_label":    "Now Working",
+        "in_run_label":   "Press to",
+        "out_mode_label": "Now Working",
+        "out_op_label":   "Now working",
+        "out_run_label":  "Press to",
+    },
+
     # ── UI button overrides (driven by /api/buttons) ─────────────
     "ui": {
         "buttons": {
@@ -273,7 +285,7 @@ def gpio_handler():
     global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
     global hi_level_sensor,out_feed_sucess
     gpio.update() 
-   
+    
     if gpio.state("intake_mode") and state["infeed"]["operation"] == "REMOTE" :
         state["infeed"]["mode"] = "AUTO"
     elif gpio.state("intake_mode") and state["infeed"]["operation"] == "MANUAL"  :
@@ -291,12 +303,12 @@ def gpio_handler():
                     print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
                     state["outfeed"]["mode"] = "MANUAL"
                      
-    if gpio.state("intake_mode") :
-                 
-                if  not gpio.state("intake_mode"):
+     
+    #check intake mode when init      
+    if  gpio.state("intake_mode"):
                     print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
                     state["infeed"]["mode"] = "AUTO"
-                else:   
+    else:   
                     print("[GPIO] intake_mode_pin LOW — setting infeed mode to MANUAL")
                     state["infeed"]["mode"] = "MANUAL"
 
@@ -311,6 +323,8 @@ def gpio_handler():
                     print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
                     state["outfeed"]["mode"] = "MANUAL"
                     state["outfeed"]["operation"] = "LOCAL"
+
+     
 
     while True:
         time.sleep(0.2) 
@@ -338,7 +352,7 @@ def gpio_handler():
             elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"]:
                     time.sleep(2)
                     if gpio.state("intke_start"):
-                    
+                        state["labels"]["in_op_label"] = "Now Continuously"
                         _now_w = weiVal
                         _req_w = state["infeed"]["manual_vol_L"]
                         t = threading.Thread(
@@ -381,7 +395,6 @@ def gpio_handler():
             elif  not gpio.state("outtk_start") and  state["outfeed"]["running"] and state["outfeed"]["mode"]=="AUTO" :
                 time.sleep(1)
                 print("stop wait")
-
                 #chnge button state amal
                 #if not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE":
                 if not gpio.state("outtk_start") :
@@ -601,6 +614,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
     print("Exit auto control loop.")
     gpio.output_off("ind_led_in")
     gpio.output_off("ind_led_in")
+    state["labels"]["in_op_label"] = "Now Working"
            
 
 
@@ -1947,7 +1961,7 @@ def _mqtt_publish_thread():
                     else:
                         print(f"[MQTT-PUB] → {topic} : {payload}")
                     _publish_queue.task_done()
-                    time.sleep(1)
+                    time.sleep(5)
                 except queue.Empty:
                     # Nothing to send — check connection is still alive
                     if not pub_client.is_connected():
@@ -2048,8 +2062,8 @@ if __name__ == "__main__":
     t = threading.Thread(target=daily_6am_scheduler, name="daily-scheduler", daemon=True)
     t.start()
 
-    t = threading.Thread(target=_mqtt_publish_thread, name="mqtt__send_data", daemon=True)
-    t.start()
+    #t = threading.Thread(target=_mqtt_publish_thread, name="mqtt__send_data", daemon=True)
+    #t.start()
 
     # Start MQTT in its own daemon thread BEFORE Flask
     t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
@@ -2059,8 +2073,8 @@ if __name__ == "__main__":
     t = threading.Thread(target=gpio_handler, name="gpio-handler", daemon=True)
     t.start()
 
-    t = threading.Thread(target=_mqtt_state_broadcast_thread, name="mqtt-tx-broadcast", daemon=True)
-    t.start()
+    #t = threading.Thread(target=_mqtt_state_broadcast_thread, name="mqtt-tx-broadcast", daemon=True)
+    #t.start()
 
     # Start Flask (use_reloader=False required when using threads)
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

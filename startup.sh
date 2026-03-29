@@ -37,6 +37,6 @@ echo "[OLS] emailAutoSend.py started (PID $!)"
 
 sleep 2
 # 5. speed_test service 
-python speed_test.py &
-echo "[OLS] speed_test.py started (PID $!)"
+#python speed_test.py &
+#echo "[OLS] speed_test.py started (PID $!)"
 
