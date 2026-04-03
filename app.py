@@ -305,7 +305,7 @@ def gpio_handler():
                      
      
     #check intake mode when init      
-    if  gpio.state("intake_mode"):
+    if not gpio.state("intake_mode"):
                     print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
                     state["infeed"]["mode"] = "AUTO"
     else:   
