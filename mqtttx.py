@@ -46,7 +46,8 @@ clear_now = False
 
 while True:
     try:
-        chunk  = ser.read(20).decode('utf-8', errors='ignore')
+        chunk  = ser.read(16).decode('utf-8', errors='ignore')
+        #print(f"Read chunk: {chunk!r}")
         buffer += chunk
 
         numbers = re.findall(r'=\s*([\d.]+)', buffer)
