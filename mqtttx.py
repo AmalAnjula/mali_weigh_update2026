@@ -44,18 +44,38 @@ client.connect("localhost", 1883)
 print("OK")
 clear_now = False
 
+class DiffFilter:
+    def __init__(self, threshold=1.0):
+        self.threshold = threshold
+        self.prev = None
+
+    def feed(self, number):
+        if self.prev is None:
+            self.prev = number
+            return number
+
+        diff = abs(number - self.prev)
+        self.prev = number
+
+        return number if diff <= self.threshold else None
+
+f = DiffFilter(threshold=SPIKE_LIMIT)
+
+
 while True:
     try:
-        chunk  = ser.read(16).decode('utf-8', errors='ignore')
-        #print(f"Read chunk: {chunk!r}")
+        chunk  = ser.read(20).decode('utf-8', errors='ignore')
         buffer += chunk
 
         numbers = re.findall(r'=\s*([\d.]+)', buffer)
         buffer  = re.split(r'=\s*[\d.]+', buffer)[-1]  # keep partial tail
-
+        weight=0
+        #print(f"RAW: {numbers}" )
         for raw in numbers:
-            weight = float(raw)
+            #weight = float(raw)
 
+            weight = f.feed( float(raw))
+            '''
             # ── Spike filter ──────────────────────────────────────
             if last_weight is not None:
                 diff = abs(weight - last_weight)
@@ -71,9 +91,11 @@ while True:
             # ─────────────────────────────────────────────────────
 
             last_weight = weight
-
-            client.publish("serial/weight", weight, qos=0, retain=False)
-            log_msg = f"Weight published: {weight}"
+            '''
+            if weight is not None:
+                client.publish("serial/weight", weight, qos=0, retain=False)
+                #log_msg = f"Weight published: {weight}"
+            
             print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weight}")
             #logging.info(log_msg)
 

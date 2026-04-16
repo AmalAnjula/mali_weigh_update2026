@@ -1,0 +1,271 @@
+2026-04-09 06:00:05 [WARNING] ols.tech: [DAILY CSV] No data found for 2026-04-08
+2026-04-09 06:00:05 [WARNING] ols.tech: [SCHEDULER] No data found or CSV generation failed for today's job
+2026-04-09 06:00:18 [INFO] ols.tech: [SCHEDULER] Daily CSV emailed successfully
+2026-04-09 06:00:18 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-04-09 07:00:08 [INFO] ols.tech: [SCHEDULER] Flag reset to 0.
+2026-04-09 07:28:52 [INFO] ols.tech: GPIO handler thread started.
+2026-04-09 07:28:52 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-09 07:28:52 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 22:09:37 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:09:37 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:09:37 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:09:37 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:09:37 [INFO] ols.tech: [outfeed] Drain started. current=100.00 kg  requested=65.00 kg  target=35.00 kg
+2026-04-09 22:09:37 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 22:09:37 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 22:10:06 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:10:06 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:10:10 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=93.80 kg
+2026-04-09 22:10:10 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:10:10 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:10:10 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 22:10:10 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:10:10 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:10:10 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 22:10:10 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 22:10:10 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 22:16:15 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:16:15 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:16:15 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:16:15 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:16:15 [INFO] ols.tech: [outfeed] Drain started. current=93.80 kg  requested=65.00 kg  target=28.80 kg
+2026-04-09 22:16:15 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 22:16:15 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 22:16:46 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:16:46 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:16:50 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=87.00 kg
+2026-04-09 22:16:50 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:16:50 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:16:50 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 22:16:50 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:16:50 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:16:50 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 22:16:50 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 22:16:51 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 22:22:46 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:22:46 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:22:46 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:22:46 [INFO] ols.tech: [outfeed] Drain started. current=87.00 kg  requested=65.00 kg  target=22.00 kg
+2026-04-09 22:22:46 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 22:22:46 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 22:22:46 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:23:20 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:23:20 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:23:24 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=79.80 kg
+2026-04-09 22:23:24 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:23:24 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:23:24 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 22:23:24 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:23:24 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:23:24 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 22:23:24 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 22:23:25 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 22:28:57 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:28:57 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:28:57 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:28:57 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:28:57 [INFO] ols.tech: [outfeed] Drain started. current=79.00 kg  requested=65.00 kg  target=14.00 kg
+2026-04-09 22:28:57 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 22:28:57 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 22:29:32 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:29:32 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:29:36 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=72.40 kg
+2026-04-09 22:29:36 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:29:36 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:29:36 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 22:29:36 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:29:36 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:29:36 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 22:29:36 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 22:29:36 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 22:35:25 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:35:25 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:35:25 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:35:25 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:35:25 [INFO] ols.tech: [outfeed] Drain started. current=72.00 kg  requested=65.00 kg  target=7.00 kg
+2026-04-09 22:35:25 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 22:35:25 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 22:35:59 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:35:59 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:36:03 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=65.40 kg
+2026-04-09 22:36:03 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:36:03 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:36:03 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 22:36:03 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:36:03 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:36:03 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 22:36:03 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 22:36:03 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 22:41:26 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:41:26 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:41:26 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:41:26 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:41:26 [INFO] ols.tech: [outfeed] Drain started. current=65.40 kg  requested=65.00 kg  target=0.40 kg
+2026-04-09 22:41:26 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 22:41:26 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 22:41:49 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:41:49 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:41:53 [WARNING] ols.tech: [outfeed] Stopped: lo_level threshold. final=60.40 kg
+2026-04-09 22:41:53 [INFO] ols.tech: [DB] logged: KRISCO | FAIL | [outfeed] Stopped: lo_level threshold
+2026-04-09 22:41:53 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:41:53 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:41:53 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 22:41:53 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 22:41:53 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 22:46:26 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:46:26 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:46:26 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:46:26 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:46:26 [ERROR] ols.tech: [oil_drain] ABORTED: requested 65.00 kg but only 60.40 kg available (tare=0.00 kg)
+2026-04-09 22:46:26 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:49:01 [INFO] ols.tech: GPIO handler thread started.
+2026-04-09 22:49:01 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-09 22:49:01 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 22:49:16 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:49:16 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:49:16 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:49:16 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:49:16 [ERROR] ols.tech: [oil_drain] ABORTED: requested 65.00 kg but only 60.40 kg available (tare=0.00 kg)
+2026-04-09 22:49:16 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:52:27 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-09 22:52:28 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 22:52:36 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 22:52:36 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 22:52:36 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 22:52:36 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:52:36 [ERROR] ols.tech: [oil_drain] ABORTED: requested 65.00 kg but only 60.40 kg available (tare=0.00 kg)
+2026-04-09 22:52:36 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 22:56:27 [INFO] ols.tech: GPIO handler thread started.
+2026-04-09 22:56:27 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-09 22:56:27 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 22:56:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 22:56:41 [INFO] ols.tech: oil_add thread started remote Auto — now=60.20 kg  requested=95.00 kg
+2026-04-09 22:56:41 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 22:56:41 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-04-09 22:56:41 [INFO] ols.tech: Oil addition started. Initial: 60.20 kg  Requested: 95.00 kg
+2026-04-09 22:56:41 [INFO] ols.tech: Infeed valve set to OPEN
+2026-04-09 22:56:41 [INFO] ols.tech: Infeed run state set to True
+2026-04-09 22:58:53 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-09 22:58:54 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 23:01:18 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:01:18 [INFO] ols.tech: Infeed run state set to False
+2026-04-09 23:01:22 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=60.20 requested=95.00 final=60.00
+2026-04-09 23:01:22 [INFO] ols.tech: [DB] logged: KRISCO | FAIL | [Infeed] high level sensor
+2026-04-09 23:01:22 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:01:22 [INFO] ols.tech: Infeed run state set to False
+2026-04-09 23:01:22 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-04-09 23:01:22 [WARNING] ols.tech: Auto fill sequence failed or aborted in auto control loop.
+2026-04-09 23:01:22 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 23:00:45 [INFO] ols.tech: GPIO handler thread started.
+2026-04-09 23:00:45 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-09 23:00:45 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 23:03:39 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-09 23:03:40 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 23:04:05 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:04:05 [INFO] ols.tech: oil_add thread started remote Auto — now=0.00 kg  requested=95.00 kg
+2026-04-09 23:04:05 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:04:05 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-04-09 23:04:05 [INFO] ols.tech: Oil addition started. Initial: 0.00 kg  Requested: 95.00 kg
+2026-04-09 23:04:05 [INFO] ols.tech: Infeed valve set to OPEN
+2026-04-09 23:04:05 [INFO] ols.tech: Infeed run state set to True
+2026-04-09 23:04:05 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:04:05 [INFO] ols.tech: Infeed run state set to False
+2026-04-09 23:04:09 [WARNING] ols.tech: Oil add stopped: high level sensor triggered. initial=0.00 requested=95.00 final=0.00
+2026-04-09 23:04:09 [INFO] ols.tech: [DB] logged: KRISCO | FAIL | [Infeed] high level sensor
+2026-04-09 23:04:09 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:04:09 [INFO] ols.tech: Infeed run state set to False
+2026-04-09 23:04:09 [INFO] ols.tech: oil_add complete — busyFlagInfeedBusy cleared.
+2026-04-09 23:04:09 [WARNING] ols.tech: Auto fill sequence failed or aborted in auto control loop.
+2026-04-09 23:04:10 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 23:04:17 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:04:17 [INFO] ols.tech: oil_add thread started remote Auto — now=0.00 kg  requested=95.00 kg
+2026-04-09 23:04:17 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:04:17 [INFO] ols.tech: oil_add requested — checking if outfeed is busy ...
+2026-04-09 23:04:17 [INFO] ols.tech: Oil addition started. Initial: 0.00 kg  Requested: 95.00 kg
+2026-04-09 23:04:17 [INFO] ols.tech: Infeed valve set to OPEN
+2026-04-09 23:04:17 [INFO] ols.tech: Infeed run state set to True
+2026-04-09 23:04:17 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-09 23:04:17 [INFO] ols.tech: Infeed run state set to False
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                2026-04-09 23:04:26 [INFO] ols.tech: GPIO handler thread started.
+2026-04-09 23:04:26 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-09 23:04:26 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 23:05:57 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-09 23:05:58 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-09 23:06:14 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 23:06:14 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 23:06:14 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:06:14 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:06:14 [INFO] ols.tech: [outfeed] Drain started. current=112.80 kg  requested=65.00 kg  target=47.80 kg
+2026-04-09 23:06:14 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 23:06:14 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 23:07:47 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:07:47 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:07:51 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=90.00 kg
+2026-04-09 23:07:51 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:07:51 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:07:51 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 23:07:51 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:07:51 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:07:51 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 23:07:51 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 23:07:52 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 23:26:42 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 23:26:42 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 23:26:42 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:26:42 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:26:42 [INFO] ols.tech: [outfeed] Drain started. current=90.20 kg  requested=65.00 kg  target=25.20 kg
+2026-04-09 23:26:42 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 23:26:42 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 23:27:40 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:27:40 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:27:44 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=77.00 kg
+2026-04-09 23:27:44 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:27:44 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:27:44 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 23:27:44 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:27:44 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:27:44 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 23:27:44 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 23:27:44 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 23:35:58 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 23:35:58 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 23:35:58 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:35:58 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:35:58 [INFO] ols.tech: [outfeed] Drain started. current=77.20 kg  requested=65.00 kg  target=12.20 kg
+2026-04-09 23:35:58 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 23:35:58 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 23:36:33 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:36:33 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:36:37 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=69.80 kg
+2026-04-09 23:36:37 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:36:37 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:36:37 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 23:36:37 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:36:37 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:36:37 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 23:36:37 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 23:36:38 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 23:41:15 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 23:41:15 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 23:41:15 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:41:15 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:41:15 [INFO] ols.tech: [outfeed] Drain started. current=69.80 kg  requested=65.00 kg  target=4.80 kg
+2026-04-09 23:41:15 [INFO] ols.tech: Outfeed valve set to OPEN
+2026-04-09 23:41:15 [INFO] ols.tech: Outfeed run state set to True
+2026-04-09 23:41:49 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:41:49 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:41:53 [INFO] ols.tech: [outfeed] Oven request to stop. requested=65.00 kg  final=62.60 kg
+2026-04-09 23:41:53 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:41:53 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:41:53 [INFO] ols.tech: [DB] logged: KRISCO | Sucess | [outfeed] Oven request to stop
+2026-04-09 23:41:53 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:41:53 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:41:54 [INFO] ols.tech: [outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.
+2026-04-09 23:41:54 [INFO] ols.tech: infeed active after outfeed. always keep same
+2026-04-09 23:41:54 [INFO] ols.tech: [SYNC] Sent 1 rows to remote — all marked synced.
+2026-04-09 23:46:12 [INFO] ols.tech: [outfeed] oil_drain requested — vol=65.00 L
+2026-04-09 23:46:12 [INFO] ols.tech: [outfeed] oil_drain thread REMOTE started — vol=65.00 L
+2026-04-09 23:46:12 [INFO] ols.tech: Outfeed valve set to CLOSED
+2026-04-09 23:46:12 [INFO] ols.tech: Outfeed run state set to False
+2026-04-09 23:46:12 [ERROR] ols.tech: [oil_drain] ABORTED: requested 65.00 kg but only 62.00 kg available (tare=0.00 kg)
+2026-04-09 23:46:12 [INFO] ols.tech: Outfeed run state set to False

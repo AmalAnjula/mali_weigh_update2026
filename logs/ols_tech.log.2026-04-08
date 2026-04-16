@@ -1,0 +1,5 @@
+2026-04-08 06:00:02 [WARNING] ols.tech: [DAILY CSV] No data found for 2026-04-07
+2026-04-08 06:00:02 [WARNING] ols.tech: [SCHEDULER] No data found or CSV generation failed for today's job
+2026-04-08 06:00:13 [INFO] ols.tech: [SCHEDULER] Daily CSV emailed successfully
+2026-04-08 06:00:13 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-04-08 07:00:04 [INFO] ols.tech: [SCHEDULER] Flag reset to 0.

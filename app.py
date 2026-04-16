@@ -1,0 +1,2695 @@
+#!/usr/bin/env python3
+"""
+OLS Monitor — Flask Backend  +  MQTT Weight Thread
+====================================================
+Serves the HTML UI and handles all API calls.
+A dedicated MQTT thread subscribes to the weight topic and pushes
+the value (weiVal) straight into the shared state every message.
+
+──────────────────────────────────────────────────────────────────
+  MQTT CONFIG  (edit section below or set environment variables)
+──────────────────────────────────────────────────────────────────
+  MQTT_BROKER   broker hostname / IP   default: localhost
+  MQTT_PORT     broker TCP port        default: 1883
+  MQTT_TOPIC    weight topic           default: ols/weight
+  MQTT_USER     username (optional)
+  MQTT_PASS     password (optional)
+──────────────────────────────────────────────────────────────────
+
+Endpoints
+---------
+GET    /              -> index.html
+GET    /api/data      -> full state JSON  (polled 1 Hz by UI)
+POST   /api/control   -> button click events
+POST   /api/update    -> push any state value  {"path":"tank.weight_kg","value":520}
+POST   /api/buttons   -> enable/disable button {"button":"in-run-btn","disabled":true}
+DELETE /api/log       -> clear event log
+
+Terminal output for every button press:
+  [BUTTON EVENT] {"side": "infeed", "button": "run", "value": "START", "state": true}
+
+MQTT terminal output:
+  [MQTT] Connected to localhost:1883
+  [MQTT] weight = 523.40 kg  (level 52.34%)
+  [MQTT] Error frame: #ERR_SERIAL
+  [MQTT] Disconnected - reconnecting in 5 s
+"""
+
+import os, json, time, logging, logging.handlers, threading,sqlite3
+from datetime import datetime
+from flask import Flask, request, jsonify, send_from_directory, make_response
+import yaml
+ 
+import gpio_reader as gpio
+import queue
+
+
+inputs = {}
+
+sync_now=False
+
+# ── ALARMS LIST (in-memory) ──────────────────────────────────
+# Each element: {"timestamp": "YYYY-MM-DD HH:MM:SS", "message": "alarm text"}
+alarms_list = [
+    {"timestamp": "2026-04-06 14:30:45", "message": "HI ALARM - Tank level too high"},
+    {"timestamp": "2026-04-06 14:25:30", "message": "Low level sensor triggered"},
+    {"timestamp": "202ds20:15", "message": "Outfesaration failed"}
+]
+
+with open("config.yml") as f:
+    CONFIG = yaml.safe_load(f)
+
+INFEED_TIMEOUT = CONFIG["infeed"]["filling_time"]
+OUTFEED_TIMEOUT = CONFIG["outfeed"]["draining_time"]
+print("INFEED_TIMEOUT =", INFEED_TIMEOUT, "seconds")
+print("OUTFEED_TIMEOUT =", OUTFEED_TIMEOUT, "seconds")
+
+   # seconds — max time allowed for one oil addition
+
+ 
+
+
+# ── Try importing paho; warn clearly if missing ────────────────────
+try:
+    import paho.mqtt.client as mqtt_client
+    MQTT_AVAILABLE = True
+except ImportError:
+    MQTT_AVAILABLE = False
+    print("  paho-mqtt not installed - MQTT thread disabled.")
+    print("   Install with:  pip install paho-mqtt")
+
+# ══════════════════════════════════════════════════════════════════
+#  MQTT CONFIGURATION  — edit here or override via env vars
+# ══════════════════════════════════════════════════════════════════
+MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
+MQTT_PORT   = int(os.getenv("MQTT_PORT",  "1883"))
+MQTT_TOPIC  = os.getenv("MQTT_TOPIC",  "serial/weight")
+MQTT_USER   = os.getenv("MQTT_USER",   "")          # leave "" if no auth
+MQTT_PASS   = os.getenv("MQTT_PASS",   "")
+
+# ══════════════════════════════════════════════════════════════════
+#  LOGGING  — all logs written to /logs/  (created if missing)
+# ══════════════════════════════════════════════════════════════════
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+
+#prod_logger = ProductionLogger(LOG_DIR)
+
+def mqtt_publish(topic: str, payload, retain: bool = False, qos: int = 0):
+    """
+    Thread-safe helper — call this from anywhere to queue a publish.
+    """
+    _publish_queue.put((topic, str(payload), qos, retain))
+
+
+# ══════════════════════════════════════════════════════════════════
+#  SQLITE PRODUCTION LOG DATABASE
+# ══════════════════════════════════════════════════════════════════
+
+DB_PATH      = os.path.join(LOG_DIR, "production.db")
+DB_MAX_BYTES = 500 * 1024 * 1024   # 500 MB hard ceiling
+ 
+# ── Remote sync config ─────────────────────────────────────────────
+# Set REMOTE_RPI_IP to the IP of your RPi5 on the same LAN.
+# The receiver runs on port 5001 (remote_receiver.py).
+REMOTE_RPI_IP   = os.getenv("REMOTE_RPI_IP", "127.0.0.1")
+REMOTE_SYNC_URL = f"http://{REMOTE_RPI_IP}:5001/api/sync"
+SYNC_INTERVAL   = 60          # seconds between sync attempts
+ 
+def _init_db():
+    """Create the production_log table if it doesn't exist."""
+    with sqlite3.connect(DB_PATH) as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS production_log (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp       TEXT    NOT NULL,
+                product         TEXT,
+                initial_weight  REAL,
+                required_weight REAL,
+                final_weight    REAL,
+                status          TEXT,
+                reason          TEXT,
+                synced          INTEGER DEFAULT 0
+            )
+        """)
+        # Add synced column if upgrading from an older DB that lacks it
+        try:
+            con.execute("ALTER TABLE production_log ADD COLUMN synced INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass   # column already exists — normal on fresh start
+        con.commit()
+    
+    
+ 
+_init_db()
+ 
+def _db_reset_if_full(con):
+    """
+    Called inside an open connection before every INSERT.
+    If the DB file is at or above DB_MAX_BYTES:
+      - delete all rows older than 3 months
+      - run VACUUM to release the disk space back to the OS
+    """
+    try:
+        size = os.path.getsize(DB_PATH)
+    except OSError:
+        return                          # can't stat → skip check
+ 
+    if size >= DB_MAX_BYTES:
+        cur = con.execute(
+            "DELETE FROM production_log WHERE timestamp < datetime('now', '-3 months')"
+        )
+        deleted = cur.rowcount
+        con.commit()
+        con.execute("VACUUM")           # shrinks the file on disk
+        tech_log.warning(
+            "[DB] Size limit reached (%.1f MB) — deleted %d records older than 3 months.",
+            size / 1024 / 1024, deleted,
+        )
+        print(f"[DB] 500 MB limit hit — {deleted} records older than 3 months deleted.")
+ 
+def db_log(product, initial_weight, required_weight, final_weight, status, reason):
+    global sync_now
+    """Insert one production event row into the SQLite database (thread-safe)."""
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            _db_reset_if_full(con)      # wipe if at/over 500 MB
+            con.execute(
+                """INSERT INTO production_log
+                   (timestamp, product, initial_weight, required_weight,
+                    final_weight, status, reason, synced)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, 0)""",
+                (ts, product,
+                 round(float(initial_weight),  3),
+                 round(float(required_weight), 3),
+                 round(float(final_weight),    3),
+                 status, reason)
+            )
+            con.commit()
+        sync_now=True
+        tech_log.info("[DB] logged: %s | %s | %s", product, status, reason)
+    except Exception as exc:
+        tech_log.error("[DB] Failed to write production log: %s", exc)
+ 
+ 
+# ══════════════════════════════════════════════════════════════════
+#  REMOTE SYNC THREAD
+#  Runs every SYNC_INTERVAL seconds.
+#  Picks up all rows where synced=0, POSTs them to the RPi5
+#  receiver, then marks them synced=1 on success.
+#  Network drops are handled gracefully — rows just retry next cycle.
+# ══════════════════════════════════════════════════════════════════
+def _remote_sync_thread():
+    import urllib.request, urllib.error
+    global sync_now
+    tech_log.info("[SYNC] Remote sync thread started → %s", REMOTE_SYNC_URL)
+    print(f"[SYNC] Remote sync thread started → {REMOTE_SYNC_URL}")
+    
+    cnt=0
+    while True:
+
+
+        while (cnt<SYNC_INTERVAL and not sync_now):
+                time.sleep(1)
+                cnt+=1
+        cnt=0
+        sync_now=False
+
+        #time.sleep(SYNC_INTERVAL)
+        try:
+            # ── 1. Fetch all unsynced rows ──────────────────────────
+            with sqlite3.connect(DB_PATH) as con:
+                con.row_factory = sqlite3.Row
+                rows = con.execute(
+                    """SELECT id, timestamp, product,
+                              initial_weight, required_weight,
+                              final_weight, status, reason
+                       FROM production_log
+                       WHERE synced = 0
+                       ORDER BY id ASC"""
+                ).fetchall()
+ 
+            if not rows:
+                continue   # nothing to send
+ 
+            # ── 2. Build JSON payload ───────────────────────────────
+            records = [dict(r) for r in rows]
+            payload = json.dumps(records).encode("utf-8")
+ 
+            # ── 3. POST to remote receiver ──────────────────────────
+            req = urllib.request.Request(
+                REMOTE_SYNC_URL,
+                data    = payload,
+                method  = "POST",
+                headers = {"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                status_code = resp.status
+ 
+            if status_code == 200:
+                # ── 4. Mark rows as synced ──────────────────────────
+                ids = [r["id"] for r in records]
+                with sqlite3.connect(DB_PATH) as con:
+                    con.execute(
+                        f"UPDATE production_log SET synced=1 WHERE id IN ({','.join('?'*len(ids))})",
+                        ids,
+                    )
+                    con.commit()
+                tech_log.info("[SYNC] Sent %d rows to remote — all marked synced.", len(ids))
+                print(f"[SYNC] {len(ids)} rows synced to {REMOTE_RPI_IP}")
+            else:
+                tech_log.warning("[SYNC] Remote returned HTTP %s — will retry.", status_code)
+ 
+        except urllib.error.URLError as exc:
+            tech_log.warning("[SYNC] Cannot reach remote (%s) — will retry in %ds.", exc.reason, SYNC_INTERVAL)
+        except Exception as exc:
+            tech_log.error("[SYNC] Unexpected error: %s", exc)
+ 
+ 
+
+ 
+
+_log_fmt     = logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+def _make_file_handler(filename: str, level=logging.DEBUG) -> logging.FileHandler:
+    h = logging.handlers.TimedRotatingFileHandler(
+        os.path.join(LOG_DIR, filename),
+        when="midnight",       # rotate every day at midnight
+        backupCount=30,        # keep 30 days of logs
+        encoding="utf-8",
+    )
+    h.setFormatter(_log_fmt)
+    h.setLevel(level)
+    return h
+
+# Console handler — INFO and above, no werkzeug noise
+_console_handler = logging.StreamHandler()
+_console_handler.setFormatter(_log_fmt)
+_console_handler.setLevel(logging.INFO)
+
+# Root logger — sends everything to console + ols_app.log
+logging.basicConfig(level=logging.DEBUG, handlers=[])   # clear default handlers
+root_log = logging.getLogger()
+root_log.setLevel(logging.DEBUG)
+root_log.addHandler(_console_handler)
+root_log.addHandler(_make_file_handler("ols_app.log"))
+
+# Dedicated tech (MQTT / system) logger → also writes to ols_tech.log
+tech_log = logging.getLogger("ols.tech")
+tech_log.addHandler(_make_file_handler("ols_tech.log"))
+tech_log.setLevel(logging.DEBUG)
+
+# ── Silence Flask/Werkzeug access log lines ────────────────────────
+# Suppresses:  192.168.x.x - - [..] "GET /api/data HTTP/1.1" 200 -
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
+logging.getLogger("werkzeug").propagate = False
+
+
+# ══════════════════════════════════════════════════════════════════
+#  FLASK APP
+# ══════════════════════════════════════════════════════════════════
+app   = Flask(__name__, static_folder=".")
+_lock = threading.Lock()
+
+# ══════════════════════════════════════════════════════════════════
+#  SHARED STATE  (all UI data lives here)
+# ══════════════════════════════════════════════════════════════════
+def _now():
+    return datetime.now().isoformat(timespec="seconds")
+
+
+state = {
+    "product":      CONFIG.get("product", "Crude Oil"),
+    "product_code": CONFIG.get("product_code", "OIL-001"),
+    "timestamp":    _now(),
+
+    "serial": {
+        "port":     CONFIG.get("serial", {}).get("port",     "/dev/ttyUSB0"),
+        "baudrate": CONFIG.get("serial", {}).get("baudrate", 9600),
+    },
+
+    "tank": {
+        "weight_kg":         0.0,
+        "tare_kg":           CONFIG["tank"].get("tare_kg", 0.0),
+        "max_kg":            CONFIG["tank"].get("max_kg", 100.0),
+        "level_pct":         0.0,
+        "density_kgl":       CONFIG["tank"].get("density_kgl", 0.87),
+        "infeed_valve":      CONFIG["tank"].get("infeed_valve", 5.0),
+        "hi_threshold_pct":  CONFIG["tank"].get("hi_threshold_pct", 80),
+        "lo_threshold_pct":  CONFIG["tank"].get("lo_threshold_pct", 20),
+        "hi_level_kg":       CONFIG["tank"].get("hi_level_kg", 850.0),
+        "lo_level_kg":       CONFIG["tank"].get("lo_level_kg", 10.0),
+        "hi_alarm":          False,
+        "lo_alarm":          False,
+        "lo_level":          CONFIG["tank"].get("lo_level_kg", 20.0),
+        "hi_level":          CONFIG["tank"].get("hi_level_kg", 85.0),
+        
+
+    },
+
+# ── Physical sensor states ──────────────────────────────
+    "sensors": {
+        "lo_level": False,   # True = float switch triggered
+        "hi_level": False,
+    },
+
+    "infeed": {
+        "mode":         "AUTO",
+        "operation":    "LOCAL",
+        "running":      False,
+        "valve_open":   False,
+         "manual_vol_L": CONFIG["infeed"].get("manual_vol_L", 25.0),
+         "auto_start_level": CONFIG["infeed"].get("auto_start_level", 60.0),
+         
+         
+
+    },
+
+    "outfeed": {
+        "mode":         "AUTO",
+        "operation":    "LOCAL",
+        "running":      False,
+        "valve_open":   False,
+        "manual_vol_L": CONFIG["outfeed"].get("manual_vol_L", 26.0),
+    },
+
+    # ── MQTT status block — read by the UI ──────────────────────
+    "mqtt": {
+        "connected":    False,
+        "serial_error": False,
+        "last_value":   None,       # last raw value or error string
+        "last_ts":      None,       # ISO timestamp of last good reading
+        "topic":        MQTT_TOPIC,
+        "broker":       f"{MQTT_BROKER}:{MQTT_PORT}",
+    },
+
+    "log": [],
+
+
+ # ── UI label overrides — change any button sub-label via /api/update ──
+    # Example:  {"path": "labels.in_op_label", "value": "Operation Mode"}
+    "labels": {
+        "in_mode_label":  "Now Mode",
+        "in_op_label":    "Now Working",
+        "in_run_label":   "Press to",
+        "out_mode_label": "Now Working",
+        "out_op_label":   "Now working",
+        "out_run_label":  "Press to",
+    },
+
+    # ── UI button overrides (driven by /api/buttons) ─────────────
+    "ui": {
+        "buttons": {
+            "in-mode-btn":  {"disabled": False},
+            "in-op-btn":    {"disabled": False},
+            "in-run-btn":   {"disabled": False},
+            "out-mode-btn": {"disabled": False},
+            "out-op-btn":   {"disabled": False},
+            "out-run-btn":  {"disabled": False},
+        }
+    },
+}
+
+# ── Global MQTT value (also mirrored into state under lock) ────────
+weiVal       = 0.0
+serial_error = False
+out_feed_sucess=False
+auto_start_after_outfeed=False
+ 
+# ── Infeed sequence control flags ──────────────────────────────────
+# busyFlagInfeedBusy  → True while oil_add() sequence is running
+# busyFlagOutfeedBusy → set True externally when outfeed is active;
+#                       oil_add() will wait here before starting
+busyFlagInfeedBusy  = False
+busyFlagOutfeedBusy = False
+
+# Interrupt flags — any of these being True aborts the oil_add loop
+infeed_local_remote_change = False
+infeed_mode_change         = False
+infeed_remote_stop                = False
+local_stop                 = False
+
+
+low_level_sensor = False
+hi_level_sensor=False
+# ── Outfeed sequence control flags ─────────────────────────────────
+outfeed_local_stop            = False
+outfeed_remote_stop           = False
+outfeed_local_remote_change   = False
+outfeed_mode_change           = False
+
+
+_publish_queue = queue.Queue()
+
+
+
+# ── GPIO HANDLER THREAD  (polls GPIO states and updates shared state) ───────────────────────
+
+def gpio_handler():
+    tech_log.info("GPIO handler thread started.")
+    global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
+    global hi_level_sensor,out_feed_sucess
+    gpio.update() 
+    
+    state["infeed"]["operation"] = "REMOTE"
+    state["outfeed"]["operation"] = "REMOTE"
+
+    if gpio.state("intake_mode") and state["infeed"]["operation"] == "REMOTE" :
+        state["infeed"]["mode"] = "AUTO"
+    elif gpio.state("intake_mode") and state["infeed"]["operation"] == "MANUAL"  :
+        state["infeed"]["mode"] = "MANUAL"
+
+
+
+    if gpio.state("outk_remot") :
+                if  not gpio.state("outk_remot"):
+                    print("[GPIO] outfeed pin HIGH — setting outfeed mode to AUTO----")
+                    state["outfeed"]["mode"] = "AUTO"
+                    
+
+                else:
+                    print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
+                    state["outfeed"]["mode"] = "MANUAL"
+                     
+     
+    #check intake mode when init      
+    if not gpio.state("intake_mode"):
+                    print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
+                    state["infeed"]["mode"] = "AUTO"
+    else:   
+                    print("[GPIO] intake_mode_pin LOW — setting infeed mode to MANUAL")
+                    state["infeed"]["mode"] = "MANUAL"
+
+
+    if not gpio.state("outk_remot") :
+                 
+                    print("[GPIO] outfeed pin HIGH — setting outfeed mode to AUTO")
+                    state["outfeed"]["mode"] = "AUTO"
+                    state["outfeed"]["operation"] = "REMOTE"
+
+    else:
+                    print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
+                    state["outfeed"]["mode"] = "MANUAL"
+                    state["outfeed"]["operation"] = "LOCAL"
+
+     
+
+    while True:
+        time.sleep(0.2) 
+        try:
+            # brief sleep to allow graceful shutdown (not implemented here, but good practice)
+            gpio.update()  # read all GPIO pins and update internal state for edge detection
+            
+
+            # Rising edge — fires ONCE when button pressed, not every poll
+            if gpio.rising("intke_start") and state["infeed"]["mode"]=="MANUAL"   and not state["infeed"]["running"]:
+                    _now_w = weiVal
+                    _req_w = state["infeed"]["manual_vol_L"]
+                    t = threading.Thread(
+                        target=oil_add,
+                        args=(_now_w, _req_w,False),
+                        daemon=True,
+                        name="infeed_manual_remote",
+                    )
+                    t.start()
+                    tech_log.info(
+                        "oil_add thread started remote manual — now=%.2f kg  requested=%.2f kg",
+                        _now_w, _req_w)
+                    print(f"[infeed remote manual ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+
+            elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"]:
+                    time.sleep(2)
+                    if gpio.state("intke_start"):
+                        state["labels"]["in_op_label"] = "Now Continuously"
+                        _now_w = weiVal
+                        _req_w = state["infeed"]["manual_vol_L"]
+                        t = threading.Thread(
+                            target=auto_infeed_control,
+                            args=(_now_w, _req_w,True),
+                            daemon=True,
+                            name="infeed_auto_remote",
+                        )
+                        t.start()
+                        tech_log.info(
+                            "oil_add thread started remote Auto — now=%.2f kg  requested=%.2f kg",
+                            _now_w, _req_w)
+                        print(f"[infeed remote auto ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+                    
+            if gpio.rising("intke_stop")  :
+                tech_log.info("GPIO: intke_stop_pin triggered — setting remote_stop=True")
+                print("[GPIO] intke_stop_pin triggered — setting remote_stop=True")
+                infeed_remote_stop = True
+
+            if gpio.rising("outtk_stop"):
+                outfeed_remote_stop=True
+                tech_log.info("GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True")
+
+            #if gpio.rising("outtk_start") and state["outfeed"]["operation"]=="REMOTE": #chnge button state amal 
+            if gpio.rising("outtk_start") : #chnge button state amal 
+                _req_vol = state["outfeed"]["manual_vol_L"]
+                _req_vol = state["outfeed"]["manual_vol_L"]
+                t = threading.Thread(
+                        target=oil_drain,
+                        args=(_req_vol,),
+                        daemon=True,
+                        name="outfeed_AUTO",
+                    )
+                t.start()
+                tech_log.info("[outfeed] oil_drain thread REMOTE started — vol=%.2f L", _req_vol)
+                print(f"[outfeed] oil_drain thread REMOTE started  vol={_req_vol:.2f} L")
+
+            #chnge button state amal 
+            #elif  not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE" and state["outfeed"]["running"] and state["outfeed"]["mode"]=="AUTO" :
+            elif  not gpio.state("outtk_start") and  state["outfeed"]["running"] and state["outfeed"]["mode"]=="AUTO" :
+                time.sleep(1)
+                print("stop wait")
+                #chnge button state amal
+                #if not gpio.state("outtk_start") and state["outfeed"]["operation"]=="REMOTE":
+                if not gpio.state("outtk_start") :
+                    out_feed_sucess=True
+                    print("stop  actual wait")
+
+
+
+                
+
+            #if gpio.changed("intake_mode") and state["infeed"]["operation"] == "REMOTE":
+            
+
+            if gpio.changed("outk_remot")  :
+                if  not gpio.state("outk_remot"):
+                    print("[GPIO] outfeed pin HIGH — setting outfeed mode to AUTO")
+                    state["outfeed"]["mode"] = "AUTO"
+                    state["outfeed"]["operation"] = "REMOTE"  #amal
+                    state["ui"]["buttons"]["out-op-btn"]["disabled"] = True
+ 
+                else:
+                    print("[GPIO] outfeed pin LOW — setting outfeed mode to MANUAL")
+                    state["outfeed"]["mode"] = "MANUAL"
+                    #chnge button state amal
+                    state["outfeed"]["operation"] = "LOCAL"
+                    state["ui"]["buttons"]["out-op-btn"]["disabled"] = False
+
+            if gpio.changed("intake_mode") :
+                infeed_local_remote_change=True
+                infeed_mode_change=True
+                if  not gpio.state("intake_mode"):
+                    print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
+                    state["infeed"]["mode"] = "AUTO"
+                    state["infeed"]["operation"] = "REMOTE"
+                else:   
+                    print("[GPIO] intake_mode_pin LOW — setting infeed mode to MANUAL")
+                    state["infeed"]["mode"] = "MANUAL"
+                    state["infeed"]["operation"] = "LOCAL"
+
+                #tech_log.info("GPIO: intke_stop_pin triggered — setting local_stop=True")
+
+  
+                #tech_log.info("GPIO: intke_remot_pin triggered — setting remote_stop=True")
+            state["sensors"]["lo_level"] =  gpio.state("lowr_sns")   # assuming active LOW sensor (0 when triggered)
+            state["sensors"]["hi_level"] = gpio.state("up_sns")      # assuming active HIGH sensor (1 when triggered)
+            low_level_sensor = not state["sensors"]["lo_level"] 
+            hi_level_sensor =not state["sensors"]["hi_level"] 
+             
+ 
+            #print("tank low level sensor:", inputs["lowr_sns"], "  tank up level sensor:", inputs["up_sns"])
+                #tech_log.info("GPIO: lowr_sns_pin triggered — setting low_level_sensor=True")
+
+            # For demonstration, we log the pin states. In a real application,
+            # you would use these values to update the shared state or trigger actions.
+             
+        except Exception as e:
+            tech_log.error(f"Error reading GPIO states: {e}")
+        #time.sleep(1)   # poll interval
+
+
+# ══════════════════════════════════════════════════════════════════
+#  HELPERS
+# ══════════════════════════════════════════════════════════════════
+def _log(event, **extras):
+    """Append a log entry. Always snapshots current tank weight & level_pct
+    so every row in the UI table has numbers to display."""
+    tk = state["tank"]
+    net_kg  = round(max(0.0, tk["weight_kg"] - tk.get("tare_kg", 0.0)), 2)
+    lvl_pct = round(tk.get("level_pct", 0.0), 1)
+    entry = {
+        "ts":     _now(),
+        "evt":    event,
+        "weight": net_kg,
+        "level":  lvl_pct,
+        **extras,
+    }
+    state["log"].insert(0, entry)
+    state["log"] = state["log"][:200]
+
+def _recalc_alarms():
+    """Recalculate level_pct and hi/lo alarms from weight_kg."""
+    tk  = state["tank"]
+    net = max(0.0, tk["weight_kg"] - tk["tare_kg"])
+    tk["level_pct"] = round(min(100.0, net / tk["max_kg"] * 100.0), 2) \
+                      if tk["max_kg"] > 0 else 0.0
+    tk["hi_alarm"]  = tk["level_pct"] >= tk["hi_threshold_pct"]
+    tk["lo_alarm"]  = tk["level_pct"] <= tk["lo_threshold_pct"]
+
+def _print_event(payload: dict):
+    print(f"\n[BUTTON EVENT] {json.dumps(payload, indent=2)}")
+
+
+# ══════════════════════════════════════════════════════════════════
+#  INFEED HELPERS  (write directly to state — no HTTP round-trip)
+# ══════════════════════════════════════════════════════════════════
+def infeed_open(open_state: bool):
+    """Open (True) or close (False) the infeed valve directly in state."""
+    with _lock:
+        state["infeed"]["valve_open"] = open_state
+    
+    
+
+    print(f"[infeed] valve -> {'OPEN' if open_state else 'CLOSED'}")
+    tech_log.info("Infeed valve set to %s", "OPEN" if open_state else "CLOSED")
+
+
+def infeed_run_state(run_state: bool):
+
+
+    """Set infeed running state directly in state."""
+    with _lock:
+        state["infeed"]["running"]    = run_state
+        state["infeed"]["valve_open"] = run_state
+
+    if run_state:
+         gpio.output_on("out_wei_led")
+    else:
+         gpio.output_off("out_wei_led")
+
+    print(f"[infeed] running -> {run_state}")
+    tech_log.info("Infeed run state set to %s", run_state)
+
+
+
+
+
+def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: bool):
+    """Simple auto-control loop for AUTO mode.
+    Opens the valve until the required weight is reached, then closes it.
+    Does not implement any of the interrupt or safety checks of oil_add().
+    """
+    global weiVal
+    global local_stop, infeed_remote_stop,serial_error,auto_start_after_outfeed
+    infeed_open(False)
+    
+     
+    state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
+    state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
+    local_stop=False
+    result=False
+    
+    gpio.output_on("ind_led_in")
+    infeed_remote_stop=False
+    
+    while True:
+        
+         
+        #print("wait for tank empty")
+        gpio.output_on("ind_led_in")
+        if(local_stop ):
+            tech_log.error("Local stop received in auto control loop.")
+            print("Local stop received, exiting auto control. 1")
+            state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+            state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+            local_stop=False
+            break
+        elif infeed_remote_stop:
+            tech_log.error("Remote stop received in auto control loop.")
+            print("Remote stop received, exiting auto control.")
+            state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+            state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+            infeed_remote_stop=False
+            break
+        elif serial_error:
+            tech_log.error("Serial error detected in auto control loop.")
+            print("Serial error detected, exiting auto control.")
+            state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+            state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+            serial_error=False
+            break
+
+        elif   auto_start_after_outfeed:
+            auto_start_after_outfeed=False
+            result=oil_add(weiVal, required_weight,True)
+            gpio.output_on("ind_led_in")
+            
+           
+                 
+
+
+        elif (weiVal<state["infeed"]["auto_start_level"]) :  
+              
+            result=oil_add(weiVal, required_weight,True)
+
+             
+            if result:
+                tech_log.info("Auto fill sequence completed in auto control loop.")
+                print("Auto fill done")
+                state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
+                state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
+            else:
+                tech_log.warning("Auto fill sequence failed or aborted in auto control loop.")
+                print("Auto fill failed or aborted.")
+                state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+                state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+                break
+                
+              
+
+        '''while(True):
+            time.sleep(0.1)
+            if(local_stop):
+                print("Local stop received, exiting auto control.2")
+                state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+                state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+                local_stop=False
+                break'''
+                
+            
+
+
+                             
+                            
+                            
+        time.sleep(0.1)   # poll interval
+    state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+    state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+    print("Exit auto control loop.")
+    gpio.output_off("ind_led_in")
+    gpio.output_off("ind_led_in")
+    state["labels"]["in_op_label"] = "Now Working"
+           
+
+
+def shutdown_infeed():
+    """Helper to stop infeed immediately from any context (e.g. outfeed thread)."""
+   
+    # ── STEP 4: Always clean up valve + run state ──────────────────
+    infeed_open(False)
+    infeed_run_state(False)
+    gpio.output_off("ind_led_in") 
+    gpio.output_off("in_solv")
+    print("---- End filling ----")  # newline after progress line
+
+# ══════════════════════════════════════════════════════════════════
+#  OIL ADDITION SEQUENCE
+#  Called in a background thread when:
+#    mode == MANUAL  AND  operation == LOCAL  AND  run → START
+# ══════════════════════════════════════════════════════════════════
+def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
+    global weiVal, serial_error
+    global busyFlagInfeedBusy, busyFlagOutfeedBusy
+    global infeed_local_remote_change, infeed_mode_change
+    global infeed_remote_stop, local_stop
+    global low_level_sensor
+    global hi_level_sensor
+    infeed_open(False)
+    gpio.output_on("ind_led_in") 
+    state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
+    state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
+    tech_log.info("oil_add requested — checking if outfeed is busy ...")
+
+    # ── STEP 1: Wait until outfeed finishes ────────────────────────
+    _waited = False
+    while busyFlagOutfeedBusy:
+        if not _waited:
+            #gpio.output_on("in_wei_led")
+            tech_log.warning("Outfeed busy — infeed waiting ...")
+            print("[oil_add] Outfeed busy — waiting for outfeed to finish ...")
+            _waited = True
+        time.sleep(0.5)
+    if _waited:
+        #gpio.output_off("in_wei_led")
+        tech_log.info("Outfeed cleared — proceeding with oil addition.")
+        print("[oil_add] Outfeed cleared — starting.")
+
+    # ── STEP 2: Mark infeed as busy, reset all interrupt flags ─────
+    busyFlagInfeedBusy         = True
+    infeed_local_remote_change = False
+    local_stop                 = False
+    infeed_remote_stop                = False
+    infeed_mode_change         = False
+    # Note: do NOT reset serial_error — it reflects live MQTT state
+
+    intial_weight = now_weight
+
+    tech_log.info(
+        "Oil addition started. Initial: %.2f kg  Requested: %.2f kg",
+        intial_weight, required_weight)
+    print("Starting oil addition. Initial weight: %.2f kg, Required weight: %.2f kg"
+          % (intial_weight, required_weight))
+
+    start_time = time.time()
+    
+    _log("Infeed oil addition started",
+         weight=round(intial_weight, 2), requested=round(required_weight, 2))
+
+    # ── STEP 3: Weight-tracking loop ───────────────────────────────
+    done = False
+    result=False
+
+    infeed_open(True)
+    infeed_run_state(True)
+    gpio.output_on("in_solv")
+
+    while not done:
+        elapsed = time.time() - start_time
+        print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg ", end="\r")
+        # Timeout
+        if elapsed > INFEED_TIMEOUT:
+            done = True
+            result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.warning(
+                "Oil add TIMEOUT after %ds. initial=%.2f requested=%.2f final=%.2f",
+                INFEED_TIMEOUT, intial_weight, required_weight, weiVal)
+            print("[oil_add] TIMEOUT after %ds — initial %.2f requested %.2f final %.2f"
+                  % (INFEED_TIMEOUT, intial_weight, required_weight, weiVal))
+            _log("⚠ Infeed timeout", elapsed_s=round(elapsed, 1),
+                 initial=round(intial_weight, 2), requested=round(required_weight, 2),
+                 final=round(weiVal, 2))
+
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] Oil add TIMEOUT"
+            )
+             
+                
+            if infeed_auto:
+                infeed_run_state(False)
+                local_stop=True
+            break
+
+        
+        elif state["sensors"]["hi_level"]:
+            done = True
+            result=False
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.warning(
+                "Oil add stopped: high level sensor triggered. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Stopped: high level sensor triggered — initial %.2f requested %.2f final %.2f"
+                  % (intial_weight, required_weight, weiVal))
+            _log("⚠ Infeed stopped: high level sensor",
+                 initial=round(intial_weight, 2), requested=round(required_weight, 2),
+                 final=round(weiVal, 2))
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] high level sensor"
+            )
+            break
+
+        elif weiVal > state["tank"]["hi_level"]:
+            done = True
+            result=False
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.warning(
+                "Oil add stopped: weight exceeded hi level. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Stopped: weight exceeded hi level — initial %.2f requested %.2f final %.2f"
+                  % (intial_weight, required_weight, weiVal))
+            _log("⚠ Infeed stopped: weight exceeded hi level",
+                 initial=round(intial_weight, 2), requested=round(required_weight, 2),
+                 final=round(weiVal, 2))
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] weight exceeded hi level"
+            )
+            break
+
+        # Target reached — normal completion
+        elif weiVal >= required_weight - state["tank"]["infeed_valve"] :
+            done = True
+            result=True
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.info(
+                "Required weight reached. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Target reached — initial %.2f requested %.2f final %.2f"
+                  % (intial_weight, required_weight, weiVal))
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "Sucess",
+            "[Infeed] Required weight reached"
+            )
+
+            infeed_open(False)
+
+            if not infeed_auto:
+                infeed_run_state(False)
+            _log("Infeed target reached",
+                 initial=round(intial_weight, 2), requested=round(required_weight, 2),
+                 final=round(weiVal, 2))
+            break
+
+        # Serial / MQTT sensor error
+        elif serial_error:
+            done = True
+            result=False
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            serial_error=False
+            tech_log.error("Serial error during oil addition — aborting.")
+            print("[oil_add] Serial error — aborting.")
+            _log("⚠ Infeed aborted: serial error", final=round(weiVal, 2))
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] serial error"
+            )
+
+            break
+
+
+        if not hi_level_sensor:
+            done = True
+            result=False
+            infeed_run_state(False)
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
+            tech_log.warning(
+                "Hi level sensor trig. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Hi level sensor trig.")
+            _log("Infeed remote stop",
+                 initial=round(intial_weight, 2), final=round(weiVal, 2))
+            
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] Hi level sensor trig"
+            )
+
+            break
+
+
+        # Remote stop signal
+        elif infeed_remote_stop:
+            done = True
+            result=False
+            infeed_run_state(False)
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
+            tech_log.warning(
+                "Remote stop. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Remote stop.")
+            _log("Infeed remote stop",
+                 initial=round(intial_weight, 2), final=round(weiVal, 2))
+            
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] remote stop"
+            )
+
+            break
+
+        # Local stop (operator pressed STOP on UI)
+        elif local_stop:
+            done = True
+            result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
+            tech_log.warning(
+                "Local stop. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Local stop.")
+            _log("Infeed local stop",
+                 initial=round(intial_weight, 2), final=round(weiVal, 2))
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] oil_add Local stop"
+            )
+
+
+            break
+
+        # Mode changed mid-sequence
+        elif infeed_mode_change:       
+            infeed_mode_change=False         
+            done = True
+            result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
+            tech_log.warning(
+                "Mode change during oil addition. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] Mode changed — aborting.")
+            _log("Infeed aborted: mode change", final=round(weiVal, 2))
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] mode change"
+            )
+            break
+
+        # Operation (LOCAL/REMOTE) changed mid-sequence
+        elif infeed_local_remote_change:
+            infeed_local_remote_change=False
+            done = True
+            result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
+            tech_log.warning(
+                "Local/Remote change during oil addition. initial=%.2f requested=%.2f final=%.2f",
+                intial_weight, required_weight, weiVal)
+            print("[oil_add] LOCAL/REMOTE changed — aborting.")
+            _log("Infeed aborted: operation change", final=round(weiVal, 2))
+            db_log(
+            state["product"],
+            intial_weight,
+            required_weight,
+            weiVal,
+            "FAIL",
+            "[Infeed] operation change"
+            )
+
+            break
+
+        time.sleep(0.1)   # poll interval — avoids 100 % CPU spin
+
+    # ── STEP 4: Always clean up valve + run state ──────────────────
+    infeed_open(False)
+    infeed_run_state(False)
+    gpio.output_off("ind_led_in") 
+    gpio.output_off("in_solv")
+    print("---- End filling ----")  # newline after progress line
+    
+
+    if not infeed_auto:
+        infeed_run_state(False)
+        state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
+        state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
+    time.sleep(0.1)         # brief settle
+
+    # ── STEP 5: Release busy flag ───────────────────────────────────
+    busyFlagInfeedBusy = False
+    tech_log.info("oil_add complete — busyFlagInfeedBusy cleared.")
+    print("[oil_add] Sequence complete.")
+    return result
+
+
+# ══════════════════════════════════════════════════════════════════
+#  OUTFEED HELPERS
+# ══════════════════════════════════════════════════════════════════
+def outfeed_open(open_state: bool):
+    with _lock:
+        state["outfeed"]["valve_open"] = open_state
+    print(f"[outfeed] valve -> {'OPEN' if open_state else 'CLOSED'}")
+    tech_log.info("Outfeed valve set to %s", "OPEN" if open_state else "CLOSED")
+
+
+def outfeed_run_state(run_state: bool):
+    with _lock:
+        state["outfeed"]["running"]    = run_state
+        state["outfeed"]["valve_open"] = run_state
+
+    if run_state:
+         gpio.output_on("in_wei_led")
+    else:
+         gpio.output_off("in_wei_led")
+
+    print(f"[outfeed] running -> {run_state}")
+    tech_log.info("Outfeed run state set to %s", run_state)
+
+
+
+def shutdown_outfeed():
+    """Helper to stop outfeed immediately from any context (e.g. infeed thread)."""
+    # ── STEP 4: Always clean up valve + run state ──────────────────
+    outfeed_open(False)
+    outfeed_run_state(False)
+    gpio.output_off("ind_led_out") 
+    gpio.output_off("out_solv")
+    print("---- End draining ----")  # newline after progress line
+
+
+    
+
+# ══════════════════════════════════════════════════════════════════
+#  OUTFEED MANUAL SEQUENCE  (MANUAL + LOCAL + START)
+#
+#  Flow:
+#    1. Wait until infeed finishes   (busyFlagInfeedBusy → False)
+#    2. Check current oil >= requested volume (else abort with error)
+#    3. Open outfeed valve and drain until weight drops by requested kg
+#    4. Stop on: timeout / lo_level / lo_level_sensor / local_stop /
+#               remote_stop / mode_change / operation_change
+# ══════════════════════════════════════════════════════════════════
+def oil_drain(requested_vol_L: float):
+    global weiVal, serial_error
+    global busyFlagInfeedBusy, busyFlagOutfeedBusy
+    global outfeed_local_stop, outfeed_remote_stop
+    global outfeed_local_remote_change, outfeed_mode_change
+    global low_level_sensor,outfeed_remote_stop
+    global out_feed_sucess,auto_start_after_outfeed
+    tech_log.info("[outfeed] oil_drain requested — vol=%.2f L", requested_vol_L)
+
+    # Lock buttons while sequence runs
+    state["ui"]["buttons"]["out-mode-btn"]["disabled"] = True
+    state["ui"]["buttons"]["out-op-btn"]["disabled"]   = True
+     
+    outfeed_open(False)
+    outfeed_run_state(False)
+    gpio.output_on("ind_led_out")
+    # ── STEP 1: Wait until infeed finishes ─────────────────────────
+    _waited = False
+    while busyFlagInfeedBusy:
+        if not _waited:
+            #gpio.output_on("out_wei_led")
+            tech_log.warning("[outfeed] Infeed busy — outfeed waiting ...")
+            print("[oil_drain] Infeed busy — waiting for infeed to finish ...")
+            _waited = True
+        time.sleep(0.5)
+    if _waited:
+        #gpio.output_off("out_wei_led")
+        tech_log.info("[outfeed] Infeed cleared — proceeding.")
+        print("[oil_drain] Infeed cleared — starting drain.")
+
+    # ── STEP 2: Mark outfeed as busy, reset flags ───────────────────
+    busyFlagOutfeedBusy         = True
+    outfeed_local_stop          = False
+    outfeed_remote_stop         = False
+    outfeed_local_remote_change = False
+    outfeed_mode_change         = False
+
+    # Convert requested volume → kg using current density
+    with _lock:
+        density     = state["tank"]["density_kgl"]
+        current_kg  = weiVal
+        lo_level    = state["tank"]["lo_level"]
+        tare_kg     = state["tank"]["tare_kg"]
+        max_kg      = state["tank"]["max_kg"]
+
+    requested_kg = requested_vol_L * density
+
+    # ── STEP 3: Pre-check — enough oil available? ───────────────────
+    available_kg = max(0.0, current_kg - tare_kg)
+    if requested_kg > available_kg:
+        msg = (
+            f"[oil_drain] ABORTED: requested {requested_kg:.2f} kg "
+            f"but only {available_kg:.2f} kg available (tare={tare_kg:.2f} kg)"
+        )
+        tech_log.error(msg)
+        print(msg)
+        _log("⚠ Outfeed aborted: insufficient oil",
+             requested_kg=round(requested_kg, 2),
+             available_kg=round(available_kg, 2),
+             current_kg=round(current_kg, 2))
+        outfeed_run_state(False)
+        busyFlagOutfeedBusy = False
+        state["ui"]["buttons"]["out-mode-btn"]["disabled"] = False
+        state["ui"]["buttons"]["out-op-btn"]["disabled"]   = False
+        gpio.output_off("ind_led_out")
+        return
+
+    target_kg   = current_kg - requested_kg   # weight we expect to reach
+    start_time  = time.time()
+
+    tech_log.info(
+        "[outfeed] Drain started. current=%.2f kg  requested=%.2f kg  target=%.2f kg",
+        current_kg, requested_kg, target_kg)
+    print("[oil_drain] Start: current=%.2f kg  drain=%.2f kg  target=%.2f kg"
+          % (current_kg, requested_kg, target_kg))
+    _log("Outfeed drain started",
+         current_kg=round(current_kg, 2),
+         requested_kg=round(requested_kg, 2),
+         target_kg=round(target_kg, 2))
+
+    outfeed_open(True)
+    outfeed_run_state(True)
+    gpio.output_on("out_solv")
+    # ── STEP 4: Drain loop ──────────────────────────────────────────
+    done = False
+    while not done:
+        elapsed = time.time() - start_time
+
+        if elapsed > OUTFEED_TIMEOUT:
+            done = True
+
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.warning(
+                "[outfeed] TIMEOUT after %ds. target=%.2f final=%.2f",
+                OUTFEED_TIMEOUT, target_kg, weiVal)
+            print("[oil_drain] TIMEOUT after %ds" % OUTFEED_TIMEOUT)
+            _log("⚠ Outfeed timeout",
+                 elapsed_s=round(elapsed, 1),
+                 target_kg=round(target_kg, 2),
+                 final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "FAIL",
+            "[outfeed] TIMEOUT"
+            )
+
+            break
+
+ 
+        elif out_feed_sucess:
+            out_feed_sucess=False
+            done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.info(
+                "[outfeed] Oven request to stop. requested=%.2f kg  final=%.2f kg",
+                requested_kg, weiVal)
+            print("[oil_drain] Oven request to stop — drained %.2f kg" % (current_kg - weiVal))
+            outfeed_open(False)
+            outfeed_run_state(False)
+            _log("Outfeed Oven request to stop",
+                 requested_kg=round(requested_kg, 2),
+                 drained_kg=round(current_kg - weiVal, 2),
+                 final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Sucess",
+            "[outfeed] Oven request to stop"
+            )
+            break
+        # Tank too low — stop draining
+        elif weiVal<= lo_level or low_level_sensor:
+            done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            reason = "low level sensor" if low_level_sensor else "lo_level threshold"
+            tech_log.warning("[outfeed] Stopped: %s. final=%.2f kg", reason, weiVal)
+            print("[oil_drain] Stopped: %s" % reason)
+            _log(f"⚠ Outfeed stopped: {reason}", final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "FAIL",
+            f"[outfeed] Stopped: {reason}"
+            )
+            break
+
+        elif outfeed_remote_stop:
+            done = True
+            outfeed_remote_stop=False
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.warning("[outfeed] Remote stop.")
+            print("[oil_drain] Remote stop.")
+            _log("Outfeed remote stop", final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "FAIL",
+            "[outfeed] Remote stop"
+            )
+            break
+
+        # Target reached —external sig
+        
+
+        # Target reached — normal completion
+        elif weiVal <= target_kg:
+            done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.info(
+                "[outfeed] Target reached. requested=%.2f kg  final=%.2f kg",
+                requested_kg, weiVal)
+            print("[oil_drain] Target reached — drained %.2f kg" % (current_kg - weiVal))
+            outfeed_open(False)
+            outfeed_run_state(False)
+            _log("Outfeed target reached",
+                 requested_kg=round(requested_kg, 2),
+                 drained_kg=round(current_kg - weiVal, 2),
+                 final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Sucess",
+            "[outfeed] target reached"
+            )
+            break
+
+        elif serial_error:
+            serial_error=False
+            done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.error("[outfeed] Serial error — aborting.")
+            print("[oil_drain] Serial error — aborting.")
+            _log("⚠ Outfeed aborted: serial error", final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "[outfeed] Serial error"
+            )
+            break
+
+        elif outfeed_local_stop:
+            done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.info("[outfeed] Local stop.")
+            print("[oil_drain] Local stop.")
+            _log("Outfeed local stop",
+                 drained_kg=round(current_kg - weiVal, 2),
+                 final_kg=round(weiVal, 2))
+            
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "[outfeed] Local stop"
+            )
+            break
+
+         
+        elif outfeed_mode_change:
+            done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.warning("[outfeed] Mode changed mid-sequence — aborting.")
+            _log("Outfeed aborted: mode change", final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "[outfeed] aborted: mode change"
+            )
+            break
+
+        elif outfeed_local_remote_change:
+            done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+            tech_log.warning("[outfeed] Operation changed mid-sequence — aborting.")
+            _log("Outfeed aborted: operation change", final_kg=round(weiVal, 2))
+            db_log(
+            state["product"],
+            current_kg,
+            requested_kg,
+            weiVal,
+            "Fail",
+            "[Outfeed] aborted: operation change"
+            )
+            break
+
+        time.sleep(0.1)
+
+    # ── STEP 5: Always clean up ─────────────────────────────────────
+    outfeed_open(False)
+    outfeed_run_state(False)
+    gpio.output_off("out_solv")
+    gpio.output_off("ind_led_out")
+    time.sleep(0.1)
+
+    busyFlagOutfeedBusy = False
+    state["ui"]["buttons"]["out-mode-btn"]["disabled"] = False
+    state["ui"]["buttons"]["out-op-btn"]["disabled"]   = False
+    tech_log.info("[outfeed] oil_drain complete — busyFlagOutfeedBusy cleared.")
+    print("[oil_drain] Sequence complete.")
+    
+    if state["infeed"]["mode"]=="AUTO" and not busyFlagInfeedBusy:
+        _now_w = weiVal
+        _req_w = state["infeed"]["manual_vol_L"]
+        #result=oil_add(weiVal, _req_w,False)
+        tech_log.info("infeed active after outfeed. always keep same")
+        print("[infeed active after outfeed. always keep same.")
+        auto_start_after_outfeed=True
+    
+        
+
+
+# ══════════════════════════════════════════════════════════════════
+#  OUTFEED AUTO SEQUENCE  (AUTO + LOCAL + START)
+#
+#  Same safety guards as MANUAL (wait for infeed, timeout,
+#  lo_level, lo_level_sensor, stop signals).
+#  The actual drain logic is intentionally left empty — add your
+#  AUTO outfeed business logic here when ready.
+# ══════════════════════════════════════════════════════════════════
+def auto_outfeed_control():
+    global weiVal, serial_error
+    global busyFlagInfeedBusy, busyFlagOutfeedBusy
+    global outfeed_local_stop, outfeed_remote_stop
+    global outfeed_local_remote_change, outfeed_mode_change
+    global low_level_sensor
+
+    tech_log.info("[outfeed AUTO] auto_outfeed_control started.")
+    print("[auto_outfeed] Started.")
+
+    state["ui"]["buttons"]["out-mode-btn"]["disabled"] = True
+    state["ui"]["buttons"]["out-op-btn"]["disabled"]   = True
+
+    # ── Wait until infeed finishes ──────────────────────────────────
+    _waited = False
+    while busyFlagInfeedBusy:
+        if not _waited:
+            #gpio.output_on("out_wei_led")
+            tech_log.warning("[outfeed AUTO] Infeed busy — waiting ...")
+            print("[auto_outfeed] Infeed busy — waiting ...")
+            _waited = True
+        # Check for stop while waiting
+        if outfeed_local_stop or outfeed_remote_stop:
+            tech_log.info("[outfeed AUTO] Stop requested while waiting for infeed.")
+            outfeed_run_state(False)
+            busyFlagOutfeedBusy = False
+            state["ui"]["buttons"]["out-mode-btn"]["disabled"] = False
+            state["ui"]["buttons"]["out-op-btn"]["disabled"]   = False
+            return
+        time.sleep(0.5)
+    if _waited:
+        #gpio.output_off("out_wei_led")
+        tech_log.info("[outfeed AUTO] Infeed cleared — proceeding.")
+
+    busyFlagOutfeedBusy         = True
+    outfeed_local_stop          = False
+    outfeed_remote_stop         = False
+    outfeed_local_remote_change = False
+    outfeed_mode_change         = False
+
+    with _lock:
+        lo_level   = state["tank"]["lo_level"]
+        start_kg   = weiVal
+
+    tech_log.info("[outfeed AUTO] Running. current=%.2f kg", start_kg)
+    _log("Outfeed AUTO sequence started", current_kg=round(start_kg, 2))
+
+    start_time = time.time()
+    
+    # ── AUTO drain loop — add your logic inside here ────────────────
+    gpio.output_on("out_solv")
+
+    done = False
+    while not done:
+        elapsed = time.time() - start_time
+
+        if elapsed > OUTFEED_TIMEOUT:
+            done = True
+            tech_log.warning("[outfeed AUTO] TIMEOUT after %ds.", OUTFEED_TIMEOUT)
+            print("[auto_outfeed] TIMEOUT after %ds" % OUTFEED_TIMEOUT)
+            _log("⚠ Outfeed AUTO timeout", elapsed_s=round(elapsed, 1))
+            db_log(
+            state["product"],
+            start_kg,
+            weiVal,
+            weiVal,
+            "Fail",
+            "this cannot happen"
+            )
+            break
+
+        elif weiVal<= lo_level or low_level_sensor:
+            done = True
+            reason = "low level sensor" if low_level_sensor else "lo_level threshold"
+            tech_log.warning("[outfeed AUTO] Stopped: %s", reason)
+            print("[auto_outfeed] Stopped: %s" % reason)
+            _log(f"⚠ Outfeed AUTO stopped: {reason}", final_kg=round(weiVal, 2))
+            break
+
+        elif serial_error:
+            done = True
+            tech_log.error("[outfeed AUTO] Serial error — aborting.")
+            _log("⚠ Outfeed AUTO aborted: serial error")
+            break
+
+        elif outfeed_local_stop:
+            done = True
+            tech_log.info("[outfeed AUTO] Local stop.")
+            _log("Outfeed AUTO local stop", final_kg=round(weiVal, 2))
+            break
+
+        elif outfeed_remote_stop:
+            done = True
+            tech_log.info("[outfeed AUTO] Remote stop.")
+            _log("Outfeed AUTO remote stop", final_kg=round(weiVal, 2))
+            break
+
+        elif outfeed_mode_change:
+            done = True
+            tech_log.warning("[outfeed AUTO] Mode changed — aborting.")
+            _log("Outfeed AUTO aborted: mode change")
+            break
+
+        elif outfeed_local_remote_change:
+            done = True
+            tech_log.warning("[outfeed AUTO] Operation changed — aborting.")
+            _log("Outfeed AUTO aborted: operation change")
+            break
+
+        # ── YOUR AUTO OUTFEED LOGIC GOES HERE ──────────────────────
+
+        time.sleep(0.1)
+
+    # ── Cleanup ─────────────────────────────────────────────────────
+    outfeed_open(False)
+    outfeed_run_state(False)
+    gpio.output_off("out_solv")
+    time.sleep(0.1)
+
+    busyFlagOutfeedBusy = False
+    state["ui"]["buttons"]["out-mode-btn"]["disabled"] = False
+    state["ui"]["buttons"]["out-op-btn"]["disabled"]   = False
+    tech_log.info("[outfeed AUTO] Complete — busyFlagOutfeedBusy cleared.")
+    print("[auto_outfeed] Sequence complete.")
+
+# ══════════════════════════════════════════════════════════════════
+#  MQTT CALLBACKS  (run inside paho's network thread)
+# ══════════════════════════════════════════════════════════════════
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        client.subscribe(MQTT_TOPIC)
+        with _lock:
+            state["mqtt"]["connected"] = True
+        print(f"\n[MQTT] Connected to {MQTT_BROKER}:{MQTT_PORT}  topic={MQTT_TOPIC}")
+        tech_log.info("MQTT connected. Subscribed to %s", MQTT_TOPIC)
+    else:
+        print(f"\n[MQTT] Connection failed  rc={rc}")
+        tech_log.error("MQTT connection failed rc=%s", rc)
+
+
+def on_disconnect(client, userdata, rc):
+    with _lock:
+        state["mqtt"]["connected"] = False
+    tech_log.warning("MQTT disconnected rc=%s", rc)
+    print(f"\n[MQTT] Disconnected (rc={rc}) — paho will auto-reconnect")
+
+
+def on_message_weight(client, userdata, msg):
+    """
+    Your original callback — unchanged logic.
+    Parses weiVal, sets serial_error, and syncs into shared state.
+    """
+    global weiVal, serial_error
+
+    payload_str = msg.payload.decode()
+
+    try:
+        if payload_str.startswith("#"):
+            # ── Error frame from sensor ─────────────────────────
+            print(f"\n[MQTT] Error frame: {payload_str}")
+            tech_log.error("Error message received from MQTT: %s", payload_str)
+            serial_error = True
+            with _lock:
+                state["mqtt"]["serial_error"] = True
+                state["mqtt"]["last_value"]   = payload_str
+            _log(f"⚠ MQTT sensor error: {payload_str}")
+            time.sleep(10)     # same delay as your original code
+
+        else:
+            # ── Good numeric reading ─────────────────────────────
+            weiVal       = float(payload_str)
+            #serial_error = False
+
+            with _lock:
+                # Push weight into tank state
+                state["tank"]["weight_kg"]    = weiVal
+                state["mqtt"]["serial_error"] = False
+                state["mqtt"]["last_value"]   = weiVal
+                state["mqtt"]["last_ts"]      = _now()
+                # Recalculate level % and alarms from new weight
+                _recalc_alarms()
+
+            '''print(
+                f"[MQTT] weight = {weiVal:.2f} kg"
+                f"  level = {state['tank']['level_pct']:.2f}%"
+            )
+            tech_log.info(
+                "weight=%.2f kg  level=%.2f%%",
+                weiVal, state["tank"]["level_pct"]
+            )'''
+
+    except ValueError:
+        print(f"\n[MQTT] Non-numeric payload: {payload_str!r}")
+        tech_log.error("Received non-numeric weight value: %s", payload_str)
+        weiVal       = 0.0
+        serial_error = True
+        with _lock:
+            state["mqtt"]["serial_error"] = True
+            state["mqtt"]["last_value"]   = payload_str
+        _log(f"⚠ MQTT parse error: {payload_str}")
+
+
+# ══════════════════════════════════════════════════════════════════
+#  MQTT THREAD  (started as daemon before Flask)
+# ══════════════════════════════════════════════════════════════════
+def _mqtt_thread():
+    """
+    Separate daemon thread.
+    Uses paho loop_forever() with built-in auto-reconnect.
+    """
+    if not MQTT_AVAILABLE:
+        print("[MQTT] Thread not started — paho-mqtt not installed.")
+        return
+
+    client = mqtt_client.Client(client_id="ols-monitor", clean_session=True)
+
+    if MQTT_USER:
+        client.username_pw_set(MQTT_USER, MQTT_PASS)
+
+    client.on_connect    = on_connect
+    client.on_disconnect = on_disconnect
+    client.on_message    = on_message_weight
+
+    # Exponential back-off: 1 s min, 30 s max between reconnect attempts
+    client.reconnect_delay_set(min_delay=1, max_delay=30)
+
+    while True:
+        try:
+            print(f"[MQTT] Connecting to {MQTT_BROKER}:{MQTT_PORT} ...")
+            client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
+            client.loop_forever()          # blocks; reconnects automatically
+        except Exception as exc:
+            tech_log.error("MQTT fatal error: %s — retry in 5 s", exc)
+            print(f"[MQTT] Error: {exc} — retrying in 5 s")
+            with _lock:
+                state["mqtt"]["connected"] = False
+            time.sleep(5)
+
+
+# ══════════════════════════════════════════════════════════════════
+#  FLASK ROUTES
+# ══════════════════════════════════════════════════════════════════
+
+@app.route("/")
+def index():
+    return send_from_directory(".", "index.html")
+
+
+@app.route("/api/data")
+def api_data():
+    with _lock:
+        state["timestamp"] = _now()
+        
+        return jsonify(state)
+
+
+# ─────────────────────────────────────────────────────────────────
+# POST /api/control  — all button clicks arrive here
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/control", methods=["POST"])
+def api_control():
+    body   = request.get_json(force=True)
+    side   = body.get("side")
+    action = body.get("action")
+    global local_stop, infeed_remote_stop, infeed_mode_change, infeed_local_remote_change
+    global outfeed_local_stop, outfeed_remote_stop, outfeed_mode_change, outfeed_local_remote_change
+
+    with _lock:
+
+        # ── Settings save ──────────────────────────────────────────
+        if side == "_settings" and action == "save_settings":
+            data = body.get("data", {})
+            state.update({
+                "product":      data.get("product",      state["product"]),
+                "product_code": data.get("product_code", state["product_code"]),
+            })
+            for k in ("max_kg", "density_kgl", "tare_kg",
+                      "hi_threshold_pct", "lo_threshold_pct"):
+                if k in data.get("tank", {}):
+                    state["tank"][k] = data["tank"][k]
+            if "manual_vol_L" in data.get("infeed", {}):
+                state["infeed"]["manual_vol_L"] = data["infeed"]["manual_vol_L"]
+            _recalc_alarms()
+            _print_event({"action": "save_settings", "status": "ok"})
+            _log("Settings saved")
+             
+            return jsonify({"ok": True})
+
+        if side not in ("infeed", "outfeed"):
+            return jsonify({"error": "unknown side"}), 400
+
+        s = state[side]
+
+        if action == "mode":
+            s["mode"] = "MANUAL" if s["mode"] == "AUTO" else "AUTO"
+            _print_event({"side": side, "button": "mode", "value": s["mode"]})
+            _log(f"{side.capitalize()} mode -> {s['mode']}")
+            # Signal oil_add loop if infeed sequence is running
+            if side == "infeed" and busyFlagInfeedBusy:
+                infeed_mode_change = True
+            if side == "outfeed" and busyFlagOutfeedBusy:
+                outfeed_mode_change = True
+
+        elif action == "operation":
+            s["operation"] = "REMOTE" if s["operation"] == "LOCAL" else "LOCAL"
+            if side =="outfeed" and s["operation"] == "REMOTE":
+                
+
+                s["mode"]="AUTO"
+            elif side =="outfeed" and s["operation"] == "LOCAL":
+            
+                s["mode"]="MANUAL"
+
+            _print_event({"side": side, "button": "operation", "value": s["operation"]})
+            _log(f"{side.capitalize()} operation -> {s['operation']}")
+            # Signal oil_add loop if infeed sequence is running
+            if side == "infeed" and busyFlagInfeedBusy:
+                infeed_local_remote_change = True
+            if side == "outfeed" and busyFlagOutfeedBusy:
+                outfeed_local_remote_change = True
+
+        elif action == "run":
+            s["running"]    = not s["running"]
+            s["valve_open"] = s["running"]
+            '''_print_event({
+                "side":   side,
+                "button": "run",
+                "value":  "START" if s["running"] else "STOP",
+                "state":  s["running"],
+            })'''
+            _log(f"{side.capitalize()} -> {'START' if s['running'] else 'STOP'}")
+
+            # ── Infeed MANUAL + LOCAL: launch / abort oil_add sequence ──
+            if side == "infeed":
+
+                if   s["operation"] == "REMOTE":
+                    if gpio.state("intake_mode"):
+                        s["mode"] == "MANUAL"
+                    else:
+                        s["mode"] == "AUTO"
+
+
+
+                
+                if s["running"] and s["mode"] == "MANUAL" and s["operation"] == "LOCAL":
+                    # START → spawn oil_add in background thread
+                    # Snapshot the weight and requested volume BEFORE releasing lock
+                    _now_w = weiVal
+                    _req_w = state["infeed"]["manual_vol_L"]
+                    t = threading.Thread(
+                        target=oil_add,
+                        args=(_now_w, _req_w,False),
+                        daemon=True,
+                        name="infeed_manual_local_thread",
+                    )
+                    t.start()
+                    tech_log.info(
+                        "oil_add thread started local manual — now=%.2f kg  requested=%.2f kg",
+                        _now_w, _req_w)
+                    print(f"[infeed local manual ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+
+                elif s["running"] and s["mode"] == "AUTO" and s["operation"] == "LOCAL":
+                   
+
+                        _now_w = weiVal
+                        _req_w = state["infeed"]["manual_vol_L"]
+                        # START in AUTO mode → just open the valve, no thread
+                        tech_log.info(
+                            "oil_add thread started local auto — now=%.2f kg  requested=%.2f kg",
+                            _now_w, _req_w)
+                        print(f"[infeed local auto ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+                        t = threading.Thread(
+                            target=auto_infeed_control,
+                            args=(_now_w, _req_w,True),
+                            daemon=True,
+                            name="infeed_auto_local_thread",
+                        )
+                        t.start()
+
+                elif s["operation"] == "REMOTE":
+                    state["infeed"]["running"] = False
+
+
+                elif not s["running"]:
+                    # STOP pressed → signal the running oil_add loop to exit
+                    local_stop = True
+                    tech_log.info("Local stop signalled to oil_add.")
+
+            # ── Outfeed run handling ────────────────────────────────
+            if side == "outfeed":
+                
+                
+                
+                if s["running"] and s["mode"] == "MANUAL" and s["operation"] == "LOCAL":
+                    _req_vol = state["outfeed"]["manual_vol_L"]
+                    t = threading.Thread(
+                        target=oil_drain,
+                        args=(_req_vol,),
+                        daemon=True,
+                        name="outfeed_manual",
+                    )
+                    t.start()
+                    tech_log.info("[outfeed] oil_drain thread local started — vol=%.2f L", _req_vol)
+                    print(f"[outfeed] oil_drain local thread started  vol={_req_vol:.2f} L")
+
+                elif s["running"] and s["mode"] == "AUTO" and s["operation"] == "LOCAL":
+                    t = threading.Thread(
+                        target=auto_outfeed_control,
+                        daemon=True,
+                        name="outfeed_auto",
+                    )
+                    t.start()
+                    tech_log.info("[outfeed] auto_outfeed_control thread started.")
+                    print("[outfeed] AUTO sequence thread started.")
+
+                elif not s["running"]:
+                    outfeed_local_stop = True
+                    tech_log.info("[outfeed] Local stop signalled.")
+                 
+
+
+        elif action == "valve":
+            s["valve_open"] = bool(body.get("state", False))
+            _print_event({
+                "side":   side,
+                "button": "valve",
+                "value":  "OPEN" if s["valve_open"] else "CLOSED",
+                "state":  s["valve_open"],
+            })
+            _log(f"{side.capitalize()} valve -> {'OPEN' if s['valve_open'] else 'CLOSED'}")
+
+        elif action == "apply":
+            vol = float(body.get("vol", 0))
+            if vol <= 0:
+                return jsonify({"error": "volume must be > 0"}), 400
+
+            # Save to state
+            state[side]["manual_vol_L"] = vol
+
+            # Save to config.yml
+            try:
+                cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
+                with open(cfg_path) as f:
+                    cfg = yaml.safe_load(f) or {}
+                cfg.setdefault(side, {})["manual_vol_L"] = vol
+                with open(cfg_path, "w") as f:
+                    yaml.safe_dump(cfg, f)
+                tech_log.info("manual_vol_L %.2f L saved to config.yml [%s]", vol, side)
+            except Exception as e:
+                tech_log.error("Failed to save manual_vol_L: %s", e)
+
+            _print_event({"side": side, "button": "apply_volume", "vol_L": vol})
+            _log(f"{side.capitalize()} volume set to {vol} L")
+
+
+        else:
+            return jsonify({"error": f"unknown action: {action}"}), 400
+
+    return jsonify({"ok": True})
+
+
+# ─────────────────────────────────────────────────────────────────
+# POST /api/update  — push any value from external Python script
+#   {"path": "tank.weight_kg", "value": 520.5}
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/update", methods=["POST"])
+def api_update():
+    body  = request.get_json(force=True)
+    path  = body.get("path", "")
+    value = body.get("value")
+    parts = path.split(".")
+
+    with _lock:
+        if len(parts) == 1:
+            if parts[0] in state:
+                state[parts[0]] = value
+                print(f"\n[API UPDATE] {path} = {json.dumps(value)}")
+            else:
+                return jsonify({"error": f"unknown key: {path}"}), 400
+        elif len(parts) == 2:
+            section, key = parts
+            if section in state and isinstance(state[section], dict):
+                state[section][key] = value
+                print(f"\n[API UPDATE] {path} = {json.dumps(value)}")
+                if section == "tank":
+                    _recalc_alarms()
+            else:
+                return jsonify({"error": f"unknown path: {path}"}), 400
+        else:
+            return jsonify({"error": "path depth > 2 not supported"}), 400
+
+    return jsonify({"ok": True, "path": path, "value": value})
+
+
+# ─────────────────────────────────────────────────────────────────
+# POST /api/buttons — enable / disable any button
+#   {"button": "in-run-btn", "disabled": true}
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/buttons", methods=["POST"])
+def api_buttons():
+    body     = request.get_json(force=True)
+    btn_id   = body.get("button")
+    disabled = bool(body.get("disabled", False))
+
+    with _lock:
+        btns = state["ui"]["buttons"]
+        if btn_id not in btns:
+            return jsonify({"error": f"unknown button: {btn_id}"}), 400
+        btns[btn_id]["disabled"] = disabled
+
+    print(f"\n[API BUTTONS] {btn_id} -> {'DISABLED' if disabled else 'ENABLED'}")
+    return jsonify({"ok": True, "button": btn_id, "disabled": disabled})
+
+
+# ─────────────────────────────────────────────────────────────────
+# DELETE /api/log
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/log", methods=["DELETE"])
+def api_log_clear():
+    with _lock:
+        state["log"].clear()
+    print("\n[LOG] Cleared")
+    return jsonify({"ok": True})
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /api/alarms  — last 20 alarm records from production_log
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/alarms", methods=["GET"])
+def api_alarms():
+    global alarms_list
+    # Return alarms list (each element is one alarm)
+    return jsonify(alarms_list)
+
+
+# ─────────────────────────────────────────────────────────────────
+# POST /api/alarms  — add alarm to list
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/alarms", methods=["POST"])
+def api_add_alarm():
+    global alarms_list
+    try:
+        data = request.get_json()
+        alarm_msg = data.get("message", "")
+
+        if alarm_msg:
+            ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            alarms_list.append({"timestamp": ts, "message": alarm_msg})
+            tech_log.info("[ALARM] Added: %s", alarm_msg)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        tech_log.error("Failed to add alarm: %s", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─────────────────────────────────────────────────────────────────
+# DELETE /api/alarms  — clear all alarms
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/alarms", methods=["DELETE"])
+def api_clear_alarms():
+    global alarms_list
+    alarms_list.clear()
+    tech_log.info("[ALARM] Cleared all alarms")
+    return jsonify({"success": True})
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /api/log/csv  — last 20 rows from the latest production CSV
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/log/csv", methods=["GET"])
+def api_log_csv():
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT   DATE(timestamp) as date,
+                         TIME(timestamp) as time,
+                         product,
+                         initial_weight as now_weight,
+                         required_weight as req_weight,
+                         final_weight,
+                         status as task_state,
+                         reason
+                FROM production_log
+                ORDER BY id DESC
+                LIMIT 20
+            """)
+            rows = [dict(row) for row in cursor.fetchall()]
+            # Return newest first (already ordered DESC)
+            return jsonify(rows)
+    except Exception as e:
+        tech_log.error("Failed to read log from database: %s", e)
+        return jsonify([])
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /api/products  — read products.csv beside config.yml
+#   Returns: [{"code": "OIL-001", "name": "Crude Oil"}, ...]
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/products", methods=["GET"])
+def api_products():
+    import csv
+    cfg_dir      = os.path.dirname(os.path.abspath(__file__))
+    products_csv = os.path.join(cfg_dir, "products.csv")
+    products     = []
+    try:
+        with open(products_csv, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                code = (row.get("code") or "").strip()
+                name = (row.get("name") or "").strip()
+                if code and name:
+                    products.append({"code": code, "name": name})
+    except FileNotFoundError:
+        tech_log.warning("products.csv not found at %s", products_csv)
+    return jsonify(products)
+
+
+# ─────────────────────────────────────────────────────────────────
+# POST /api/settings  — save all settings to config.yml + update state
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/settings", methods=["POST"])
+def api_settings():
+    body = request.get_json(force=True)
+
+    cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
+    try:
+        with open(cfg_path) as f:
+            cfg = yaml.safe_load(f) or {}
+    except Exception:
+        cfg = {}
+
+    if "product_code" in body:
+        cfg["product_code"] = body["product_code"]
+        state["product_code"] = body["product_code"]
+    if "product" in body:
+        cfg["product"] = body["product"]
+        state["product"] = body["product"]
+
+    if "serial" in body:
+        cfg.setdefault("serial", {})
+        cfg["serial"]["port"]     = body["serial"].get("port", cfg["serial"].get("port", "/dev/ttyUSB0"))
+        cfg["serial"]["baudrate"] = int(body["serial"].get("baudrate", cfg["serial"].get("baudrate", 9600)))
+        state.setdefault("serial", {})
+        state["serial"]["port"]     = cfg["serial"]["port"]
+        state["serial"]["baudrate"] = cfg["serial"]["baudrate"]
+
+    if "tank" in body:
+        t  = body["tank"]
+        cfg.setdefault("tank", {})
+        tk = state["tank"]
+        for key in ("max_kg", "density_kgl", "tare_kg", "infeed_valve",
+                    "hi_level_kg", "hi_threshold_pct", "lo_level_kg", "lo_threshold_pct"):
+            if key in t:
+                val = float(t[key])
+                cfg["tank"][key] = val
+                if key in tk:
+                    tk[key] = val
+        _recalc_alarms()
+
+    if "infeed" in body:
+        i = body["infeed"]
+        cfg.setdefault("infeed", {})
+        if "filling_time" in i: cfg["infeed"]["filling_time"] = int(i["filling_time"])
+        if "manual_vol_L" in i:
+            cfg["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
+            state["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
+
+    if "outfeed" in body:
+        o = body["outfeed"]
+        cfg.setdefault("outfeed", {})
+        if "draining_time" in o: cfg["outfeed"]["draining_time"] = int(o["draining_time"])
+        if "manual_vol_L"  in o:
+            cfg["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
+            state["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
+
+    try:
+        with open(cfg_path, "w") as f:
+            yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
+        tech_log.info("[SETTINGS] saved to config.yml")
+        print("[SETTINGS] config.yml updated")
+    except Exception as e:
+        tech_log.error("[SETTINGS] Failed to write config.yml: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"ok": True})
+
+
+def _mqtt_state_broadcast_thread():
+    while True:
+         
+        try:
+            with _lock:
+                weight          = weiVal
+                outfeed_running = state["outfeed"]["running"]
+                infeed_running  = state["infeed"]["running"]
+
+            payload = json.dumps({
+                "ts":      int(time.time()),
+                "weight":  round(weight, 2),
+                "infeed":  infeed_running,
+                "outfeed": outfeed_running,
+            })
+
+            _publish_queue.put(("ols/tx/status", payload, 0, False))
+
+        except Exception as exc:
+            tech_log.error("[MQTT-TX] Broadcast error: %s", exc)
+            time.sleep(10)
+
+        
+
+# ──  mqtt send ────────────────────────────────────
+
+
+
+ 
+
+def _mqtt_publish_thread():
+    """
+    Daemon thread that drains _publish_queue and publishes
+    only when the broker is connected.
+    """
+    if not MQTT_AVAILABLE:
+        print("[MQTT-PUB] Thread not started — paho-mqtt not installed.")
+        return
+
+    pub_client = mqtt_client.Client(client_id="ols-publisher", clean_session=True)
+
+    if MQTT_USER:
+        pub_client.username_pw_set(MQTT_USER, MQTT_PASS)
+
+    pub_client.reconnect_delay_set(min_delay=1, max_delay=30)
+
+    # Keep trying to connect in the background
+    while True:
+        
+        try:
+            print(f"[MQTT-PUB] Connecting to {MQTT_BROKER}:{MQTT_PORT} ...")
+            pub_client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
+            pub_client.loop_start()          # non-blocking — lets us drain the queue
+
+            while True:
+                try:
+
+                    topic, payload, qos, retain = _publish_queue.get(timeout=1)
+                    result = pub_client.publish(topic, payload, qos=qos, retain=retain)
+                    if result.rc != mqtt_client.MQTT_ERR_SUCCESS:
+                        tech_log.warning("[MQTT-PUB] Publish failed rc=%s  topic=%s", result.rc, topic)
+                    else:
+                        print(f"[MQTT-PUB] → {topic} : {payload}")
+                    _publish_queue.task_done()
+                    time.sleep(5)
+                except queue.Empty:
+                    # Nothing to send — check connection is still alive
+                    if not pub_client.is_connected():
+                        print("[MQTT-PUB] Lost connection — reconnecting …")
+                        break
+
+        except Exception as exc:
+            tech_log.error("[MQTT-PUB] Fatal: %s — retry in 5 s", exc)
+            print(f"[MQTT-PUB] Error: {exc} — retrying in 5 s")
+        finally:
+            try:
+                pub_client.loop_stop()
+            except Exception:
+                pass
+
+        time.sleep(1)
+
+
+
+
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /api/export/dates  — export CSV by comma-separated date range
+# Parameters: dates=YYYY-MM-DD,YYYY-MM-DD (e.g. ?dates=2026-04-06,2026-04-08)
+# Same day: starts from 06:00:00, ends at 23:59:59
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/export/dates", methods=["GET"])
+def api_export_by_dates():
+    from datetime import datetime as dt
+    import csv
+    import io
+
+    dates_param = request.args.get("dates", "")
+
+    if not dates_param:
+        return jsonify({"error": "Missing 'dates' parameter"}), 400
+
+    # Split by comma
+    date_parts = dates_param.split(",")
+    if len(date_parts) != 2:
+        return jsonify({"error": "Invalid dates format. Use: YYYY-MM-DD,YYYY-MM-DD"}), 400
+
+    start_date_str = date_parts[0].strip()
+    end_date_str = date_parts[1].strip()
+
+    try:
+        start_date = dt.strptime(start_date_str, "%Y-%m-%d")
+        end_date = dt.strptime(end_date_str, "%Y-%m-%d")
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+    # Build timestamp range
+    # If same day: 6am start, 11:59:59pm end
+    # Otherwise: full days
+    if start_date.date() == end_date.date():
+        start_ts = start_date.strftime("%Y-%m-%d 06:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+    else:
+        start_ts = start_date.strftime("%Y-%m-%d 00:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT timestamp, product, initial_weight, required_weight,
+                       final_weight, status, reason
+                FROM production_log
+                WHERE timestamp >= ? AND timestamp <= ?
+                ORDER BY timestamp ASC
+            """, (start_ts, end_ts))
+            rows = cursor.fetchall()
+
+        # Build CSV in memory
+        output = io.StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(["date", "time", "product", "now_weight", "req_weight", "final_weight", "task_state", "reason"])
+
+        # Write data rows
+        for row in rows:
+            ts = row["timestamp"]  # format: "2026-04-05 14:30:45"
+            if ts:
+                parts = ts.split(" ")
+                date_part = parts[0] if len(parts) > 0 else ""
+                time_part = parts[1] if len(parts) > 1 else ""
+            else:
+                date_part = ""
+                time_part = ""
+
+            writer.writerow([
+                date_part,
+                time_part,
+                row["product"] or "",
+                round(float(row["initial_weight"]) if row["initial_weight"] else 0, 2),
+                round(float(row["required_weight"]) if row["required_weight"] else 0, 2),
+                round(float(row["final_weight"]) if row["final_weight"] else 0, 2),
+                row["status"] or "",
+                row["reason"] or ""
+            ])
+
+        csv_content = output.getvalue()
+        output.close()
+
+        # Return as downloadable file
+        response = make_response(csv_content)
+        response.headers["Content-Disposition"] = f"attachment; filename=production_log_{start_date_str}_to_{end_date_str}.csv"
+        response.headers["Content-Type"] = "text/csv"
+        return response
+
+    except Exception as e:
+        tech_log.error("Failed to export CSV by dates: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /api/export/csv  — export production logs as CSV by date range
+# Parameters: start_date, end_date (format: YYYY-MM-DD)
+# If same day: starts from 06:00:00, ends at 23:59:59
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/export/csv", methods=["GET"])
+def api_export_csv():
+    from datetime import datetime as dt
+    import csv
+    import io
+
+    start_date_str = request.args.get("start_date", "")
+    end_date_str   = request.args.get("end_date", "")
+
+    if not start_date_str or not end_date_str:
+        return jsonify({"error": "Missing start_date or end_date"}), 400
+
+    try:
+        start_date = dt.strptime(start_date_str, "%Y-%m-%d")
+        end_date = dt.strptime(end_date_str, "%Y-%m-%d")
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+    # Build timestamp range
+    # If same day: 6am start, 11:59:59pm end
+    # Otherwise: full days
+    if start_date.date() == end_date.date():
+        start_ts = start_date.strftime("%Y-%m-%d 06:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+    else:
+        start_ts = start_date.strftime("%Y-%m-%d 00:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT timestamp, product, initial_weight, required_weight,
+                       final_weight, status, reason
+                FROM production_log
+                WHERE timestamp >= ? AND timestamp <= ?
+                ORDER BY timestamp ASC
+            """, (start_ts, end_ts))
+            rows = cursor.fetchall()
+
+        # Build CSV in memory
+        output = io.StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(["date", "time", "product", "now_weight", "req_weight", "final_weight", "task_state", "reason"])
+
+        # Write data rows
+        for row in rows:
+            ts = row["timestamp"]  # format: "2026-04-05 14:30:45"
+            if ts:
+                parts = ts.split(" ")
+                date_part = parts[0] if len(parts) > 0 else ""
+                time_part = parts[1] if len(parts) > 1 else ""
+            else:
+                date_part = ""
+                time_part = ""
+
+            writer.writerow([
+                date_part,
+                time_part,
+                row["product"] or "",
+                round(float(row["initial_weight"]) if row["initial_weight"] else 0, 2),
+                round(float(row["required_weight"]) if row["required_weight"] else 0, 2),
+                round(float(row["final_weight"]) if row["final_weight"] else 0, 2),
+                row["status"] or "",
+                row["reason"] or ""
+            ])
+
+        csv_content = output.getvalue()
+        output.close()
+
+        # Return as downloadable file
+        response = make_response(csv_content)
+        response.headers["Content-Disposition"] = f"attachment; filename=production_log_{start_date_str}_to_{end_date_str}.csv"
+        response.headers["Content-Type"] = "text/csv"
+        return response
+
+    except Exception as e:
+        tech_log.error("Failed to export CSV: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+
+
+def filter_database_for_csv(start_ts, end_ts):
+    """
+    Query the production_log table for records between start_ts and end_ts.
+    Returns: list of dicts with keys: timestamp, product, initial_weight,
+             required_weight, final_weight, status, reason
+    """
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT timestamp, product, initial_weight, required_weight,
+                       final_weight, status, reason
+                FROM production_log
+                WHERE timestamp >= ? AND timestamp <= ?
+                ORDER BY timestamp ASC
+            """, (start_ts, end_ts))
+            rows = [dict(row) for row in cursor.fetchall()]
+            return rows
+    except Exception as e:
+        tech_log.error("Failed to query database for CSV: %s", e)
+        return []
+
+        
+def _generate_daily_csv():
+    """
+    Generate CSV for yesterday's production data (6 AM to 11:59 PM).
+    Returns: path to the generated CSV file or None on error.
+    """
+    from datetime import datetime as dt, timedelta
+    import csv
+    import os
+
+    try:
+        # Calculate yesterday's date range: 6 AM to 11:59 PM
+        yesterday = dt.now().date() - timedelta(days=1)
+        start_ts = yesterday.strftime("%Y-%m-%d 06:00:00")
+        end_ts   =  dt.now().date().strftime("%Y-%m-%d 05:59:59")
+        print("poll database for yesterday:", start_ts, "to", end_ts)
+        # Query database
+
+        rows = filter_database_for_csv(start_ts, end_ts)
+
+        
+
+        if not rows:
+            tech_log.warning("[DAILY CSV] No data found for %s", yesterday.strftime("%Y-%m-%d"))
+            return None
+
+        # Create logs directory if it doesn't exist
+         
+        os.makedirs(LOG_DIR, exist_ok=True)
+
+        # Generate filename
+        csv_filename = f"production_{yesterday.strftime('%Y-%m-%d')}.csv"
+        csv_path = os.path.join(LOG_DIR, csv_filename)
+
+        # Write CSV file
+        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            # Write header
+            writer.writerow(["date", "time", "product", "now_weight", "req_weight", "final_weight", "task_state", "reason"])
+
+            # Write data rows
+            for row in rows:
+                ts = row["timestamp"]  # format: "2026-04-05 14:30:45"
+                if ts:
+                    parts = ts.split(" ")
+                    date_part = parts[0] if len(parts) > 0 else ""
+                    time_part = parts[1] if len(parts) > 1 else ""
+                else:
+                    date_part = ""
+                    time_part = ""
+
+                writer.writerow([
+                    date_part,
+                    time_part,
+                    row["product"] or "",
+                    round(float(row["initial_weight"]) if row["initial_weight"] else 0, 2),
+                    round(float(row["required_weight"]) if row["required_weight"] else 0, 2),
+                    round(float(row["final_weight"]) if row["final_weight"] else 0, 2),
+                    row["status"] or "",
+                    row["reason"] or ""
+                ])
+
+        tech_log.info("[DAILY CSV] Generated %s (%d records)", csv_path, len(rows))
+        return csv_path
+
+    except Exception as e:
+        tech_log.error("[DAILY CSV] Failed to generate CSV: %s", e)
+        return None
+
+
+# ── DAILY 6 AM SCHEDULER THREAD ────────────────────────────────────
+def daily_6am_scheduler():
+    """Polls time. Runs job once at/after 6 AM (flag=0), resets flag at 7 AM."""
+    while True:
+        now = datetime.now()
+        hour = now.hour
+
+        # Read current flag from config
+        try:
+            with open("config.yml") as f:
+                cfg = yaml.safe_load(f) or {}
+        except Exception as e:
+            tech_log.error("[SCHEDULER] Failed to read config.yml: %s", e)
+            time.sleep(60)
+            continue
+
+        job_done = cfg.get("daily_job_done", 0)
+
+        # 6 AM or later AND job not done yet → run it
+        if hour == 6 and job_done == 0:
+            import emailsend as em
+
+            # Generate CSV from database for yesterday (6 AM to 11:59 PM)
+            csv_file = _generate_daily_csv()
+
+            if csv_file and os.path.exists(csv_file):
+                print("Generated CSV:", csv_file)
+                tech_log.info("[SCHEDULER] Generated daily CSV from database: %s", csv_file)
+                print("[SCHEDULER] Running daily 6 AM job —", now.strftime("%Y-%m-%d %H:%M:%S"))
+
+                body = em.build_body(csv_file)
+
+                em.send_email(
+                    "PLANT_01_PALM_OLEIN_SPRAYER",
+                    body,
+                    "sprayer01weighingpo@malibangroup.lk",
+                    csv_file
+                )
+                time.sleep(2)
+                em.send_email(
+                    "PLANT_01_PALM_OLEIN_SPRAYER",
+                    body,
+                    "amalanjula@gmail.com",
+                    csv_file
+                )
+                tech_log.info("[SCHEDULER] Daily CSV emailed successfully")
+            else:
+                tech_log.warning("[SCHEDULER] No data found or CSV generation failed for today's job")
+
+                body = f"""Hi,
+
+                This report is auto-generated by Raspberry Pi 5.
+                For old log files, please contact your admin.
+
+                --------------------------------------------------
+                DAILY PRODUCTION SUMMARY
+                
+                --------------------------------------------------
+
+                    No production data found for yesterday (6 AM to next day 5.59 AM).
+                --------------------------------------------------
+
+                Have a nice day!
+
+                Regards,
+                RPI5
+                """                 
+                
+
+                em.send_email(
+                    "PLANT_01_PALM_OLEIN_SPRAYER",
+                    body,
+                    "sprayer01weighingpo@malibangroup.lk"
+                    
+                )
+                time.sleep(2)
+                em.send_email(
+                    "PLANT_01_PALM_OLEIN_SPRAYER",
+                    body,
+                    "amalanjula@gmail.com"
+                    
+                )
+                tech_log.info("[SCHEDULER] Daily CSV emailed successfully")
+
+
+            # ── YOUR JOB CODE HERE ──────────────────────
+
+            # ───────────────────────────────────────────
+
+            # Write flag = 1 to config
+            cfg["daily_job_done"] = 1
+            with open("config.yml", "w") as f:
+                yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
+            tech_log.info("[SCHEDULER] Job done. Flag set to 1.")
+
+        # 7 AM or later AND flag is 1 → reset it
+        elif hour >= 7 and job_done == 1:
+            cfg["daily_job_done"] = 0
+            with open("config.yml", "w") as f:
+                yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
+            tech_log.info("[SCHEDULER] Flag reset to 0.")
+
+        time.sleep(10)  # check every minute
+
+
+# ══════════════════════════════════════════════════════════════════
+#  ENTRY POINT
+# ══════════════════════════════════════════════════════════════════
+if __name__ == "__main__":
+    print("=" * 60)
+    print("  OLS Monitor Server")
+    print(f"  UI     ->  http://localhost:5000")
+    print(f"  Broker ->  {MQTT_BROKER}:{MQTT_PORT}")
+    print(f"  Topic  ->  {MQTT_TOPIC}")
+    print("=" * 60)
+    
+    t = threading.Thread(target=daily_6am_scheduler, name="daily-scheduler", daemon=True)
+    t.start()
+
+    #t = threading.Thread(target=_mqtt_publish_thread, name="mqtt__send_data", daemon=True)
+    #t.start()
+
+    # Start MQTT in its own daemon thread BEFORE Flask
+    t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
+    t.start()
+    print(f"[MQTT] Thread started (id={t.ident})\n")
+
+    t = threading.Thread(target=gpio_handler, name="gpio-handler", daemon=True)
+    t.start()
+
+    #t = threading.Thread(target=_mqtt_state_broadcast_thread, name="mqtt-tx-broadcast", daemon=True)
+    #t.start()
+    t = threading.Thread(target=_remote_sync_thread, name="remote-db-sync", daemon=True)
+    t.start()
+    print(f"[SYNC] Remote DB sync thread started → {REMOTE_SYNC_URL}")
+ 
+
+    # Start Flask (use_reloader=False required when using threads)
+    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

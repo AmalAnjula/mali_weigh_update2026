@@ -400,6 +400,7 @@ td.cwt { color: var(--green); }
 <div class="tabs">
   <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
   <button class="tab" onclick="switchTab('setting',this)">Settings</button>
+  <button class="tab" onclick="switchTab('alarms',this)">Alarms</button>
   <button class="tab" onclick="switchTab('log',this)">Log</button>
 </div>
 
@@ -651,26 +652,57 @@ td.cwt { color: var(--green); }
 </div>
 </div>
 
-<!-- ═══ LOG ═══ -->
-<div id="tab-log" class="tab-panel">
-  <div class="log-toolbar">
-    <button class="ltb" onclick="fetchCsvLog()">↻ Refresh</button>
-    <span class="log-ct" id="log-ct">— records</span>
+<!-- ═══ ALARMS ═══ -->
+<div id="tab-alarms" class="tab-panel">
+  <!-- Clear Alarms Button -->
+  <div style="margin-bottom: 16px; display: flex; gap: 8px;">
+    <button class="ltb" onclick="fetchAlarms()">↻ Refresh</button>
+    <button class="ltb danger" onclick="clearAlarms()" style="margin-left: auto;">🗑 Clear All</button>
   </div>
+
+  <!-- Alarms List -->
   <div class="log-tw">
     <div class="log-scroll">
       <table>
         <thead>
           <tr>
-            <th>Date</th><th>Time</th><th>Product</th>
-            <th>Now Wt (kg)</th><th>Req Wt (kg)</th><th>Final Wt (kg)</th>
-            <th>State</th><th>Reason</th>
+            <th>Timestamp</th><th>Message</th>
           </tr>
         </thead>
-        <tbody id="log-tbody">
-          <tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No events yet</td></tr>
+        <tbody id="alarms-tbody">
+          <tr><td colspan="2" style="text-align:center;padding:20px;color:#9ca3af;">No alarms</td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LOG ═══ -->
+<div id="tab-log" class="tab-panel">
+   
+
+  <!-- LOGS Section -->
+  <div>
+    <h3 style="font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);">📋 Production Log</h3>
+    <div class="log-toolbar">
+      <button class="ltb" onclick="fetchCsvLog()">↻ Refresh</button>
+      <span class="log-ct" id="log-ct">— records</span>
+    </div>
+    <div class="log-tw">
+      <div class="log-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Time</th><th>Product</th>
+              <th>Now Wt (kg)</th><th>Req Wt (kg)</th><th>Final Wt (kg)</th>
+              <th>State</th><th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:20px;color:#9ca3af;">No events yet</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -1106,14 +1138,111 @@ function renderLog(rows) {
   }).join("");
 }
 
+async function fetchAlarms() {
+  try {
+    const r = await fetch("/api/alarms", { cache: "no-store" });
+    if (!r.ok) return;
+    const rows = await r.json();
+    renderAlarms(rows);
+  } catch(e) {
+    console.warn("Alarms fetch failed:", e);
+  }
+}
+
+function renderAlarms(rows) {
+  const tbody = document.getElementById("alarms-tbody");
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:20px;color:#9ca3af;">No alarms</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((r, idx) => {
+    return `<tr>
+      <td style="color:#9ca3af;font-size:11px;white-space:nowrap;font-weight:600;">${r.timestamp || "—"}</td>
+      <td class="ca" style="color:var(--red);font-weight:600;">${r.message || "—"}</td>
+    </tr>`;
+  }).join("");
+}
+
+async function fetchAlarms() {
+  try {
+    const r = await fetch("/api/alarms", { cache: "no-store" });
+    if (!r.ok) return;
+    const rows = await r.json();
+    renderAlarms(rows);
+  } catch(e) {
+    console.warn("Alarms fetch failed:", e);
+  }
+}
+
+async function clearAlarms() {
+  if (!confirm("Clear all alarms?")) return;
+  try {
+    const r = await fetch("/api/alarms", { method: "DELETE" });
+    if (!r.ok) {
+      showToast("Failed to clear alarms", "warn");
+      return;
+    }
+    showToast("Alarms cleared ✓", "ok");
+    fetchAlarms();
+  } catch(e) {
+    console.error("Clear error:", e);
+    showToast("Error clearing alarms", "warn");
+  }
+}
+
+async function exportCsv() {
+  const startDate = document.getElementById("exp-start-date").value;
+  const endDate = document.getElementById("exp-end-date").value;
+
+  if (!startDate || !endDate) {
+    showToast("Please select both start and end dates", "warn");
+    return;
+  }
+
+  try {
+    const url = `/api/export/csv?start_date=${startDate}&end_date=${endDate}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      const err = await response.json();
+      showToast("Export failed: " + (err.error || "Unknown error"), "warn");
+      return;
+    }
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `production_log_${startDate}_to_${endDate}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+    showToast("CSV exported successfully ✓", "ok");
+  } catch(e) {
+    console.error("Export error:", e);
+    showToast("Export failed: " + e.message, "warn");
+  }
+}
+
 // Poll CSV log every 5 seconds when log tab is visible
 setInterval(() => {
   const logTab = document.getElementById("tab-log");
-  if (logTab && logTab.classList.contains("active")) fetchCsvLog();
+  const alarmsTab = document.getElementById("tab-alarms");
+  if (logTab && logTab.classList.contains("active")) {
+    fetchCsvLog();
+  }
+  if (alarmsTab && alarmsTab.classList.contains("active")) {
+    fetchAlarms();
+  }
 }, 5000);
 
 // Initial fetch when page loads
 fetchCsvLog();
+fetchAlarms();
+
+// Set default dates to today
+const today = new Date().toISOString().split('T')[0];
+document.getElementById("exp-start-date").value = today;
+document.getElementById("exp-end-date").value = today;
 
 // ═════════════════════════════════════════════════
 // TABS / TOAST / CLOCK
@@ -1123,7 +1252,11 @@ function switchTab(name, btn) {
   document.querySelectorAll(".tab").forEach(b => b.classList.remove("active"));
   document.getElementById("tab-" + name).classList.add("active");
   btn.classList.add("active");
-  if (name === "log") fetchCsvLog();
+  if (name === "alarms") {
+    fetchAlarms();
+  } else if (name === "log") {
+    fetchCsvLog();
+  }
 }
 
 let _tt;

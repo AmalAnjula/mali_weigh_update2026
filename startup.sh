@@ -36,6 +36,10 @@ python emailAutoSend.py &
 echo "[OLS] emailAutoSend.py started (PID $!)"
 
 sleep 2
+
+python remoteRec.py &
+echo "[OLS] remoteRec.py started (PID $!)"
+
 # 5. speed_test service 
 #python speed_test.py &
 #echo "[OLS] speed_test.py started (PID $!)"

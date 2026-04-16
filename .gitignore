@@ -208,7 +208,7 @@ __marimo__/
 
 
 
-production*
+logs/ols_app*
+logs/ols_tech.log*
+weight.log*
 
-
-logs/

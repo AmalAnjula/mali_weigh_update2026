@@ -1,0 +1,22 @@
+2026-04-07 06:00:07 [WARNING] ols.tech: [DAILY CSV] No data found for 2026-04-06
+2026-04-07 06:00:07 [WARNING] ols.tech: [SCHEDULER] No data found or CSV generation failed for today's job
+2026-04-07 06:00:07 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-04-07 06:28:17 [WARNING] ols.tech: [DAILY CSV] No data found for 2026-04-06
+2026-04-07 06:28:17 [WARNING] ols.tech: [SCHEDULER] No data found or CSV generation failed for today's job
+2026-04-07 06:28:17 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-04-07 06:29:32 [INFO] ols.tech: GPIO handler thread started.
+2026-04-07 06:29:32 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-07 06:29:32 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-07 06:29:32 [WARNING] ols.tech: [DAILY CSV] No data found for 2026-04-06
+2026-04-07 06:29:32 [WARNING] ols.tech: [SCHEDULER] No data found or CSV generation failed for today's job
+2026-04-07 06:29:43 [INFO] ols.tech: [SCHEDULER] Daily CSV emailed successfully
+2026-04-07 06:29:43 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-04-07 06:36:12 [INFO] ols.tech: GPIO handler thread started.
+2026-04-07 06:36:12 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-07 06:36:12 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-07 07:00:03 [INFO] ols.tech: [SCHEDULER] Flag reset to 0.
+2026-04-07 12:21:53 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-07 12:21:53 [INFO] ols.tech: oil_add thread started remote Auto — now=99.80 kg  requested=95.00 kg
+2026-04-07 19:13:43 [INFO] ols.tech: GPIO handler thread started.
+2026-04-07 19:13:43 [INFO] ols.tech: [SYNC] Remote sync thread started → http://127.0.0.1:5001/api/sync
+2026-04-07 19:13:43 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight

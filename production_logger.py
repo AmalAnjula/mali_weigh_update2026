@@ -111,3 +111,31 @@ class ProductionLogger:
                 self._mqtt_publish(self._mqtt_topic, payload)
             except Exception as exc:
                 print(f"[ProductionLogger] MQTT publish error: {exc}")
+
+    # ── CSV Export ──────────────────────────────────────────────────────
+
+    def export_production_log_to_csv(self):
+        """
+        Export production data from the last 24 hours to a CSV file.
+
+        The file is named: production_YYYY-MM-DD.csv (where date is based on
+        the shift hour logic — if current time is before shift_hour, it uses
+        yesterday's date).
+
+        Returns the filename if successful, None otherwise.
+        """
+        try:
+            # Get the log date (respects shift_hour)
+            log_date = self._get_log_date()
+            filename = os.path.join(self.log_dir, f"production_{log_date}.csv")
+
+            if os.path.exists(filename):
+                print(f"[ProductionLogger] Export: {filename} already exists")
+                return filename
+            else:
+                print(f"[ProductionLogger] No data to export for {log_date}")
+                return None
+
+        except Exception as e:
+            print(f"[ProductionLogger] Error exporting CSV: {e}")
+            return None

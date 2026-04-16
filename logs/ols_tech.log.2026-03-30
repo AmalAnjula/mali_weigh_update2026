@@ -1,0 +1,7 @@
+2026-03-30 06:00:06 [INFO] ols.tech: [SCHEDULER] Running daily 6 AM job...{latest_file}
+2026-03-30 06:00:18 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-03-30 07:00:09 [INFO] ols.tech: [SCHEDULER] Flag reset to 0.
+2026-03-30 08:22:35 [INFO] ols.tech: GPIO handler thread started.
+2026-03-30 08:22:35 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-30 09:00:12 [INFO] ols.tech: GPIO handler thread started.
+2026-03-30 09:00:12 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight

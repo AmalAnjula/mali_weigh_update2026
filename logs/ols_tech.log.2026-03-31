@@ -1,0 +1,10 @@
+2026-03-31 20:42:34 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-03-31 20:42:35 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-31 20:51:20 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-03-31 20:51:24 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-03-31 20:51:35 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-03-31 20:51:35 [INFO] ols.tech: oil_add thread started remote Auto — now=89.00 kg  requested=100.00 kg
+2026-03-31 21:21:37 [INFO] ols.tech: GPIO handler thread started.
+2026-03-31 21:21:37 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-03-31 21:26:08 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-03-31 21:26:09 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight

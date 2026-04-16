@@ -1,0 +1,45 @@
+2026-04-03 06:00:03 [INFO] ols.tech: [SCHEDULER] Running daily 6 AM job...{latest_file}
+2026-04-03 06:00:14 [INFO] ols.tech: [SCHEDULER] Job done. Flag set to 1.
+2026-04-03 07:00:04 [INFO] ols.tech: [SCHEDULER] Flag reset to 0.
+2026-04-03 15:41:13 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 15:41:13 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 15:46:47 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 15:46:48 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 15:47:50 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-03 15:47:50 [INFO] ols.tech: oil_add thread started remote Auto — now=88.60 kg  requested=100.00 kg
+2026-04-03 16:09:22 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 16:09:22 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 16:12:07 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 16:12:07 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 16:21:40 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-04-03 16:21:56 [ERROR] ols.tech: Error message received from MQTT: #device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2026-04-03 16:31:48 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 16:31:48 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 16:33:14 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-03 16:33:14 [INFO] ols.tech: oil_add thread started remote Auto — now=88.00 kg  requested=100.00 kg
+2026-04-03 16:36:38 [INFO] ols.tech: GPIO: intke_stop_pin triggered — setting remote_stop=True
+2026-04-03 16:36:38 [ERROR] ols.tech: Remote stop received in auto control loop.
+2026-04-03 16:36:43 [INFO] ols.tech: Infeed valve set to CLOSED
+2026-04-03 16:36:43 [INFO] ols.tech: oil_add thread started remote Auto — now=88.80 kg  requested=100.00 kg
+2026-04-03 16:43:30 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 16:43:30 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 17:10:55 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 17:10:55 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 17:14:55 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 17:14:55 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 17:41:56 [INFO] ols.tech: GPIO handler thread started.
+2026-04-03 17:41:56 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 21:36:08 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 21:36:09 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 21:36:10 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 21:36:11 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 21:36:12 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 21:36:13 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 21:36:14 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 21:36:15 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 21:36:16 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 21:36:17 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 21:36:18 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 21:36:19 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
+2026-04-03 21:36:20 [WARNING] ols.tech: MQTT disconnected rc=7
+2026-04-03 21:36:21 [INFO] ols.tech: MQTT connected. Subscribed to serial/weight
