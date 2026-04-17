@@ -113,7 +113,7 @@ DB_MAX_BYTES = 500 * 1024 * 1024   # 500 MB hard ceiling
 # ── Remote sync config ─────────────────────────────────────────────
 # Set REMOTE_RPI_IP to the IP of your RPi5 on the same LAN.
 # The receiver runs on port 5001 (remote_receiver.py).
-REMOTE_RPI_IP   = os.getenv("REMOTE_RPI_IP", "127.0.0.1")
+REMOTE_RPI_IP   = os.getenv("REMOTE_RPI_IP", "192.168.0.151")
 REMOTE_SYNC_URL = f"http://{REMOTE_RPI_IP}:5001/api/sync"
 SYNC_INTERVAL   = 60          # seconds between sync attempts
  
@@ -217,7 +217,7 @@ def _remote_sync_thread():
                 cnt+=1
         cnt=0
         sync_now=False
-
+        print("Starting sync now")
         #time.sleep(SYNC_INTERVAL)
         try:
             # ── 1. Fetch all unsynced rows ──────────────────────────
@@ -233,12 +233,13 @@ def _remote_sync_thread():
                 ).fetchall()
  
             if not rows:
+                #print("[SYNC] No new rows to sync.")
                 continue   # nothing to send
  
             # ── 2. Build JSON payload ───────────────────────────────
             records = [dict(r) for r in rows]
             payload = json.dumps(records).encode("utf-8")
- 
+            #print(payload.decode("utf-8"))
             # ── 3. POST to remote receiver ──────────────────────────
             req = urllib.request.Request(
                 REMOTE_SYNC_URL,
@@ -262,6 +263,7 @@ def _remote_sync_thread():
                 print(f"[SYNC] {len(ids)} rows synced to {REMOTE_RPI_IP}")
             else:
                 tech_log.warning("[SYNC] Remote returned HTTP %s — will retry.", status_code)
+
  
         except urllib.error.URLError as exc:
             tech_log.warning("[SYNC] Cannot reach remote (%s) — will retry in %ds.", exc.reason, SYNC_INTERVAL)
