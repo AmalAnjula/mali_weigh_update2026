@@ -39,10 +39,10 @@ import os, json, time, logging, logging.handlers, threading,sqlite3
 from datetime import datetime
 from flask import Flask, request, jsonify, send_from_directory, make_response
 import yaml
- 
+import serial
 import gpio_reader as gpio
 import queue
-
+import re
 
 inputs = {}
 
@@ -72,6 +72,9 @@ print("OUTFEED_TIMEOUT =", OUTFEED_TIMEOUT, "seconds")
 # ── Try importing paho; warn clearly if missing ────────────────────
 try:
     import paho.mqtt.client as mqtt_client
+    client = mqtt_client.Client()
+    client.connect("localhost", 1883)
+
     MQTT_AVAILABLE = True
 except ImportError:
     MQTT_AVAILABLE = False
@@ -691,7 +694,7 @@ def infeed_run_state(run_state: bool):
          gpio.output_off("out_wei_led")
 
     print(f"[infeed] running -> {run_state}")
-    tech_log.info("Infeed run state set to %s", run_state)
+    #tech_log.info("Infeed run state set to %s", run_state)
 
 
 
@@ -767,7 +770,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
                 state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
                 state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
                 break
-                
+            tech_log.info  ("*******************")
               
 
         '''while(True):
@@ -1145,7 +1148,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
 
     # ── STEP 5: Release busy flag ───────────────────────────────────
     busyFlagInfeedBusy = False
-    tech_log.info("oil_add complete — busyFlagInfeedBusy cleared.")
+    #tech_log.info("oil_add complete — busyFlagInfeedBusy cleared.")
     print("[oil_add] Sequence complete.")
     return result
 
@@ -1171,7 +1174,7 @@ def outfeed_run_state(run_state: bool):
          gpio.output_off("in_wei_led")
 
     print(f"[outfeed] running -> {run_state}")
-    tech_log.info("Outfeed run state set to %s", run_state)
+    #tech_log.info("Outfeed run state set to %s", run_state)
 
 
 
@@ -1629,6 +1632,102 @@ def auto_outfeed_control():
     tech_log.info("[outfeed AUTO] Complete — busyFlagOutfeedBusy cleared.")
     print("[auto_outfeed] Sequence complete.")
 
+
+
+class DiffFilter:
+    def __init__(self, threshold=1.0):
+        self.threshold = threshold
+        self.prev = None
+
+    def feed(self, number):
+        if self.prev is None:
+            self.prev = number
+            return number
+
+        diff = abs(number - self.prev)
+        self.prev = number
+
+        return number if diff <= self.threshold else None
+
+
+
+ 
+def serial_read_data():
+    tech_log.info("Serial read thread started.")
+    print("[serial_read] Thread started.")
+    global weiVal, serial_error
+
+    serial_port = CONFIG["serial"]["port"]
+    serial_baud = CONFIG["serial"]["baudrate"]
+    ser = serial.Serial(serial_port, serial_baud)
+    SPIKE_LIMIT = CONFIG["serial"]["diff"]
+    f = DiffFilter(threshold=SPIKE_LIMIT)
+    buffer      = ""
+    while True:
+        try:
+             
+            chunk  = ser.read(20).decode('utf-8' )
+            buffer += chunk
+
+            numbers = re.findall(r'=\s*([\d.]+)', buffer)
+            buffer  = re.split(r'=\s*[\d.]+', buffer)[-1]  # keep partial tail
+            weight=0
+             
+            for raw in numbers:
+                #weight = float(raw)
+
+                weight = f.feed( float(raw))
+                '''
+                # ── Spike filter ──────────────────────────────────────
+                if last_weight is not None:
+                    diff = abs(weight - last_weight)
+                    if diff > SPIKE_LIMIT:
+                        msg = (f"IGNORED spike: prev={last_weight:.2f}  "
+                            f"new={weight:.2f}  diff={diff:.2f}")
+                        print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> {msg}")
+                        logging.warning(msg)
+                        continue          # skip, keep last_weight unchanged
+
+                if clear_now:
+                    logging.info("Clearing spike filter after previous spike")
+                # ─────────────────────────────────────────────────────
+
+                last_weight = weight
+                '''
+                if weight is not None:
+                    weiVal= float(weight)
+                    
+                    with _lock:
+                        # Push weight into tank state
+                        state["tank"]["weight_kg"]    = weiVal
+                        state["mqtt"]["serial_error"] = False
+                        state["mqtt"]["last_value"]   = weiVal
+                        state["mqtt"]["last_ts"]      = _now()
+                        # Recalculate level % and alarms from new weight
+                        _recalc_alarms()
+
+                    #log_msg = f"Weight published: {weight}"
+                    
+                    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
+                    try:
+                        client.publish("serial/weight", weight, qos=0, retain=False)
+                    except Exception as e:
+                        pass
+                    
+                #logging.info(log_msg)
+
+        except Exception as e:
+            err_msg = f"Error reading from serial or publishing to MQTT: {e}"
+             
+            print(err_msg)
+            logging.error(err_msg)
+            time.sleep(5)
+            continue
+        
+     
+
+'''
+no use mqtt. read serial on same app
 # ══════════════════════════════════════════════════════════════════
 #  MQTT CALLBACKS  (run inside paho's network thread)
 # ══════════════════════════════════════════════════════════════════
@@ -1686,14 +1785,7 @@ def on_message_weight(client, userdata, msg):
                 # Recalculate level % and alarms from new weight
                 _recalc_alarms()
 
-            '''print(
-                f"[MQTT] weight = {weiVal:.2f} kg"
-                f"  level = {state['tank']['level_pct']:.2f}%"
-            )
-            tech_log.info(
-                "weight=%.2f kg  level=%.2f%%",
-                weiVal, state["tank"]["level_pct"]
-            )'''
+            
 
     except ValueError:
         print(f"\n[MQTT] Non-numeric payload: {payload_str!r}")
@@ -1741,6 +1833,7 @@ def _mqtt_thread():
             with _lock:
                 state["mqtt"]["connected"] = False
             time.sleep(5)
+'''
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -2679,9 +2772,15 @@ if __name__ == "__main__":
     #t.start()
 
     # Start MQTT in its own daemon thread BEFORE Flask
-    t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
+    #t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
+    #t.start()
+    #print(f"[MQTT] Thread started (id={t.ident})\n")
+
+
+    # Start MQTT in its own daemon thread BEFORE Flask
+    t = threading.Thread(target=serial_read_data, name="serial_read_data", daemon=True)
     t.start()
-    print(f"[MQTT] Thread started (id={t.ident})\n")
+    print(f"[SERIAL] Thread started (id={t.ident})\n")
 
     t = threading.Thread(target=gpio_handler, name="gpio-handler", daemon=True)
     t.start()
@@ -2692,6 +2791,6 @@ if __name__ == "__main__":
     t.start()
     print(f"[SYNC] Remote DB sync thread started → {REMOTE_SYNC_URL}")
  
-
+    tech_log.info("****Server started. ******")
     # Start Flask (use_reloader=False required when using threads)
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

@@ -8,8 +8,8 @@ cd /home/palmoil/stuff
 source venv/bin/activate
 
 # 1. Start MQTT serial reader
-python mqtttx.py &
-echo "[OLS] mqtttx.py started (PID $!)"
+#python mqtttx.py &
+#echo "[OLS] mqtttx.py started (PID $!)"
 
 sleep 3
 
