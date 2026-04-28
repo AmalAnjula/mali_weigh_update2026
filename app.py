@@ -43,11 +43,14 @@ import serial
 import gpio_reader as gpio
 import queue
 import re
-
+import json
+import paho.mqtt.client as mqtt_client
+import paho.mqtt.publish as publish
 inputs = {}
 
+diff=0
 sync_now=False
-
+client = None
 # ── ALARMS LIST (in-memory) ──────────────────────────────────
 # Each element: {"timestamp": "YYYY-MM-DD HH:MM:SS", "message": "alarm text"}
 alarms_list = [
@@ -68,7 +71,7 @@ print("OUTFEED_TIMEOUT =", OUTFEED_TIMEOUT, "seconds")
 
  
 
-
+'''
 # ── Try importing paho; warn clearly if missing ────────────────────
 try:
     import paho.mqtt.client as mqtt_client
@@ -81,12 +84,15 @@ except ImportError:
     print("  paho-mqtt not installed - MQTT thread disabled.")
     print("   Install with:  pip install paho-mqtt")
 
+'''
+
 # ══════════════════════════════════════════════════════════════════
 #  MQTT CONFIGURATION  — edit here or override via env vars
 # ══════════════════════════════════════════════════════════════════
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
+#MQTT_BROKER = os.getenv("MQTT_BROKER", "192.168.0.151")
 MQTT_PORT   = int(os.getenv("MQTT_PORT",  "1883"))
-MQTT_TOPIC  = os.getenv("MQTT_TOPIC",  "serial/weight")
+MQTT_TOPIC  = os.getenv("MQTT_TOPIC",  "tank/data")
 MQTT_USER   = os.getenv("MQTT_USER",   "")          # leave "" if no auth
 MQTT_PASS   = os.getenv("MQTT_PASS",   "")
 
@@ -820,6 +826,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     global infeed_remote_stop, local_stop
     global low_level_sensor
     global hi_level_sensor
+    global diff
     infeed_open(False)
     gpio.output_on("ind_led_in") 
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
@@ -873,6 +880,10 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
         elapsed = time.time() - start_time
         print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg ", end="\r")
         # Timeout
+
+
+        diff= required_weight-weiVal
+
         if elapsed > INFEED_TIMEOUT:
             done = True
             result=False
@@ -1653,9 +1664,10 @@ class DiffFilter:
 
  
 def serial_read_data():
+    global client,diff
     tech_log.info("Serial read thread started.")
     print("[serial_read] Thread started.")
-    global weiVal, serial_error
+    global weiVal, serial_error,busyFlagInfeedBusy
 
     serial_port = CONFIG["serial"]["port"]
     serial_baud = CONFIG["serial"]["baudrate"]
@@ -1710,8 +1722,16 @@ def serial_read_data():
                     
                     print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
                     try:
+                        payload = {
+                            "w": weight,
+                            "r":    busyFlagInfeedBusy,
+                            "d":    diff
+                        }
+                        #weight,runflag,diff
+                        client.publish("serial/weight", json.dumps(payload),qos=0, retain=False)
                         client.publish("serial/weight", weight, qos=0, retain=False)
                     except Exception as e:
+                        print (e)
                         pass
                     
                 #logging.info(log_msg)
@@ -1724,10 +1744,7 @@ def serial_read_data():
             time.sleep(5)
             continue
         
-     
-
-'''
-no use mqtt. read serial on same app
+      
 # ══════════════════════════════════════════════════════════════════
 #  MQTT CALLBACKS  (run inside paho's network thread)
 # ══════════════════════════════════════════════════════════════════
@@ -1806,9 +1823,7 @@ def _mqtt_thread():
     Separate daemon thread.
     Uses paho loop_forever() with built-in auto-reconnect.
     """
-    if not MQTT_AVAILABLE:
-        print("[MQTT] Thread not started — paho-mqtt not installed.")
-        return
+    global client
 
     client = mqtt_client.Client(client_id="ols-monitor", clean_session=True)
 
@@ -1828,12 +1843,12 @@ def _mqtt_thread():
             client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
             client.loop_forever()          # blocks; reconnects automatically
         except Exception as exc:
-            tech_log.error("MQTT fatal error: %s — retry in 5 s", exc)
-            print(f"[MQTT] Error: {exc} — retrying in 5 s")
+            tech_log.error("MQTT fatal error: %s — retry in 10 s", exc)
+            print(f"[MQTT] Error: {exc} — retrying in 10 s")
             with _lock:
                 state["mqtt"]["connected"] = False
-            time.sleep(5)
-'''
+            time.sleep(10)
+
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -2772,9 +2787,9 @@ if __name__ == "__main__":
     #t.start()
 
     # Start MQTT in its own daemon thread BEFORE Flask
-    #t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
-    #t.start()
-    #print(f"[MQTT] Thread started (id={t.ident})\n")
+    t = threading.Thread(target=_mqtt_thread, name="mqtt-weight", daemon=True)
+    t.start()
+    print(f"[MQTT] Thread started (id={t.ident})\n")
 
 
     # Start MQTT in its own daemon thread BEFORE Flask
