@@ -17,9 +17,9 @@ serial:
 tank:
   density_kgl: 1.0
   hi_level_kg: 101.0
-  hi_threshold_pct: 85.0
+  hi_threshold_pct: 84.0
   infeed_valve: 1.0
   lo_level_kg: 60.0
   lo_threshold_pct: 20.0
-  max_kg: 100.0
+  max_kg: 120.0
   tare_kg: 0.0

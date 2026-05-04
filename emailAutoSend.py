@@ -1,329 +1,339 @@
+#!/usr/bin/env python3
 """
-gmail_auto_reply.py
-────────────────────────────────────────────────────────────────
-Monitors a Gmail inbox every 5 minutes (+ IMAP IDLE for fast pickup).
-When an email subject contains a date string (YYYY-MM-DD), it looks for
-  /home/palmoil/stuff/logs/production_<date>.csv
-and replies with the file attached.
-If the file is missing or the subject is unrecognised, it sends an error reply.
+emailAutoSend.py
+================
+Polls an inbox for emails whose subject starts with "sendme".
+Expected subject format:
+    sendme 20260210132435 20260310132435
+              ^start         ^stop
+              YYYYMMDDHHmmss
 
-Setup (one-time):
-  pip install imapclient
-  Enable "IMAP" in Gmail settings → See all settings → Forwarding and POP/IMAP
-  Use an App Password (Google Account → Security → App Passwords).
+Steps:
+  1. Fetch unread emails
+  2. Reject any email whose subject doesn't start with "sendme" (sends a rejection reply)
+  3. Parse start / stop datetime from the subject
+  4. Query /logs/production.db for rows in that range
+  5. Write a CSV temp file, attach it, send reply
+  6. Delete the temp CSV
+  7. Mark processed email as read / delete it
+
+Config — edit the block below or set environment variables.
 """
 
-import imaplib
-import smtplib
-import email
 import os
 import re
-import time
-import threading
+import csv
+import imaplib
+import smtplib
+import sqlite3
+import tempfile
 import logging
-from email.message import EmailMessage
-from datetime import datetime, timedelta
 
-# ── CONFIG ────────────────────────────────────────────────────────────────────
-GMAIL_USER     = "sprayer01weighingpo@gmail.com"
-GMAIL_PASSWORD = "kqwalbufyepwfnpt"          # App Password (16-char)
-LOG_DIR        = "/home/palmoil/stuff/logs"
-POLL_INTERVAL  = 300                          # seconds between full polls
-IMAP_HOST      = "imap.gmail.com"
-SMTP_HOST      = "smtp.gmail.com"
-SMTP_PORT      = 587
-# ─────────────────────────────────────────────────────────────────────────────
+from datetime import datetime
+from email import message_from_bytes
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+from email.utils import formataddr
+import time
 
+# ══════════════════════════════════════════════════════════════════
+#  CONFIG  — change these or export as environment variables
+# ══════════════════════════════════════════════════════════════════
+IMAP_HOST   = os.getenv("EMAIL_IMAP_HOST",   "imap.gmail.com")
+IMAP_PORT   = int(os.getenv("EMAIL_IMAP_PORT", "993"))
+SMTP_HOST   = os.getenv("EMAIL_SMTP_HOST",   "smtp.gmail.com")
+SMTP_PORT   = int(os.getenv("EMAIL_SMTP_PORT", "587"))
+EMAIL_USER  = os.getenv("EMAIL_USER",  "sprayer01weighingpo@gmail.com")
+EMAIL_PASS  = os.getenv("EMAIL_PASS",  "kqwalbufyepwfnpt")
+EMAIL_NAME  = os.getenv("EMAIL_NAME",  "OLS Production System")
+
+ 
+
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+DB_PATH      = os.path.join(LOG_DIR, "production.db")
+ 
+POLL_EVERY  = int(os.getenv("POLL_EVERY_SEC", "5"))   # seconds between inbox checks
+
+# ══════════════════════════════════════════════════════════════════
+#  LOGGING
+# ══════════════════════════════════════════════════════════════════
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler("/home/palmoil/stuff/logs/auto_reply.log"),
-        logging.StreamHandler(),
-    ],
+    level   = logging.INFO,
+    format  = "%(asctime)s [%(levelname)s] %(message)s",
+    datefmt = "%Y-%m-%d %H:%M:%S",
 )
-log = logging.getLogger(__name__)
+log = logging.getLogger("emailAutoSend")
 
-DATE_PATTERN = re.compile(r"(\d{4}-\d{2}-\d{2})")   # matches YYYY-MM-DD
+# ══════════════════════════════════════════════════════════════════
+#  HELPERS
+# ══════════════════════════════════════════════════════════════════
+SUBJECT_PREFIX = "sendme"
+DATETIME_FMT   = "%Y%m%d%H%M%S"   # YYYYMMDDHHmmss
 
+def _parse_subject(subject: str):
+    """
+    Parses 'sendme 20260210132435 20260310132435' from a subject line.
+    Returns (start_dt, stop_dt) as datetime objects, or raises ValueError.
+    Subject must START with 'sendme' (case-insensitive).
+    """
+    subject = subject.strip()
+    if not subject.lower().startswith(SUBJECT_PREFIX):
+        raise ValueError("Subject does not start with 'sendme'")
 
-# ── HELPERS ───────────────────────────────────────────────────────────────────
+    # Extract exactly two 14-digit timestamps
+    tokens = re.findall(r"\d{14}", subject)
+    if len(tokens) < 2:
+        raise ValueError(
+            f"Expected two timestamps (YYYYMMDDHHmmss) in subject, got: {subject!r}"
+        )
 
-def extract_date(subject: str):
-    """Return 'YYYY-MM-DD' string if found in subject, else None."""
-    m = DATE_PATTERN.search(subject)
-    return m.group(1) if m else None
+    start_dt = datetime.strptime(tokens[0], DATETIME_FMT)
+    stop_dt  = datetime.strptime(tokens[1], DATETIME_FMT)
 
+    if start_dt >= stop_dt:
+        raise ValueError(
+            f"Start datetime ({start_dt}) must be before stop datetime ({stop_dt})"
+        )
 
-def csv_path_for_date(date_str: str):
-    """Return expected CSV path for a given date string."""
-    return os.path.join(LOG_DIR, f"production_{date_str}.csv")
-
-
-def build_success_body(date_str: str, csv_path: str) -> str:
-    return f"""Hi,
-
-This is an automated reply from Raspberry Pi 5.
-
-Your requested production report for {date_str} is attached.
-
-File: {os.path.basename(csv_path)}
-
-Have a nice day!
-
-Regards,
-RPI5 Palm Olein System
-"""
-
-
-def build_error_body(subject: str, reason: str) -> str:
-    return f"""Hi,
-
-This is an automated reply from Raspberry Pi 5.
-
-Unfortunately we could not fulfil your request.
-
-  Original subject : {subject}
-  Reason           : {reason}
-
-Please make sure the email subject contains a valid date in the format
-  YYYY-MM-DD
-For example:  production_2026-03-25
-
-If the problem persists, please contact your admin.
-
-Regards,
-RPI5  Palm Olein System
-"""
+    return start_dt, stop_dt
 
 
-def send_reply(to_addr: str, original_subject: str,
-               body: str, attachment_path: str = None):
-    """Send a reply email, optionally with a CSV attachment."""
-    reply_subject = f"Re: {original_subject}"
+def _query_db(start_dt: datetime, stop_dt: datetime):
+    """
+    Queries production_log for rows between start_dt and stop_dt (inclusive).
+    Returns list of dicts.
+    """
+    start_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
+    stop_str  = stop_dt.strftime("%Y-%m-%d %H:%M:%S")
 
-    msg = EmailMessage()
-    msg["Subject"] = reply_subject
-    msg["From"]    = GMAIL_USER
+    with sqlite3.connect(DB_PATH) as con:
+        con.row_factory = sqlite3.Row
+        rows = con.execute(
+            """SELECT timestamp, product, initial_weight,
+                      required_weight, final_weight, status, reason
+               FROM production_log
+               WHERE timestamp BETWEEN ? AND ?
+               ORDER BY timestamp ASC""",
+            (start_str, stop_str),
+        ).fetchall()
+
+    return [dict(r) for r in rows]
+
+
+def _write_csv(rows: list, start_dt: datetime, stop_dt: datetime) -> str:
+    """
+    Writes rows to a temp CSV file.
+    Returns the file path.
+    """
+    prefix = f"production_{start_dt.strftime('%Y%m%d%H%M%S')}_{stop_dt.strftime('%Y%m%d%H%M%S')}_"
+    fd, path = tempfile.mkstemp(prefix=prefix, suffix=".csv")
+    os.close(fd)
+
+    fieldnames = [
+        "timestamp", "product", "initial_weight",
+        "required_weight", "final_weight", "status", "reason",
+    ]
+    with open(path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    return path
+
+
+def _send_email(to_addr: str, subject: str, body: str, attachment_path: str = None):
+    """Sends an email via SMTP, with an optional file attachment."""
+    msg = MIMEMultipart()
+    msg["From"]    = formataddr((EMAIL_NAME, EMAIL_USER))
     msg["To"]      = to_addr
-    msg.set_content(body)
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
 
-    if attachment_path and os.path.exists(attachment_path):
+    if attachment_path:
+        filename = os.path.basename(attachment_path)
         with open(attachment_path, "rb") as f:
-            data = f.read()
-        msg.add_attachment(
-            data,
-            maintype="application",
-            subtype="octet-stream",
-            filename=os.path.basename(attachment_path),
-        )
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(f.read())
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", f'attachment; filename="{filename}"')
+        msg.attach(part)
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as smtp:
-        smtp.starttls()
-        smtp.login(GMAIL_USER, GMAIL_PASSWORD)
-        smtp.send_message(msg)
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(EMAIL_USER, EMAIL_PASS)
+        server.sendmail(EMAIL_USER, to_addr, msg.as_string())
 
-    log.info("Reply sent to %s | Subject: %s", to_addr, reply_subject)
+    log.info("Email sent → %s | Subject: %s", to_addr, subject)
 
 
-# ── CORE LOGIC ────────────────────────────────────────────────────────────────
+def _get_sender(email_msg) -> str:
+    """Extracts the sender's email address from a parsed email message."""
+    from_field = email_msg.get("From", "")
+    match = re.search(r"<(.+?)>", from_field)
+    return match.group(1) if match else from_field.strip()
 
-def process_message(imap: imaplib.IMAP4_SSL, uid: bytes):
-    """
-    Fetch one message by UID, decide what to reply, mark it as seen.
-    """
-    res, data = imap.uid("fetch", uid, "(RFC822)")
-    if res != "OK" or not data or data[0] is None:
-        log.warning("Could not fetch UID %s", uid)
-        return
 
-    raw = data[0][1]
-    msg = email.message_from_bytes(raw)
-
-    subject  = msg.get("Subject", "").strip()
-    from_hdr = msg.get("From", "").strip()
-
-    # Extract a plain email address from the From header
-    m = re.search(r"[\w.+-]+@[\w.-]+\.\w+", from_hdr)
-    sender = m.group(0) if m else from_hdr
-
-    log.info("Processing email | From: %s | Subject: %s", sender, subject)
-
-    date_str = extract_date(subject)
-
-    if not date_str:
-        reason = (
-            "No valid date (YYYY-MM-DD) found in the subject line."
-        )
-        log.warning("No date in subject '%s' → sending error reply", subject)
-        send_reply(sender, subject, build_error_body(subject, reason))
-    else:
-        csv_path = csv_path_for_date(date_str)
-        if os.path.exists(csv_path):
-            log.info("Found CSV: %s → attaching to reply", csv_path)
-            send_reply(
-                sender, subject,
-                build_success_body(date_str, csv_path),
-                attachment_path=csv_path,
-            )
+def _get_subject(email_msg) -> str:
+    """Returns decoded subject string."""
+    from email.header import decode_header
+    raw = email_msg.get("Subject", "")
+    parts = decode_header(raw)
+    decoded = ""
+    for part, enc in parts:
+        if isinstance(part, bytes):
+            decoded += part.decode(enc or "utf-8", errors="replace")
         else:
-            reason = (
-                f"Production file for {date_str} not found on this device.\n"
-                f"  Expected path: {csv_path}"
-            )
-            log.warning("CSV not found for %s → sending error reply", date_str)
-            send_reply(sender, subject, build_error_body(subject, reason))
-
-    # Mark the message as Seen so we don't process it again
-    imap.uid("store", uid, "+FLAGS", "\\Seen")
+            decoded += part
+    return decoded.strip()
 
 
-def fetch_unseen(imap: imaplib.IMAP4_SSL):
-    """Search for all UNSEEN messages and process each one."""
-    imap.select("INBOX")
-    res, data = imap.uid("search", None, "UNSEEN")
-    if res != "OK":
+# ══════════════════════════════════════════════════════════════════
+#  MAIN PROCESSING
+# ══════════════════════════════════════════════════════════════════
+def process_email(uid: bytes, email_msg):
+    """Full pipeline for one email."""
+    sender  = _get_sender(email_msg)
+    subject = _get_subject(email_msg)
+
+    log.info("Processing email from %s | Subject: %r", sender, subject)
+
+    # ── 1. Reject if subject doesn't start with 'sendme' ──────────
+    if not subject.strip().lower().startswith(SUBJECT_PREFIX):
+        log.warning("Rejected — subject does not start with 'sendme': %r", subject)
+        _send_email(
+            to_addr = sender,
+            subject = "Re: " + subject,
+            body    = (
+                "Your request was rejected.\n\n"
+                "Email subject must start with 'sendme' followed by two timestamps.\n\n"
+                "Example:\n"
+                "  sendme 20260210132435 20260310132435\n"
+                "           ^start(YYYYMMDDHHmmss)  ^stop(YYYYMMDDHHmmss)\n\n"
+                "-- OLS Production System"
+            ),
+        )
         return
 
-    uids = data[0].split()
-    if not uids:
-        log.debug("No new messages.")
+    # ── 2. Parse start/stop datetimes ─────────────────────────────
+    try:
+        start_dt, stop_dt = _parse_subject(subject)
+    except ValueError as exc:
+        log.warning("Bad subject format: %s", exc)
+        _send_email(
+            to_addr = sender,
+            subject = "Re: " + subject,
+            body    = (
+                f"Could not parse your request.\n\nError: {exc}\n\n"
+                "Correct format:\n"
+                "  sendme 20260210132435 20260310132435\n"
+                "-- OLS Production System"
+            ),
+        )
         return
 
-    log.info("Found %d unseen message(s).", len(uids))
-    for uid in uids:
-        try:
-            process_message(imap, uid)
-        except Exception as exc:
-            log.error("Error processing UID %s: %s", uid, exc)
+    log.info("Date range: %s → %s", start_dt, stop_dt)
+
+    # ── 3. Query database ──────────────────────────────────────────
+    try:
+        rows = _query_db(start_dt, stop_dt)
+    except Exception as exc:
+        log.error("DB query failed: %s", exc)
+        _send_email(
+            to_addr = sender,
+            subject = "Re: " + subject,
+            body    = f"Database error: {exc}\n\n-- OLS Production System",
+        )
+        return
+
+    log.info("Rows found: %d", len(rows))
+
+    # ── 4. Handle empty result ─────────────────────────────────────
+    if not rows:
+        _send_email(
+            to_addr = sender,
+            subject = "Re: " + subject,
+            body    = (
+                f"No production records found between:\n"
+                f"  Start : {start_dt.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"  Stop  : {stop_dt.strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                "-- OLS Production System"
+            ),
+        )
+        return
+
+    # ── 5. Write CSV, send, delete ─────────────────────────────────
+    csv_path = None
+    try:
+        csv_path = _write_csv(rows, start_dt, stop_dt)
+        _send_email(
+            to_addr         = sender,
+            subject         = f"Re: {subject}",
+            body            = (
+                f"Please find attached the production log export.\n\n"
+                f"  Start  : {start_dt.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"  Stop   : {stop_dt.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"  Records: {len(rows)}\n\n"
+                "-- OLS Production System"
+            ),
+            attachment_path = csv_path,
+        )
+    except Exception as exc:
+        log.error("Failed to send CSV email: %s", exc)
+    finally:
+        if csv_path and os.path.exists(csv_path):
+            os.remove(csv_path)
+            log.info("Temp CSV deleted: %s", csv_path)
 
 
-# ── LOG CLEANUP ───────────────────────────────────────────────────────────────
-
-def delete_old_logs(days: int = 7):
-    """Delete .csv and .log files in LOG_DIR older than `days` days."""
-    cutoff = datetime.now() - timedelta(days=days)
-    for filename in os.listdir(LOG_DIR):
-        if not (filename.endswith(".csv") or filename.endswith(".log")):
-            continue
-        filepath = os.path.join(LOG_DIR, filename)
-        modified = datetime.fromtimestamp(os.path.getmtime(filepath))
-        if modified < cutoff:
-            os.remove(filepath)
-            log.info("Deleted old file: %s (last modified: %s)", filename, modified.date())
-
-
-# ── IMAP IDLE (fast receive) ──────────────────────────────────────────────────
-
-def idle_loop(stop_event: threading.Event):
-    """
-    Maintain a persistent IMAP connection with IDLE.
-    When the server signals a new message, fetch_unseen() is called.
-    Falls back gracefully if IDLE is unsupported.
-    """
-    while not stop_event.is_set():
-        try:
-            log.info("IDLE: connecting to Gmail IMAP…")
-            imap = imaplib.IMAP4_SSL(IMAP_HOST)
-            imap.login(GMAIL_USER, GMAIL_PASSWORD)
+def poll_inbox():
+    """Connects to IMAP, fetches all UNSEEN emails, processes each one."""
+    try:
+        with imaplib.IMAP4_SSL(IMAP_HOST, IMAP_PORT) as imap:
+            imap.login(EMAIL_USER, EMAIL_PASS)
             imap.select("INBOX")
 
-            # Check IDLE capability
-            res, caps = imap.capability()
-            supports_idle = b"IDLE" in caps[0].upper()
+            _, uids = imap.search(None, "UNSEEN")
+            uid_list = uids[0].split()
 
-            if supports_idle:
-                log.info("IDLE: server supports IDLE — listening for new mail…")
-                while not stop_event.is_set():
-                    # Send IDLE command
-                    tag = imap._new_tag().decode()
-                    imap.send(f"{tag} IDLE\r\n".encode())
+            if not uid_list:
+                log.debug("No new emails.")
+                return
 
-                    # Wait up to 28 minutes (RFC 2177 recommends < 29 min)
-                    imap.sock.settimeout(28 * 60)
-                    idle_start = time.time()
+            log.info("Found %d unread email(s).", len(uid_list))
 
-                    try:
-                        while True:
-                            line = imap.readline()
-                            if not line:
-                                break
-                            decoded = line.decode(errors="replace").strip()
-                            log.debug("IDLE response: %s", decoded)
-                            if "EXISTS" in decoded or "RECENT" in decoded:
-                                log.info("IDLE: new mail signal received.")
-                                break
-                            # 28-min refresh
-                            if time.time() - idle_start > 27 * 60:
-                                break
-                    except Exception as idle_exc:
-                        log.warning("IDLE read error: %s", idle_exc)
+            for uid in uid_list:
+                _, data = imap.fetch(uid, "(RFC822)")
+                raw = data[0][1]
+                email_msg = message_from_bytes(raw)
 
-                    # Send DONE to exit IDLE mode
-                    imap.send(b"DONE\r\n")
-                    # Consume the tagged OK response
-                    imap.readline()
+                try:
+                    process_email(uid, email_msg)
+                except Exception as exc:
+                    log.error("Unhandled error processing email uid=%s: %s", uid, exc)
+                finally:
+                    # Mark as read regardless of success/failure
+                    imap.store(uid, "+FLAGS", "\\Seen")
 
-                    # Now fetch unseen
-                    fetch_unseen(imap)
-
-            else:
-                log.info("IDLE not supported — using poll-only mode.")
-                while not stop_event.is_set():
-                    fetch_unseen(imap)
-                    stop_event.wait(POLL_INTERVAL)
-
-            imap.logout()
-
-        except Exception as exc:
-            log.error("IDLE loop error: %s — reconnecting in 30 s", exc)
-            time.sleep(30)
+    except imaplib.IMAP4.error as exc:
+        log.error("IMAP error: %s", exc)
+    except Exception as exc:
+        log.error("Unexpected error in poll_inbox: %s", exc)
 
 
-# ── POLL THREAD (safety net every 5 min) ─────────────────────────────────────
-
-def poll_loop(stop_event: threading.Event):
-    """
-    Independent polling thread that runs every POLL_INTERVAL seconds.
-    Acts as a safety net in case the IDLE thread misses something.
-    """
-    while not stop_event.is_set():
-        stop_event.wait(POLL_INTERVAL)
-        if stop_event.is_set():
-            break
-        try:
-            log.info("Poll: checking inbox…")
-            imap = imaplib.IMAP4_SSL(IMAP_HOST)
-            imap.login(GMAIL_USER, GMAIL_PASSWORD)
-            fetch_unseen(imap)
-            imap.logout()
-            delete_old_logs(days=7)
-        except Exception as exc:
-            log.error("Poll error: %s", exc)
-
-
-# ── ENTRY POINT ───────────────────────────────────────────────────────────────
-
+# ══════════════════════════════════════════════════════════════════
+#  ENTRY POINT
+# ══════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    log.info("=== Gmail Auto-Reply Bot starting up ===")
-    log.info("Monitoring: %s", GMAIL_USER)
-    log.info("Log dir   : %s", LOG_DIR)
-    log.info("Poll every: %d seconds", POLL_INTERVAL)
+    log.info("=" * 55)
+    log.info("  OLS Email Auto-Send started")
+    log.info("  Inbox  : %s @ %s", EMAIL_USER, IMAP_HOST)
+    log.info("  DB     : %s", DB_PATH)
+    log.info("  Poll   : every %ds", POLL_EVERY)
+    log.info("=" * 55)
 
-    stop_event = threading.Event()
-
-    idle_thread = threading.Thread(target=idle_loop, args=(stop_event,), daemon=True)
-    poll_thread = threading.Thread(target=poll_loop, args=(stop_event,), daemon=True)
-
-    idle_thread.start()
-    poll_thread.start()
-
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        log.info("Shutting down…")
-        stop_event.set()
-        idle_thread.join(timeout=5)
-        poll_thread.join(timeout=5)
-        log.info("Bye.")
+    while True:
+        poll_inbox()
+        time.sleep(POLL_EVERY)
