@@ -1,0 +1,7 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-05-24,12:07:30,SN.C&C,100.4,65.0,100.4,FAIL,[outfeed] TIMEOUT
+2026-05-24,12:07:34,SN.C&C,100.4,100.0,100.4,Sucess,[Infeed] Required weight reached
+2026-05-24,12:37:32,SN.C&C,100.4,65.0,100.4,FAIL,[outfeed] TIMEOUT
+2026-05-24,12:37:36,SN.C&C,100.4,100.0,100.4,Sucess,[Infeed] Required weight reached
+2026-05-24,13:20:04,SN.C&C,100.4,65.0,100.4,FAIL,[outfeed] TIMEOUT
+2026-05-24,13:20:09,SN.C&C,100.4,100.0,100.4,Sucess,[Infeed] Required weight reached

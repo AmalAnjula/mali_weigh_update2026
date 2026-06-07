@@ -1,0 +1,205 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-05-09,06:07:17,SN.C&C,100.0,65.0,93.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:07:41,SN.C&C,93.4,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-09,06:12:38,SN.C&C,99.8,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:13:04,SN.C&C,92.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,06:18:05,SN.C&C,99.8,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:18:31,SN.C&C,92.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,06:25:15,SN.C&C,99.8,65.0,92.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:25:42,SN.C&C,92.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,06:31:33,SN.C&C,99.8,65.0,92.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:31:59,SN.C&C,92.8,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,06:37:41,SN.C&C,99.8,65.0,92.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:38:07,SN.C&C,92.4,100.0,99.6,Sucess,[Infeed] Required weight reached
+2026-05-09,06:44:06,SN.C&C,99.6,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:44:32,SN.C&C,92.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,06:49:43,SN.C&C,99.8,65.0,92.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:50:11,SN.C&C,92.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,06:55:32,SN.C&C,99.0,65.0,92.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,06:55:59,SN.C&C,92.2,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,07:01:31,SN.C&C,99.8,65.0,92.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,07:01:57,SN.C&C,92.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,07:07:52,SN.C&C,99.8,65.0,92.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,07:08:18,SN.C&C,92.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,09:45:56,SN.C&C,99.0,65.0,92.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,09:46:20,SN.C&C,92.0,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,09:51:09,SN.C&C,99.8,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,09:51:34,SN.C&C,91.8,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,09:56:25,SN.C&C,100.0,65.0,92.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,09:56:48,SN.C&C,92.2,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,10:03:57,SN.C&C,100.0,65.0,92.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:04:20,SN.C&C,92.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,10:09:18,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:09:43,SN.C&C,91.8,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,10:14:56,SN.C&C,100.0,65.0,92.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:15:21,SN.C&C,92.0,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,10:20:24,SN.C&C,100.0,65.0,92.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:20:48,SN.C&C,92.2,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-09,10:26:08,SN.C&C,100.0,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:26:31,SN.C&C,92.0,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,10:32:02,SN.C&C,100.0,65.0,92.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:32:25,SN.C&C,92.0,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-09,10:37:17,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:37:41,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,10:42:59,SN.C&C,99.8,65.0,92.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:43:24,SN.C&C,92.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,10:48:26,SN.C&C,99.8,65.0,92.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:48:50,SN.C&C,92.2,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,10:53:46,SN.C&C,100.0,65.0,92.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:54:09,SN.C&C,92.8,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,10:58:58,SN.C&C,100.0,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,10:59:21,SN.C&C,92.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,11:04:06,SN.C&C,99.8,65.0,92.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:04:30,SN.C&C,92.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,11:17:22,SN.C&C,99.8,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:17:46,SN.C&C,91.8,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-09,11:22:51,SN.C&C,99.0,65.0,92.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:23:15,SN.C&C,92.2,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,11:28:04,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:28:28,SN.C&C,91.8,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,11:33:43,SN.C&C,100.0,65.0,92.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:34:07,SN.C&C,92.2,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,11:39:06,SN.C&C,100.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:39:31,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,11:44:46,SN.C&C,99.8,65.0,92.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:45:10,SN.C&C,92.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,11:50:00,SN.C&C,100.0,65.0,92.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:50:24,SN.C&C,92.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,11:55:13,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,11:55:38,SN.C&C,91.8,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,12:00:40,SN.C&C,100.0,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:01:06,SN.C&C,91.6,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,12:06:17,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:06:42,SN.C&C,91.8,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,12:12:06,SN.C&C,100.0,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:12:30,SN.C&C,92.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,12:17:05,SN.C&C,100.0,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:17:28,SN.C&C,92.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,12:22:00,SN.C&C,100.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:22:26,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,12:27:44,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:28:09,SN.C&C,91.8,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-09,12:33:07,SN.C&C,99.0,65.0,92.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:33:32,SN.C&C,92.0,100.0,100.2,Sucess,[Infeed] Required weight reached
+2026-05-09,12:38:26,SN.C&C,100.2,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:38:53,SN.C&C,91.0,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,12:44:14,SN.C&C,100.0,65.0,91.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:44:40,SN.C&C,91.2,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,12:49:57,SN.C&C,100.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:50:23,SN.C&C,91.6,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,12:55:33,SN.C&C,100.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,12:56:00,SN.C&C,91.4,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,13:01:11,SN.C&C,100.2,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,13:01:37,SN.C&C,91.4,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,13:06:51,SN.C&C,100.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,13:07:17,SN.C&C,91.4,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,13:12:32,SN.C&C,100.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,13:12:58,SN.C&C,91.4,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,13:18:16,SN.C&C,100.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,13:18:42,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,13:23:55,SN.C&C,99.8,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,13:24:21,SN.C&C,91.4,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,13:29:28,SN.C&C,100.0,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,13:29:55,SN.C&C,91.6,100.0,100.2,Sucess,[Infeed] Required weight reached
+2026-05-09,18:14:11,SN.C&C,100.0,65.0,100.4,FAIL,[outfeed] TIMEOUT
+2026-05-09,18:14:16,SN.C&C,100.4,100.0,100.4,Sucess,[Infeed] Required weight reached
+2026-05-09,20:21:52,SN.C&C,100.6,65.0,95.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,20:22:09,SN.C&C,95.0,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,22:04:34,SN.C&C,100.0,65.0,90.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:05:02,SN.C&C,90.6,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-09,22:09:42,SN.C&C,99.8,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:10:07,SN.C&C,91.0,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,22:15:15,SN.C&C,100.0,65.0,90.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:15:45,SN.C&C,90.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,22:20:26,SN.C&C,99.8,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:20:52,SN.C&C,91.6,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,22:25:36,SN.C&C,100.0,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:26:02,SN.C&C,91.6,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,22:30:39,SN.C&C,100.0,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:31:05,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,22:35:53,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:36:20,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,22:41:05,SN.C&C,100.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:41:31,SN.C&C,91.0,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-09,22:46:09,SN.C&C,100.0,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:46:35,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,22:51:16,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:51:43,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,22:56:27,SN.C&C,100.0,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,22:56:54,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:01:41,SN.C&C,99.8,65.0,91.2,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:02:09,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:06:58,SN.C&C,100.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:07:26,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:12:20,SN.C&C,100.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:12:48,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:17:32,SN.C&C,99.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:18:00,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:22:39,SN.C&C,100.0,65.0,92.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:23:03,SN.C&C,92.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:27:18,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:27:46,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:32:30,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:32:58,SN.C&C,91.4,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-09,23:37:33,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:38:01,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:42:47,SN.C&C,100.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:43:16,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:48:02,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:48:30,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:53:12,SN.C&C,99.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:53:40,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-09,23:58:25,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-09,23:58:53,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:03:31,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:04:00,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:08:37,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:09:05,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:13:42,SN.C&C,99.8,65.0,91.2,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:14:10,SN.C&C,91.2,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:18:52,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:19:20,SN.C&C,91.6,100.0,99.0,Sucess,[Infeed] Required weight reached
+2026-05-10,00:23:57,SN.C&C,99.8,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:24:25,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:29:09,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:29:37,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:34:12,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:34:40,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:39:25,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:39:53,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:44:27,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:44:55,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:49:35,SN.C&C,99.8,65.0,91.2,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:50:03,SN.C&C,91.2,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:54:42,SN.C&C,99.0,65.0,91.0,Sucess,[outfeed] Oven request to stop
+2026-05-10,00:55:09,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,00:59:50,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:00:18,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,01:05:02,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:05:30,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,01:10:04,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:10:32,SN.C&C,91.6,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-10,01:15:06,SN.C&C,100.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:15:34,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,01:20:16,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:20:45,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,01:25:25,SN.C&C,100.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:25:53,SN.C&C,91.4,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-10,01:30:40,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:31:07,SN.C&C,91.8,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,01:35:46,SN.C&C,99.0,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:36:15,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,01:40:47,SN.C&C,99.8,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:41:15,SN.C&C,91.0,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,01:45:51,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:46:19,SN.C&C,91.6,100.0,99.6,Sucess,[Infeed] Required weight reached
+2026-05-10,01:50:58,SN.C&C,99.0,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:51:27,SN.C&C,91.6,100.0,100.0,Sucess,[Infeed] Required weight reached
+2026-05-10,01:56:01,SN.C&C,100.0,65.0,91.8,Sucess,[outfeed] Oven request to stop
+2026-05-10,01:56:28,SN.C&C,91.8,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,02:01:07,SN.C&C,99.8,65.0,91.6,Sucess,[outfeed] Oven request to stop
+2026-05-10,02:01:35,SN.C&C,91.6,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,02:06:12,SN.C&C,99.8,65.0,91.4,Sucess,[outfeed] Oven request to stop
+2026-05-10,02:06:41,SN.C&C,91.4,100.0,99.8,Sucess,[Infeed] Required weight reached
+2026-05-10,02:15:45,SN.C&C,99.8,65.0,99.8,FAIL,[outfeed] TIMEOUT
+2026-05-10,02:15:50,SN.C&C,99.8,100.0,99.8,Sucess,[Infeed] Required weight reached

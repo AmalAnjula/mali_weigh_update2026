@@ -1,3 +1,8 @@
 auto run
 
 nano  /etc/systemd/system/ols.service 
+
+sudo -u palmoil /bin/bash /home/palmoil/stuff/startup.sh
+sudo systemctl daemon-reload
+sudo systemctl enable ols.service
+sudo systemctl restart ols.service

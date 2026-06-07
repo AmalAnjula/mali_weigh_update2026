@@ -35,18 +35,29 @@ MQTT terminal output:
   [MQTT] Disconnected - reconnecting in 5 s
 """
 
-import os, json, time, logging, logging.handlers, threading
+import os, json, time, logging, logging.handlers, threading,sqlite3
 from datetime import datetime
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, make_response
 import yaml
-from production_logger import ProductionLogger
-
+import serial
 import gpio_reader as gpio
 import queue
-
-
+import re
+import json
+import paho.mqtt.client as mqtt_client
+import paho.mqtt.publish as publish
 inputs = {}
 
+diff=0
+sync_now=False
+client = None
+# ── ALARMS LIST (in-memory) ──────────────────────────────────
+# Each element: {"timestamp": "YYYY-MM-DD HH:MM:SS", "message": "alarm text"}
+alarms_list = [
+    {"timestamp": "2026-04-06 14:30:45", "message": "HI ALARM - Tank level too high"},
+    {"timestamp": "2026-04-06 14:25:30", "message": "Low level sensor triggered"},
+    {"timestamp": "202ds20:15", "message": "Outfesaration failed"}
+]
 
 with open("config.yml") as f:
     CONFIG = yaml.safe_load(f)
@@ -60,22 +71,28 @@ print("OUTFEED_TIMEOUT =", OUTFEED_TIMEOUT, "seconds")
 
  
 
-
+'''
 # ── Try importing paho; warn clearly if missing ────────────────────
 try:
     import paho.mqtt.client as mqtt_client
+    client = mqtt_client.Client()
+    client.connect("localhost", 1883)
+
     MQTT_AVAILABLE = True
 except ImportError:
     MQTT_AVAILABLE = False
     print("  paho-mqtt not installed - MQTT thread disabled.")
     print("   Install with:  pip install paho-mqtt")
 
+'''
+
 # ══════════════════════════════════════════════════════════════════
 #  MQTT CONFIGURATION  — edit here or override via env vars
 # ══════════════════════════════════════════════════════════════════
 MQTT_BROKER = os.getenv("MQTT_BROKER", "localhost")
+#MQTT_BROKER = os.getenv("MQTT_BROKER", "192.168.0.151")
 MQTT_PORT   = int(os.getenv("MQTT_PORT",  "1883"))
-MQTT_TOPIC  = os.getenv("MQTT_TOPIC",  "serial/weight")
+MQTT_TOPIC  = os.getenv("MQTT_TOPIC",  "tank/data")
 MQTT_USER   = os.getenv("MQTT_USER",   "")          # leave "" if no auth
 MQTT_PASS   = os.getenv("MQTT_PASS",   "")
 
@@ -94,12 +111,177 @@ def mqtt_publish(topic: str, payload, retain: bool = False, qos: int = 0):
     """
     _publish_queue.put((topic, str(payload), qos, retain))
 
-prod_logger = ProductionLogger(
-    LOG_DIR,
-    mqtt_publish_fn = mqtt_publish,          # uses the existing queue-based publisher
-    mqtt_topic      = "ols/tx/infeed_event", # receiver subscribes to this topic
-)
 
+# ══════════════════════════════════════════════════════════════════
+#  SQLITE PRODUCTION LOG DATABASE
+# ══════════════════════════════════════════════════════════════════
+
+DB_PATH      = os.path.join(LOG_DIR, "production.db")
+DB_MAX_BYTES = 500 * 1024 * 1024   # 500 MB hard ceiling
+ 
+# ── Remote sync config ─────────────────────────────────────────────
+# Set REMOTE_RPI_IP to the IP of your RPi5 on the same LAN.
+# The receiver runs on port 5001 (remote_receiver.py).
+REMOTE_RPI_IP   = os.getenv("REMOTE_RPI_IP", "192.168.0.151")
+REMOTE_SYNC_URL = f"http://{REMOTE_RPI_IP}:5001/api/sync"
+SYNC_INTERVAL   = 60          # seconds between sync attempts
+ 
+def _init_db():
+    """Create the production_log table if it doesn't exist."""
+    with sqlite3.connect(DB_PATH) as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS production_log (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp       TEXT    NOT NULL,
+                product         TEXT,
+                initial_weight  REAL,
+                required_weight REAL,
+                final_weight    REAL,
+                status          TEXT,
+                reason          TEXT,
+                synced          INTEGER DEFAULT 0
+            )
+        """)
+        # Add synced column if upgrading from an older DB that lacks it
+        try:
+            con.execute("ALTER TABLE production_log ADD COLUMN synced INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass   # column already exists — normal on fresh start
+        con.commit()
+    
+    
+ 
+_init_db()
+ 
+def _db_reset_if_full(con):
+    """
+    Called inside an open connection before every INSERT.
+    If the DB file is at or above DB_MAX_BYTES:
+      - delete all rows older than 3 months
+      - run VACUUM to release the disk space back to the OS
+    """
+    try:
+        size = os.path.getsize(DB_PATH)
+    except OSError:
+        return                          # can't stat → skip check
+ 
+    if size >= DB_MAX_BYTES:
+        cur = con.execute(
+            "DELETE FROM production_log WHERE timestamp < datetime('now', '-3 months')"
+        )
+        deleted = cur.rowcount
+        con.commit()
+        con.execute("VACUUM")           # shrinks the file on disk
+        tech_log.warning(
+            "[DB] Size limit reached (%.1f MB) — deleted %d records older than 3 months.",
+            size / 1024 / 1024, deleted,
+        )
+        print(f"[DB] 500 MB limit hit — {deleted} records older than 3 months deleted.")
+ 
+def db_log(product, initial_weight, required_weight, final_weight, status, reason):
+    global sync_now
+    """Insert one production event row into the SQLite database (thread-safe)."""
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            _db_reset_if_full(con)      # wipe if at/over 500 MB
+            con.execute(
+                """INSERT INTO production_log
+                   (timestamp, product, initial_weight, required_weight,
+                    final_weight, status, reason, synced)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, 0)""",
+                (ts, product,
+                 round(float(initial_weight),  3),
+                 round(float(required_weight), 3),
+                 round(float(final_weight),    3),
+                 status, reason)
+            )
+            con.commit()
+        sync_now=True
+        tech_log.info("[DB] logged: %s | %s | %s", product, status, reason)
+    except Exception as exc:
+        tech_log.error("[DB] Failed to write production log: %s", exc)
+ 
+ 
+# ══════════════════════════════════════════════════════════════════
+#  REMOTE SYNC THREAD
+#  Runs every SYNC_INTERVAL seconds.
+#  Picks up all rows where synced=0, POSTs them to the RPi5
+#  receiver, then marks them synced=1 on success.
+#  Network drops are handled gracefully — rows just retry next cycle.
+# ══════════════════════════════════════════════════════════════════
+def _remote_sync_thread():
+    import urllib.request, urllib.error
+    global sync_now
+    tech_log.info("[SYNC] Remote sync thread started → %s", REMOTE_SYNC_URL)
+    print(f"[SYNC] Remote sync thread started → {REMOTE_SYNC_URL}")
+    
+    cnt=0
+    while True:
+
+
+        while (cnt<SYNC_INTERVAL and not sync_now):
+                time.sleep(1)
+                cnt+=1
+        cnt=0
+        sync_now=False
+        print("Starting sync now")
+        #time.sleep(SYNC_INTERVAL)
+        try:
+            # ── 1. Fetch all unsynced rows ──────────────────────────
+            with sqlite3.connect(DB_PATH) as con:
+                con.row_factory = sqlite3.Row
+                rows = con.execute(
+                    """SELECT id, timestamp, product,
+                              initial_weight, required_weight,
+                              final_weight, status, reason
+                       FROM production_log
+                       WHERE synced = 0
+                       ORDER BY id ASC"""
+                ).fetchall()
+ 
+            if not rows:
+                #print("[SYNC] No new rows to sync.")
+                continue   # nothing to send
+ 
+            # ── 2. Build JSON payload ───────────────────────────────
+            records = [dict(r) for r in rows]
+            payload = json.dumps(records).encode("utf-8")
+            #print(payload.decode("utf-8"))
+            # ── 3. POST to remote receiver ──────────────────────────
+            req = urllib.request.Request(
+                REMOTE_SYNC_URL,
+                data    = payload,
+                method  = "POST",
+                headers = {"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                status_code = resp.status
+ 
+            if status_code == 200:
+                # ── 4. Mark rows as synced ──────────────────────────
+                ids = [r["id"] for r in records]
+                with sqlite3.connect(DB_PATH) as con:
+                    con.execute(
+                        f"UPDATE production_log SET synced=1 WHERE id IN ({','.join('?'*len(ids))})",
+                        ids,
+                    )
+                    con.commit()
+                tech_log.info("[SYNC] Sent %d rows to remote — all marked synced.", len(ids))
+                print(f"[SYNC] {len(ids)} rows synced to {REMOTE_RPI_IP}")
+            else:
+                tech_log.warning("[SYNC] Remote returned HTTP %s — will retry.", status_code)
+
+ 
+        except urllib.error.URLError as exc:
+            tech_log.warning("[SYNC] Cannot reach remote (%s) — will retry in %ds.", exc.reason, SYNC_INTERVAL)
+        except Exception as exc:
+            tech_log.error("[SYNC] Unexpected error: %s", exc)
+ 
+ 
+
+ 
 
 _log_fmt     = logging.Formatter(
     "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -285,10 +467,10 @@ def gpio_handler():
     global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
     global hi_level_sensor,out_feed_sucess
     gpio.update() 
-
+    
     state["infeed"]["operation"] = "REMOTE"
     state["outfeed"]["operation"] = "REMOTE"
-    
+
     if gpio.state("intake_mode") and state["infeed"]["operation"] == "REMOTE" :
         state["infeed"]["mode"] = "AUTO"
     elif gpio.state("intake_mode") and state["infeed"]["operation"] == "MANUAL"  :
@@ -366,7 +548,7 @@ def gpio_handler():
                         )
                         t.start()
                         tech_log.info(
-                            "oil_add thread started remote Auto — now=%.2f kg  requested=%.2f kg",
+                            "oil_add thread started remote Auto by button — now=%.2f kg  requested=%.2f kg",
                             _now_w, _req_w)
                         print(f"[infeed remote auto ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
                     
@@ -426,7 +608,8 @@ def gpio_handler():
                     state["ui"]["buttons"]["out-op-btn"]["disabled"] = False
 
             if gpio.changed("intake_mode") :
-                 
+                infeed_local_remote_change=True
+                infeed_mode_change=True
                 if  not gpio.state("intake_mode"):
                     print("[GPIO] intake_mode_pin HIGH — setting infeed mode to AUTO")
                     state["infeed"]["mode"] = "AUTO"
@@ -517,7 +700,7 @@ def infeed_run_state(run_state: bool):
          gpio.output_off("out_wei_led")
 
     print(f"[infeed] running -> {run_state}")
-    tech_log.info("Infeed run state set to %s", run_state)
+    #tech_log.info("Infeed run state set to %s", run_state)
 
 
 
@@ -593,7 +776,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
                 state["ui"]["buttons"]["in-mode-btn"]["disabled"] = False
                 state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
                 break
-                
+            tech_log.info  ("*******************")
               
 
         '''while(True):
@@ -621,6 +804,16 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
            
 
 
+def shutdown_infeed():
+    """Helper to stop infeed immediately from any context (e.g. outfeed thread)."""
+   
+    # ── STEP 4: Always clean up valve + run state ──────────────────
+    infeed_open(False)
+    infeed_run_state(False)
+    gpio.output_off("ind_led_in") 
+    gpio.output_off("in_solv")
+    print("---- End filling ----")  # newline after progress line
+
 # ══════════════════════════════════════════════════════════════════
 #  OIL ADDITION SEQUENCE
 #  Called in a background thread when:
@@ -633,6 +826,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     global infeed_remote_stop, local_stop
     global low_level_sensor
     global hi_level_sensor
+    global diff
     infeed_open(False)
     gpio.output_on("ind_led_in") 
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
@@ -684,11 +878,18 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
 
     while not done:
         elapsed = time.time() - start_time
-        print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg serial_error: {serial_error}", end="\r")
+        print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg ", end="\r")
         # Timeout
+
+
+        diff= weiVal-intial_weight
+
         if elapsed > INFEED_TIMEOUT:
             done = True
             result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.warning(
                 "Oil add TIMEOUT after %ds. initial=%.2f requested=%.2f final=%.2f",
                 INFEED_TIMEOUT, intial_weight, required_weight, weiVal)
@@ -697,13 +898,14 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("⚠ Infeed timeout", elapsed_s=round(elapsed, 1),
                  initial=round(intial_weight, 2), requested=round(required_weight, 2),
                  final=round(weiVal, 2))
-            prod_logger.log(
+
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "Oil add TIMEOUT"
+            "[Infeed] Oil add TIMEOUT"
             )
              
                 
@@ -716,6 +918,8 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
         elif state["sensors"]["hi_level"]:
             done = True
             result=False
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.warning(
                 "Oil add stopped: high level sensor triggered. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
@@ -724,19 +928,21 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("⚠ Infeed stopped: high level sensor",
                  initial=round(intial_weight, 2), requested=round(required_weight, 2),
                  final=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "high level sensor"
+            "[Infeed] high level sensor"
             )
             break
 
         elif weiVal > state["tank"]["hi_level"]:
             done = True
             result=False
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.warning(
                 "Oil add stopped: weight exceeded hi level. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
@@ -745,13 +951,13 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("⚠ Infeed stopped: weight exceeded hi level",
                  initial=round(intial_weight, 2), requested=round(required_weight, 2),
                  final=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "weight exceeded hi level"
+            "[Infeed] weight exceeded hi level"
             )
             break
 
@@ -759,18 +965,20 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
         elif weiVal >= required_weight - state["tank"]["infeed_valve"] :
             done = True
             result=True
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.info(
                 "Required weight reached. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] Target reached — initial %.2f requested %.2f final %.2f"
                   % (intial_weight, required_weight, weiVal))
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "Sucess",
-            "Required weight reached"
+            "[Infeed] Required weight reached"
             )
 
             infeed_open(False)
@@ -786,17 +994,19 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
         elif serial_error:
             done = True
             result=False
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             serial_error=False
             tech_log.error("Serial error during oil addition — aborting.")
             print("[oil_add] Serial error — aborting.")
             _log("⚠ Infeed aborted: serial error", final=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "serial error"
+            "[Infeed] serial error"
             )
 
             break
@@ -806,6 +1016,10 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             done = True
             result=False
             infeed_run_state(False)
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
             tech_log.warning(
                 "Hi level sensor trig. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
@@ -813,13 +1027,13 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("Infeed remote stop",
                  initial=round(intial_weight, 2), final=round(weiVal, 2))
             
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "Hi level sensor trig"
+            "[Infeed] Hi level sensor trig"
             )
 
             break
@@ -830,6 +1044,10 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             done = True
             result=False
             infeed_run_state(False)
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
             tech_log.warning(
                 "Remote stop. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
@@ -837,13 +1055,13 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
             _log("Infeed remote stop",
                  initial=round(intial_weight, 2), final=round(weiVal, 2))
             
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "Infeed remote stop"
+            "[Infeed] remote stop"
             )
 
             break
@@ -852,59 +1070,73 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
         elif local_stop:
             done = True
             result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
             tech_log.warning(
                 "Local stop. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] Local stop.")
             _log("Infeed local stop",
                  initial=round(intial_weight, 2), final=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "oil_add Local stop"
+            "[Infeed] oil_add Local stop"
             )
 
 
             break
 
         # Mode changed mid-sequence
-        elif infeed_mode_change:                
+        elif infeed_mode_change:       
+            infeed_mode_change=False         
             done = True
             result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
             tech_log.warning(
                 "Mode change during oil addition. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] Mode changed — aborting.")
             _log("Infeed aborted: mode change", final=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "mode change"
+            "[Infeed] mode change"
             )
             break
 
         # Operation (LOCAL/REMOTE) changed mid-sequence
         elif infeed_local_remote_change:
+            infeed_local_remote_change=False
             done = True
             result=False
+
+            shutdown_infeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
+
             tech_log.warning(
                 "Local/Remote change during oil addition. initial=%.2f requested=%.2f final=%.2f",
                 intial_weight, required_weight, weiVal)
             print("[oil_add] LOCAL/REMOTE changed — aborting.")
             _log("Infeed aborted: operation change", final=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             intial_weight,
             required_weight,
             weiVal,
             "FAIL",
-            "operation change"
+            "[Infeed] operation change"
             )
 
             break
@@ -927,7 +1159,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
 
     # ── STEP 5: Release busy flag ───────────────────────────────────
     busyFlagInfeedBusy = False
-    tech_log.info("oil_add complete — busyFlagInfeedBusy cleared.")
+    #tech_log.info("oil_add complete — busyFlagInfeedBusy cleared.")
     print("[oil_add] Sequence complete.")
     return result
 
@@ -944,9 +1176,6 @@ def outfeed_open(open_state: bool):
 
 def outfeed_run_state(run_state: bool):
     with _lock:
-
-    
-
         state["outfeed"]["running"]    = run_state
         state["outfeed"]["valve_open"] = run_state
 
@@ -956,8 +1185,21 @@ def outfeed_run_state(run_state: bool):
          gpio.output_off("in_wei_led")
 
     print(f"[outfeed] running -> {run_state}")
-    tech_log.info("Outfeed run state set to %s", run_state)
+    #tech_log.info("Outfeed run state set to %s", run_state)
 
+
+
+def shutdown_outfeed():
+    """Helper to stop outfeed immediately from any context (e.g. infeed thread)."""
+    # ── STEP 4: Always clean up valve + run state ──────────────────
+    outfeed_open(False)
+    outfeed_run_state(False)
+    gpio.output_off("ind_led_out") 
+    gpio.output_off("out_solv")
+    print("---- End draining ----")  # newline after progress line
+
+
+    
 
 # ══════════════════════════════════════════════════════════════════
 #  OUTFEED MANUAL SEQUENCE  (MANUAL + LOCAL + START)
@@ -1059,6 +1301,9 @@ def oil_drain(requested_vol_L: float):
 
         if elapsed > OUTFEED_TIMEOUT:
             done = True
+
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.warning(
                 "[outfeed] TIMEOUT after %ds. target=%.2f final=%.2f",
                 OUTFEED_TIMEOUT, target_kg, weiVal)
@@ -1067,13 +1312,13 @@ def oil_drain(requested_vol_L: float):
                  elapsed_s=round(elapsed, 1),
                  target_kg=round(target_kg, 2),
                  final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "FAIL",
-            "[oil_drain] TIMEOUT"
+            "[outfeed] TIMEOUT"
             )
 
             break
@@ -1082,6 +1327,8 @@ def oil_drain(requested_vol_L: float):
         elif out_feed_sucess:
             out_feed_sucess=False
             done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.info(
                 "[outfeed] Oven request to stop. requested=%.2f kg  final=%.2f kg",
                 requested_kg, weiVal)
@@ -1092,39 +1339,43 @@ def oil_drain(requested_vol_L: float):
                  requested_kg=round(requested_kg, 2),
                  drained_kg=round(current_kg - weiVal, 2),
                  final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "Sucess",
-            "Outfeed Oven request to stop"
+            "[outfeed] Oven request to stop"
             )
             break
         # Tank too low — stop draining
         elif weiVal<= lo_level or low_level_sensor:
             done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             reason = "low level sensor" if low_level_sensor else "lo_level threshold"
             tech_log.warning("[outfeed] Stopped: %s. final=%.2f kg", reason, weiVal)
             print("[oil_drain] Stopped: %s" % reason)
             _log(f"⚠ Outfeed stopped: {reason}", final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "FAIL",
-            reason
+            f"[outfeed] Stopped: {reason}"
             )
             break
 
         elif outfeed_remote_stop:
             done = True
             outfeed_remote_stop=False
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.warning("[outfeed] Remote stop.")
             print("[oil_drain] Remote stop.")
             _log("Outfeed remote stop", final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
@@ -1140,6 +1391,8 @@ def oil_drain(requested_vol_L: float):
         # Target reached — normal completion
         elif weiVal <= target_kg:
             done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.info(
                 "[outfeed] Target reached. requested=%.2f kg  final=%.2f kg",
                 requested_kg, weiVal)
@@ -1150,76 +1403,84 @@ def oil_drain(requested_vol_L: float):
                  requested_kg=round(requested_kg, 2),
                  drained_kg=round(current_kg - weiVal, 2),
                  final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "Sucess",
-            "Outfeed target reached"
+            "[outfeed] target reached"
             )
             break
 
         elif serial_error:
             serial_error=False
             done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.error("[outfeed] Serial error — aborting.")
             print("[oil_drain] Serial error — aborting.")
             _log("⚠ Outfeed aborted: serial error", final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "Fail",
-            "[oil_drain] Serial error"
+            "[outfeed] Serial error"
             )
             break
 
         elif outfeed_local_stop:
             done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.info("[outfeed] Local stop.")
             print("[oil_drain] Local stop.")
             _log("Outfeed local stop",
                  drained_kg=round(current_kg - weiVal, 2),
                  final_kg=round(weiVal, 2))
             
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "Fail",
-            "[oil_drain] Local stop"
+            "[outfeed] Local stop"
             )
             break
 
          
         elif outfeed_mode_change:
             done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.warning("[outfeed] Mode changed mid-sequence — aborting.")
             _log("Outfeed aborted: mode change", final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "Fail",
-            "Outfeed aborted: mode change"
+            "[outfeed] aborted: mode change"
             )
             break
 
         elif outfeed_local_remote_change:
             done = True
+            shutdown_outfeed()
+            time.sleep(4)  # allow time for valve to close and weight to stabilize
             tech_log.warning("[outfeed] Operation changed mid-sequence — aborting.")
             _log("Outfeed aborted: operation change", final_kg=round(weiVal, 2))
-            prod_logger.log(
+            db_log(
             state["product"],
             current_kg,
             requested_kg,
             weiVal,
             "Fail",
-            "Outfeed aborted: operation change"
+            "[Outfeed] aborted: operation change"
             )
             break
 
@@ -1318,7 +1579,7 @@ def auto_outfeed_control():
             tech_log.warning("[outfeed AUTO] TIMEOUT after %ds.", OUTFEED_TIMEOUT)
             print("[auto_outfeed] TIMEOUT after %ds" % OUTFEED_TIMEOUT)
             _log("⚠ Outfeed AUTO timeout", elapsed_s=round(elapsed, 1))
-            prod_logger.log(
+            db_log(
             state["product"],
             start_kg,
             weiVal,
@@ -1382,6 +1643,120 @@ def auto_outfeed_control():
     tech_log.info("[outfeed AUTO] Complete — busyFlagOutfeedBusy cleared.")
     print("[auto_outfeed] Sequence complete.")
 
+
+
+class DiffFilter:
+    def __init__(self, threshold=1.0):
+        self.threshold = threshold
+        self.prev = None
+
+    def feed(self, number):
+        if self.prev is None:
+            self.prev = number
+            return number
+
+        diff = abs(number - self.prev)
+        self.prev = number
+
+        return number if diff <= self.threshold else None
+
+
+
+ 
+def serial_read_data():
+    global client,diff
+    tech_log.info("Serial read thread started.")
+    print("[serial_read] Thread started.")
+    global weiVal, serial_error,busyFlagInfeedBusy
+
+    serial_port = CONFIG["serial"]["port"]
+    serial_baud = CONFIG["serial"]["baudrate"]
+    ser = serial.Serial(serial_port, serial_baud)
+    SPIKE_LIMIT = CONFIG["serial"]["diff"]
+    f = DiffFilter(threshold=SPIKE_LIMIT)
+    buffer      = ""
+    while True:
+        try:
+             
+            chunk  = ser.read(20).decode('utf-8' )
+            buffer += chunk
+
+            numbers = re.findall(r'=\s*([\d.]+)', buffer)
+            buffer  = re.split(r'=\s*[\d.]+', buffer)[-1]  # keep partial tail
+            weight=0
+            mqtt_send_flag=False
+            for raw in numbers:
+                #weight = float(raw)
+                
+                weight = f.feed( float(raw))
+                '''
+                # ── Spike filter ──────────────────────────────────────
+                if last_weight is not None:
+                    diff = abs(weight - last_weight)
+                    if diff > SPIKE_LIMIT:
+                        msg = (f"IGNORED spike: prev={last_weight:.2f}  "
+                            f"new={weight:.2f}  diff={diff:.2f}")
+                        print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> {msg}")
+                        logging.warning(msg)
+                        continue          # skip, keep last_weight unchanged
+
+                if clear_now:
+                    logging.info("Clearing spike filter after previous spike")
+                # ─────────────────────────────────────────────────────
+
+                last_weight = weight
+                '''
+                if weight is not None:
+                    weiVal= float(weight)
+                    
+                    with _lock:
+                        # Push weight into tank state
+                        state["tank"]["weight_kg"]    = weiVal
+                        state["mqtt"]["serial_error"] = False
+                        state["mqtt"]["last_value"]   = weiVal
+                        state["mqtt"]["last_ts"]      = _now()
+                        # Recalculate level % and alarms from new weight
+                        _recalc_alarms()
+
+                    #log_msg = f"Weight published: {weight}"
+                    
+                    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
+
+                    now = datetime.now()
+                    seconds = now.second
+
+                    
+                    if seconds % 5 == 0 and mqtt_send_flag==False:  # every 10 second   
+                        mqtt_send_flag=True
+                        try:
+                            payload = {
+                                "w": weight,
+                                "in":    busyFlagInfeedBusy,
+                                "out":   busyFlagOutfeedBusy,
+                                "d":    diff
+                            }
+                            #weight,runflag,diff
+                            client.publish("serial/weight", json.dumps(payload),qos=0, retain=False)
+                            client.publish("serial/weight", weight, qos=0, retain=False)
+                            #print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> Published to MQTT: {payload}")
+                        except Exception as e:
+                            print (e)
+                            pass
+                    
+                    if seconds % 5 != 0 and mqtt_send_flag==True:
+                        mqtt_send_flag=False
+
+                #logging.info(log_msg)
+
+        except Exception as e:
+            err_msg = f"Error reading from serial or publishing to MQTT: {e}"
+             
+            print(err_msg)
+            logging.error(err_msg)
+            time.sleep(5)
+            continue
+        
+      
 # ══════════════════════════════════════════════════════════════════
 #  MQTT CALLBACKS  (run inside paho's network thread)
 # ══════════════════════════════════════════════════════════════════
@@ -1439,14 +1814,7 @@ def on_message_weight(client, userdata, msg):
                 # Recalculate level % and alarms from new weight
                 _recalc_alarms()
 
-            '''print(
-                f"[MQTT] weight = {weiVal:.2f} kg"
-                f"  level = {state['tank']['level_pct']:.2f}%"
-            )
-            tech_log.info(
-                "weight=%.2f kg  level=%.2f%%",
-                weiVal, state["tank"]["level_pct"]
-            )'''
+            
 
     except ValueError:
         print(f"\n[MQTT] Non-numeric payload: {payload_str!r}")
@@ -1467,9 +1835,7 @@ def _mqtt_thread():
     Separate daemon thread.
     Uses paho loop_forever() with built-in auto-reconnect.
     """
-    if not MQTT_AVAILABLE:
-        print("[MQTT] Thread not started — paho-mqtt not installed.")
-        return
+    global client
 
     client = mqtt_client.Client(client_id="ols-monitor", clean_session=True)
 
@@ -1489,11 +1855,12 @@ def _mqtt_thread():
             client.connect(MQTT_BROKER, MQTT_PORT, keepalive=60)
             client.loop_forever()          # blocks; reconnects automatically
         except Exception as exc:
-            tech_log.error("MQTT fatal error: %s — retry in 5 s", exc)
-            print(f"[MQTT] Error: {exc} — retrying in 5 s")
+            tech_log.error("MQTT fatal error: %s — retry in 10 s", exc)
+            print(f"[MQTT] Error: {exc} — retrying in 10 s")
             with _lock:
                 state["mqtt"]["connected"] = False
-            time.sleep(5)
+            time.sleep(10)
+
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -1783,28 +2150,74 @@ def api_log_clear():
 
 
 # ─────────────────────────────────────────────────────────────────
+# GET /api/alarms  — last 20 alarm records from production_log
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/alarms", methods=["GET"])
+def api_alarms():
+    global alarms_list
+    # Return alarms list (each element is one alarm)
+    return jsonify(alarms_list)
+
+
+# ─────────────────────────────────────────────────────────────────
+# POST /api/alarms  — add alarm to list
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/alarms", methods=["POST"])
+def api_add_alarm():
+    global alarms_list
+    try:
+        data = request.get_json()
+        alarm_msg = data.get("message", "")
+
+        if alarm_msg:
+            ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            alarms_list.append({"timestamp": ts, "message": alarm_msg})
+            tech_log.info("[ALARM] Added: %s", alarm_msg)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        tech_log.error("Failed to add alarm: %s", e)
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ─────────────────────────────────────────────────────────────────
+# DELETE /api/alarms  — clear all alarms
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/alarms", methods=["DELETE"])
+def api_clear_alarms():
+    global alarms_list
+    alarms_list.clear()
+    tech_log.info("[ALARM] Cleared all alarms")
+    return jsonify({"success": True})
+
+
+# ─────────────────────────────────────────────────────────────────
 # GET /api/log/csv  — last 20 rows from the latest production CSV
 # ─────────────────────────────────────────────────────────────────
 @app.route("/api/log/csv", methods=["GET"])
 def api_log_csv():
-    import csv, glob
-    # Find all CSV files in LOG_DIR, pick the newest by filename (date-sorted)
-    pattern = os.path.join(LOG_DIR, "*.csv")
-    files   = sorted(glob.glob(pattern))
-    if not files:
-        return jsonify([])
-    latest = files[-1]   # alphabetical sort works for YYYY-MM-DD filenames
-    rows = []
     try:
-        with open(latest, newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                rows.append(row)
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT   DATE(timestamp) as date,
+                         TIME(timestamp) as time,
+                         product,
+                         initial_weight as now_weight,
+                         required_weight as req_weight,
+                         final_weight,
+                         status as task_state,
+                         reason
+                FROM production_log
+                ORDER BY id DESC
+                LIMIT 20
+            """)
+            rows = [dict(row) for row in cursor.fetchall()]
+            # Return newest first (already ordered DESC)
+            return jsonify(rows)
     except Exception as e:
-        tech_log.error("Failed to read CSV log %s: %s", latest, e)
+        tech_log.error("Failed to read log from database: %s", e)
         return jsonify([])
-    # Return last 20 rows, newest first
-    return jsonify(list(reversed(rows[-20:])))
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -1987,6 +2400,282 @@ def _mqtt_publish_thread():
 
 
 
+# ─────────────────────────────────────────────────────────────────
+# GET /api/export/dates  — export CSV by comma-separated date range
+# Parameters: dates=YYYY-MM-DD,YYYY-MM-DD (e.g. ?dates=2026-04-06,2026-04-08)
+# Same day: starts from 06:00:00, ends at 23:59:59
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/export/dates", methods=["GET"])
+def api_export_by_dates():
+    from datetime import datetime as dt
+    import csv
+    import io
+
+    dates_param = request.args.get("dates", "")
+
+    if not dates_param:
+        return jsonify({"error": "Missing 'dates' parameter"}), 400
+
+    # Split by comma
+    date_parts = dates_param.split(",")
+    if len(date_parts) != 2:
+        return jsonify({"error": "Invalid dates format. Use: YYYY-MM-DD,YYYY-MM-DD"}), 400
+
+    start_date_str = date_parts[0].strip()
+    end_date_str = date_parts[1].strip()
+
+    try:
+        start_date = dt.strptime(start_date_str, "%Y-%m-%d")
+        end_date = dt.strptime(end_date_str, "%Y-%m-%d")
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+    # Build timestamp range
+    # If same day: 6am start, 11:59:59pm end
+    # Otherwise: full days
+    if start_date.date() == end_date.date():
+        start_ts = start_date.strftime("%Y-%m-%d 06:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+    else:
+        start_ts = start_date.strftime("%Y-%m-%d 00:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT timestamp, product, initial_weight, required_weight,
+                       final_weight, status, reason
+                FROM production_log
+                WHERE timestamp >= ? AND timestamp <= ?
+                ORDER BY timestamp ASC
+            """, (start_ts, end_ts))
+            rows = cursor.fetchall()
+
+        # Build CSV in memory
+        output = io.StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(["date", "time", "product", "now_weight", "req_weight", "final_weight", "task_state", "reason"])
+
+        # Write data rows
+        for row in rows:
+            ts = row["timestamp"]  # format: "2026-04-05 14:30:45"
+            if ts:
+                parts = ts.split(" ")
+                date_part = parts[0] if len(parts) > 0 else ""
+                time_part = parts[1] if len(parts) > 1 else ""
+            else:
+                date_part = ""
+                time_part = ""
+
+            writer.writerow([
+                date_part,
+                time_part,
+                row["product"] or "",
+                round(float(row["initial_weight"]) if row["initial_weight"] else 0, 2),
+                round(float(row["required_weight"]) if row["required_weight"] else 0, 2),
+                round(float(row["final_weight"]) if row["final_weight"] else 0, 2),
+                row["status"] or "",
+                row["reason"] or ""
+            ])
+
+        csv_content = output.getvalue()
+        output.close()
+
+        # Return as downloadable file
+        response = make_response(csv_content)
+        response.headers["Content-Disposition"] = f"attachment; filename=production_log_{start_date_str}_to_{end_date_str}.csv"
+        response.headers["Content-Type"] = "text/csv"
+        return response
+
+    except Exception as e:
+        tech_log.error("Failed to export CSV by dates: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+
+# ─────────────────────────────────────────────────────────────────
+# GET /api/export/csv  — export production logs as CSV by date range
+# Parameters: start_date, end_date (format: YYYY-MM-DD)
+# If same day: starts from 06:00:00, ends at 23:59:59
+# ─────────────────────────────────────────────────────────────────
+@app.route("/api/export/csv", methods=["GET"])
+def api_export_csv():
+    from datetime import datetime as dt
+    import csv
+    import io
+
+    start_date_str = request.args.get("start_date", "")
+    end_date_str   = request.args.get("end_date", "")
+
+    if not start_date_str or not end_date_str:
+        return jsonify({"error": "Missing start_date or end_date"}), 400
+
+    try:
+        start_date = dt.strptime(start_date_str, "%Y-%m-%d")
+        end_date = dt.strptime(end_date_str, "%Y-%m-%d")
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+
+    # Build timestamp range
+    # If same day: 6am start, 11:59:59pm end
+    # Otherwise: full days
+    if start_date.date() == end_date.date():
+        start_ts = start_date.strftime("%Y-%m-%d 06:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+    else:
+        start_ts = start_date.strftime("%Y-%m-%d 00:00:00")
+        end_ts   = end_date.strftime("%Y-%m-%d 23:59:59")
+
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT timestamp, product, initial_weight, required_weight,
+                       final_weight, status, reason
+                FROM production_log
+                WHERE timestamp >= ? AND timestamp <= ?
+                ORDER BY timestamp ASC
+            """, (start_ts, end_ts))
+            rows = cursor.fetchall()
+
+        # Build CSV in memory
+        output = io.StringIO()
+        writer = csv.writer(output)
+
+        # Write header
+        writer.writerow(["date", "time", "product", "now_weight", "req_weight", "final_weight", "task_state", "reason"])
+
+        # Write data rows
+        for row in rows:
+            ts = row["timestamp"]  # format: "2026-04-05 14:30:45"
+            if ts:
+                parts = ts.split(" ")
+                date_part = parts[0] if len(parts) > 0 else ""
+                time_part = parts[1] if len(parts) > 1 else ""
+            else:
+                date_part = ""
+                time_part = ""
+
+            writer.writerow([
+                date_part,
+                time_part,
+                row["product"] or "",
+                round(float(row["initial_weight"]) if row["initial_weight"] else 0, 2),
+                round(float(row["required_weight"]) if row["required_weight"] else 0, 2),
+                round(float(row["final_weight"]) if row["final_weight"] else 0, 2),
+                row["status"] or "",
+                row["reason"] or ""
+            ])
+
+        csv_content = output.getvalue()
+        output.close()
+
+        # Return as downloadable file
+        response = make_response(csv_content)
+        response.headers["Content-Disposition"] = f"attachment; filename=production_log_{start_date_str}_to_{end_date_str}.csv"
+        response.headers["Content-Type"] = "text/csv"
+        return response
+
+    except Exception as e:
+        tech_log.error("Failed to export CSV: %s", e)
+        return jsonify({"error": str(e)}), 500
+
+
+
+def filter_database_for_csv(start_ts, end_ts):
+    """
+    Query the production_log table for records between start_ts and end_ts.
+    Returns: list of dicts with keys: timestamp, product, initial_weight,
+             required_weight, final_weight, status, reason
+    """
+    try:
+        with sqlite3.connect(DB_PATH) as con:
+            con.row_factory = sqlite3.Row
+            cursor = con.execute("""
+                SELECT timestamp, product, initial_weight, required_weight,
+                       final_weight, status, reason
+                FROM production_log
+                WHERE timestamp >= ? AND timestamp <= ?
+                ORDER BY timestamp ASC
+            """, (start_ts, end_ts))
+            rows = [dict(row) for row in cursor.fetchall()]
+            return rows
+    except Exception as e:
+        tech_log.error("Failed to query database for CSV: %s", e)
+        return []
+
+        
+def _generate_daily_csv():
+    """
+    Generate CSV for yesterday's production data (6 AM to 11:59 PM).
+    Returns: path to the generated CSV file or None on error.
+    """
+    from datetime import datetime as dt, timedelta
+    import csv
+    import os
+
+    try:
+        # Calculate yesterday's date range: 6 AM to 11:59 PM
+        yesterday = dt.now().date() - timedelta(days=1)
+        start_ts = yesterday.strftime("%Y-%m-%d 06:00:00")
+        end_ts   =  dt.now().date().strftime("%Y-%m-%d 05:59:59")
+        print("poll database for yesterday:", start_ts, "to", end_ts)
+        # Query database
+
+        rows = filter_database_for_csv(start_ts, end_ts)
+
+        
+
+        if not rows:
+            tech_log.warning("[DAILY CSV] No data found for %s", yesterday.strftime("%Y-%m-%d"))
+            return None
+
+        # Create logs directory if it doesn't exist
+         
+        os.makedirs(LOG_DIR, exist_ok=True)
+
+        # Generate filename
+        csv_filename = f"production_{yesterday.strftime('%Y-%m-%d')}.csv"
+        csv_path = os.path.join(LOG_DIR, csv_filename)
+
+        # Write CSV file
+        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            # Write header
+            writer.writerow(["date", "time", "product", "now_weight", "req_weight", "final_weight", "task_state", "reason"])
+
+            # Write data rows
+            for row in rows:
+                ts = row["timestamp"]  # format: "2026-04-05 14:30:45"
+                if ts:
+                    parts = ts.split(" ")
+                    date_part = parts[0] if len(parts) > 0 else ""
+                    time_part = parts[1] if len(parts) > 1 else ""
+                else:
+                    date_part = ""
+                    time_part = ""
+
+                writer.writerow([
+                    date_part,
+                    time_part,
+                    row["product"] or "",
+                    round(float(row["initial_weight"]) if row["initial_weight"] else 0, 2),
+                    round(float(row["required_weight"]) if row["required_weight"] else 0, 2),
+                    round(float(row["final_weight"]) if row["final_weight"] else 0, 2),
+                    row["status"] or "",
+                    row["reason"] or ""
+                ])
+
+        tech_log.info("[DAILY CSV] Generated %s (%d records)", csv_path, len(rows))
+        return csv_path
+
+    except Exception as e:
+        tech_log.error("[DAILY CSV] Failed to generate CSV: %s", e)
+        return None
+
+
 # ── DAILY 6 AM SCHEDULER THREAD ────────────────────────────────────
 def daily_6am_scheduler():
     """Polls time. Runs job once at/after 6 AM (flag=0), resets flag at 7 AM."""
@@ -2007,32 +2696,75 @@ def daily_6am_scheduler():
 
         # 6 AM or later AND job not done yet → run it
         if hour == 6 and job_done == 0:
-            import  emailsend  as em
+            import emailsend as em
 
-            latest_file = em.get_latest_csv("/home/palmoil/stuff/logs")
-            print("Latest file:", latest_file)
-            tech_log.info("[SCHEDULER] Running daily 6 AM job...{latest_file}")
-            print("[SCHEDULER] Running daily 6 AM job —", now.strftime("%Y-%m-%d %H:%M:%S"))
-             
-            body=em.build_body(latest_file) 
-            
-            em.send_email(
-            "PLANT_01_PALM_OLEIN_SPRAYER",
-            body,
-            "sprayer01weighingpo@malibangroup.lk",
-            latest_file
-            )
-            time.sleep(2)
-            em.send_email(
-            "PLANT_01_PALM_OLEIN_SPRAYER",
-            body,
-            "amalanjula@gmail.com",
-            latest_file
-            )
+            # Generate CSV from database for yesterday (6 AM to 11:59 PM)
+            csv_file = _generate_daily_csv()
 
+            if csv_file and os.path.exists(csv_file):
+                print("Generated CSV:", csv_file)
+                tech_log.info("[SCHEDULER] Generated daily CSV from database: %s", csv_file)
+                print("[SCHEDULER] Running daily 6 AM job —", now.strftime("%Y-%m-%d %H:%M:%S"))
+
+                body = em.build_body(csv_file)
+
+                em.send_email(
+                    "PLANT_01_PALM_OLEIN_SPRAYER",
+                    body,
+                    "sprayer01weighingpo@malibangroup.lk",
+                    csv_file
+                )
+                time.sleep(2)
+                em.send_email(
+                    "PLANT_01_PALM_OLEIN_SPRAYER",
+                    body,
+                    "amalanjula@gmail.com",
+                    csv_file
+                )
+                tech_log.info("[SCHEDULER] Daily CSV emailed successfully")
+            else:
+                tech_log.warning("[SCHEDULER] No data found or CSV generation failed for today's job")
+
+                body = f"""Hi,
+
+                This report is auto-generated by Raspberry Pi 5.
+                For old log files, please contact your admin.
+
+                --------------------------------------------------
+                DAILY PRODUCTION SUMMARY
+                
+                --------------------------------------------------
+
+                    No production data found for yesterday (6 AM to next day 5.59 AM).
+                --------------------------------------------------
+
+                Have a nice day!
+
+                Regards,
+                RPI5
+                """                 
+                
+                try:
+
+                    em.send_email(
+                        "PLANT_01_PALM_OLEIN_SPRAYER",
+                        body,
+                        "sprayer01weighingpo@malibangroup.lk"
+                        
+                    )
+                    time.sleep(2)
+                    em.send_email(
+                        "PLANT_01_PALM_OLEIN_SPRAYER",
+                        body,
+                        "amalanjula@gmail.com"
+                        
+                    )
+                    tech_log.info("[SCHEDULER] Daily CSV emailed successfully")
+                except Exception as e:
+                    tech_log.error("[SCHEDULER] Failed to send email: %s", e)   
 
             # ── YOUR JOB CODE HERE ──────────────────────
-            
+
             # ───────────────────────────────────────────
 
             # Write flag = 1 to config
@@ -2049,6 +2781,8 @@ def daily_6am_scheduler():
             tech_log.info("[SCHEDULER] Flag reset to 0.")
 
         time.sleep(10)  # check every minute
+    
+    tech_log.error("[SCHEDULER] Scheduler thread terminated.")  
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -2073,11 +2807,21 @@ if __name__ == "__main__":
     t.start()
     print(f"[MQTT] Thread started (id={t.ident})\n")
 
+
+    # Start MQTT in its own daemon thread BEFORE Flask
+    t = threading.Thread(target=serial_read_data, name="serial_read_data", daemon=True)
+    t.start()
+    print(f"[SERIAL] Thread started (id={t.ident})\n")
+
     t = threading.Thread(target=gpio_handler, name="gpio-handler", daemon=True)
     t.start()
 
     #t = threading.Thread(target=_mqtt_state_broadcast_thread, name="mqtt-tx-broadcast", daemon=True)
     #t.start()
-
+    t = threading.Thread(target=_remote_sync_thread, name="remote-db-sync", daemon=True)
+    t.start()
+    print(f"[SYNC] Remote DB sync thread started → {REMOTE_SYNC_URL}")
+ 
+    tech_log.info("****Server started. Version 1.02******")
     # Start Flask (use_reloader=False required when using threads)
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

@@ -465,7 +465,7 @@ _publish_queue = queue.Queue()
 def gpio_handler():
     tech_log.info("GPIO handler thread started.")
     global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
-    global hi_level_sensor,out_feed_sucess
+    global hi_level_sensor,out_feed_sucess,auto_start_after_outfeed
     gpio.update() 
     
     state["infeed"]["operation"] = "REMOTE"
@@ -534,10 +534,10 @@ def gpio_handler():
                         _now_w, _req_w)
                     print(f"[infeed remote manual ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
 
-            elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"]:
+            elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"] and auto_start_after_outfeed==False:
                     time.sleep(2)
                     if gpio.state("intke_start"):
-                        state["labels"]["in_op_label"] = "Now Continuously"
+                        state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
                         _now_w = weiVal
                         _req_w = state["infeed"]["manual_vol_L"]
                         t = threading.Thread(
@@ -548,7 +548,7 @@ def gpio_handler():
                         )
                         t.start()
                         tech_log.info(
-                            "oil_add thread started remote Auto — now=%.2f kg  requested=%.2f kg",
+                            "oil_add thread started remote Auto by button — now=%.2f kg  requested=%.2f kg",
                             _now_w, _req_w)
                         print(f"[infeed remote auto ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
                     
@@ -572,7 +572,7 @@ def gpio_handler():
                         name="outfeed_AUTO",
                     )
                 t.start()
-                tech_log.info("[outfeed] oil_drain thread REMOTE started — vol=%.2f L", _req_vol)
+                tech_log.info("[outfeed] oil_drain thread REMOTE started  vol=%.2f L", _req_vol)
                 print(f"[outfeed] oil_drain thread REMOTE started  vol={_req_vol:.2f} L")
 
             #chnge button state amal 
@@ -751,10 +751,11 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
             serial_error=False
             break
 
-        elif   auto_start_after_outfeed:
-            auto_start_after_outfeed=False
-            result=oil_add(weiVal, required_weight,True)
-            gpio.output_on("ind_led_in")
+        #elif   auto_start_after_outfeed:
+            
+            #auto_start_after_outfeed=False
+            #result=oil_add(weiVal, required_weight,True)
+            #gpio.output_on("ind_led_in")
             
            
                  
@@ -801,6 +802,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
     gpio.output_off("ind_led_in")
     gpio.output_off("ind_led_in")
     state["labels"]["in_op_label"] = "Now Working"
+    auto_start_after_outfeed=False
            
 
 
@@ -882,7 +884,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
         # Timeout
 
 
-        diff= required_weight-weiVal
+        diff= weiVal-intial_weight
 
         if elapsed > INFEED_TIMEOUT:
             done = True
@@ -1218,7 +1220,7 @@ def oil_drain(requested_vol_L: float):
     global outfeed_local_remote_change, outfeed_mode_change
     global low_level_sensor,outfeed_remote_stop
     global out_feed_sucess,auto_start_after_outfeed
-    tech_log.info("[outfeed] oil_drain requested — vol=%.2f L", requested_vol_L)
+    #tech_log.info("[outfeed] oil_drain requested — vol=%.2f L", requested_vol_L)
 
     # Lock buttons while sequence runs
     state["ui"]["buttons"]["out-mode-btn"]["disabled"] = True
@@ -1503,9 +1505,27 @@ def oil_drain(requested_vol_L: float):
         _now_w = weiVal
         _req_w = state["infeed"]["manual_vol_L"]
         #result=oil_add(weiVal, _req_w,False)
-        tech_log.info("infeed active after outfeed. always keep same")
-        print("[infeed active after outfeed. always keep same.")
-        auto_start_after_outfeed=True
+        #tech_log.info("infeed active after outfeed. always keep same")
+        #print("[infeed active after outfeed. always keep same.")
+
+        if not auto_start_after_outfeed :
+            auto_start_after_outfeed=True
+
+            state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
+            _now_w = weiVal
+            _req_w = state["infeed"]["manual_vol_L"]
+            t = threading.Thread(
+                            target=auto_infeed_control,
+                            args=(_now_w, _req_w,True),
+                            daemon=True,
+                            name="infeed_auto_remote",
+                        )
+            t.start()
+            tech_log.info(
+                "oil_add thread started.no one press button — now=%.2f kg  requested=%.2f kg",
+                 _now_w, _req_w)
+            print(f"[infeed remote auto ] oil_add thread started.no one press button  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
+            
     
         
 
@@ -1684,10 +1704,10 @@ def serial_read_data():
             numbers = re.findall(r'=\s*([\d.]+)', buffer)
             buffer  = re.split(r'=\s*[\d.]+', buffer)[-1]  # keep partial tail
             weight=0
-             
+            mqtt_send_flag=False
             for raw in numbers:
                 #weight = float(raw)
-
+                
                 weight = f.feed( float(raw))
                 '''
                 # ── Spike filter ──────────────────────────────────────
@@ -1721,19 +1741,31 @@ def serial_read_data():
                     #log_msg = f"Weight published: {weight}"
                     
                     print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
-                    try:
-                        payload = {
-                            "w": weight,
-                            "r":    busyFlagInfeedBusy,
-                            "d":    diff
-                        }
-                        #weight,runflag,diff
-                        client.publish("serial/weight", json.dumps(payload),qos=0, retain=False)
-                        client.publish("serial/weight", weight, qos=0, retain=False)
-                    except Exception as e:
-                        print (e)
-                        pass
+
+                    now = datetime.now()
+                    seconds = now.second
+
                     
+                    if seconds % 5 == 0 and mqtt_send_flag==False:  # every 10 second   
+                        mqtt_send_flag=True
+                        try:
+                            payload = {
+                                "w": weight,
+                                "in":    busyFlagInfeedBusy,
+                                "out":   busyFlagOutfeedBusy,
+                                "d":    diff
+                            }
+                            #weight,runflag,diff
+                            client.publish("serial/weight", json.dumps(payload),qos=0, retain=False)
+                            client.publish("serial/weight", weight, qos=0, retain=False)
+                            #print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> Published to MQTT: {payload}")
+                        except Exception as e:
+                            print (e)
+                            pass
+                    
+                    if seconds % 5 != 0 and mqtt_send_flag==True:
+                        mqtt_send_flag=False
+
                 #logging.info(log_msg)
 
         except Exception as e:
@@ -2806,6 +2838,6 @@ if __name__ == "__main__":
     t.start()
     print(f"[SYNC] Remote DB sync thread started → {REMOTE_SYNC_URL}")
  
-    tech_log.info("****Server started. ******")
+    tech_log.info("****Server started.Version 1.04 ******")
     # Start Flask (use_reloader=False required when using threads)
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
