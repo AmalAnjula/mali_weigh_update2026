@@ -1,0 +1,6 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-06-07,07:28:36,SN.C&C,93.8,60.0,93.8,Sucess,[outfeed] Oven request to stop
+2026-06-07,07:54:24,SN.C&C,93.8,60.0,93.8,Sucess,[outfeed] Oven request to stop
+2026-06-07,07:57:41,SN.C&C,93.0,60.0,93.0,Sucess,[outfeed] Oven request to stop
+2026-06-07,10:42:42,SN.C&C,93.6,60.0,93.6,FAIL,[outfeed] TIMEOUT
+2026-06-07,22:08:44,SN.C&C,93.8,60.0,93.0,Sucess,[outfeed] Oven request to stop
