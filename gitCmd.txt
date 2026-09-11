@@ -1,0 +1,133 @@
+There are actually two separate issues:
+
+credential-manager is not installed on the Raspberry Pi.
+GitHub does not accept your GitHub account password for git push over HTTPS anymore. Even a correct password will fail.
+
+Your current remote is HTTPS:
+
+https://github.com/AmalAnjula/mali_weigh_update2026.git/
+Best solution for your Raspberry Pi: SSH key
+
+On the Raspberry Pi terminal (the VS Code SSH terminal), run:
+
+ssh-keygen -t ed25519 -C "amalanjula@gmail.com"
+
+When it asks:
+
+Enter file in which to save the key:
+
+just press Enter.
+
+For passphrase, you can press Enter twice if you don't want one.
+
+Then display the public key:
+
+cat ~/.ssh/id_ed25519.pub
+
+You'll get something like:
+
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... amalanjula@gmail.com
+
+Copy the entire line.
+
+Then in GitHub go to:
+
+GitHub → Settings → SSH and GPG keys → New SSH key
+
+Add the key.
+
+After that, test from the Raspberry Pi:
+
+ssh -T git@github.com
+
+You should get something similar to:
+
+Hi AmalAnjula! You've successfully authenticated...
+Change your repository from HTTPS to SSH
+
+On the Raspberry Pi:
+
+git remote set-url origin git@github.com:AmalAnjula/mali_weigh_update2026.git
+
+Check:
+
+git remote -v
+
+You should now see:
+
+origin  git@github.com:AmalAnjula/mali_weigh_update2026.git (fetch)
+origin  git@github.com:AmalAnjula/mali_weigh_update2026.git (push)
+
+Then:
+
+git push origin coconut_sprayer
+
+You should not get a GitHub username/password prompt.
+
+Also fix the credential-manager error
+
+Your Pi has a Git config referring to a credential manager that isn't installed:
+
+git: 'credential-manager' is not a git command
+
+Once you switch to SSH, you don't need it. You can remove that configuration:
+
+git config --global --unset credential.helper
+
+
+reat — your GitHub SSH authentication is now working. This line confirms your remote is correctly configured:
+
+origin  git@github.com:AmalAnjula/mali_weigh_update2026.git
+
+And:
+
+Everything up-to-date
+
+means GitHub accepted the connection and there is currently nothing new to push.
+
+Your remaining problem is only the Git commit identity.
+
+Set your Git name and email on the Raspberry Pi
+
+Run:
+
+git config --global user.name "Amal Anjula"
+git config --global user.email "amalanjula@gmail.com"
+
+Then verify:
+
+git config --global user.name
+git config --global user.email
+
+You should see:
+
+Amal Anjula
+amalanjula@gmail.com
+Then commit
+git commit -m "coconut_sprayer branch updates"
+
+If the commit succeeds, push it:
+
+git push origin coconut_sprayer
+One important point
+
+This:
+
+git push origin coconut_sprayer
+Everything up-to-date
+
+does not mean your latest changes were committed.
+
+Git only pushes commits. Your workflow should be:
+------------------------------------------------------------
+# 1. Check changes
+git status
+
+# 2. Add changes
+git add .
+
+# 3. Commit
+git commit -m "coconut_sprayer branch updates"
+
+# 4. Push
+git push origin coconut_sprayer
