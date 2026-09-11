@@ -1994,7 +1994,8 @@ def api_control():
                 elif not s["running"]:
                     # STOP pressed → signal the running oil_add loop to exit
                     local_stop = True
-                    tech_log.info("Local stop signalled to oil_add.")
+                    alarms_list.clear()
+                    tech_log.info("Local stop signalled to oil_add. Alarm list cleared.")
 
             # ── Outfeed run handling ────────────────────────────────
             if side == "outfeed":
@@ -2025,7 +2026,8 @@ def api_control():
 
                 elif not s["running"]:
                     outfeed_local_stop = True
-                    tech_log.info("[outfeed] Local stop signalled.")
+                    alarms_list.clear()
+                    tech_log.info("[outfeed] Local stop signalled. Alarm list cleared.")
                  
 
 

@@ -9,21 +9,21 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #f0f2f5;
+  --bg:       #eef4f8;
   --surface:  #ffffff;
-  --border:   #00bcbf;
+  --border:   #ff03c8;
   --text:     #1a1d23;
-  --muted:    #f30000;
-  --green:    #041a0c;  /* control mode auto text col*/
-  --green-bg: #09df4d;
-  --red:      #dc2626;
-  --red-bg:   #c4f003;
-  --amber:    #ecb80a;
-  --amber-bg: #2330ea;
-  --blue:     #03410b;
-  --blue-bg:  #0fe4b2;
+  --muted:    #d62f2f;
+  --green:    #063d2a;
+  --green-bg: #38f7a0;
+  --red:      #c41212;
+  --red-bg:   #ffe7a6;
+  --amber:    #d97706;
+  --amber-bg: #fef3c7;
+  --blue:     #0e5d47;
+  --blue-bg:  #baf7e9;
   --radius:   8px;
-  --shadow:   0 1px 3px rgba(0,0,0,0.1);
+  --shadow:   0 3px 10px rgba(9, 120, 159, 0.12);
 }
 
 body {
@@ -91,9 +91,9 @@ header {
 /* ── Cards ────────────────────────────────────── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: 0 0 0 1px rgba(30,201,255,.15), var(--shadow);
 }
 .card-head {
   padding: 5px 10px 8px;
@@ -110,11 +110,12 @@ header {
 /* Button rows */
 .ctrl-btn {
   width: 100%; padding: 12px 14px; border-radius: 7px;
-  border: 1.5px solid var(--border); background: var(--surface);
+  border: 2px solid var(--border); background: var(--surface);
+  box-shadow: 0 0 0 1px rgba(30,201,255,.08);
   cursor: pointer; text-align: left; transition: all .15s;
   display: flex; flex-direction: column; gap: 2px;
 }
-.ctrl-btn:hover { border-color: var(--blue); }
+.ctrl-btn:hover { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(14,93,71,.12); }
 .ctrl-btn .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
 .ctrl-btn .value { font-size: 20px; font-weight: 700; }
 
@@ -133,7 +134,8 @@ header {
 .vol-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
 .vol-input {
   width: 100%; padding: 10px 12px; border-radius: 6px;
-  border: 1.5px solid var(--border); background: var(--bg);
+  border: 2px solid var(--border); background: var(--bg);
+  box-shadow: inset 0 0 0 1px rgba(30,201,255,.08);
   font-size: 18px; font-weight: 600; text-align: center; color: var(--text);
   outline: none; transition: border .15s;
 }
@@ -244,10 +246,10 @@ header {
 .tank-shell {
   width: 200px; height: 330px;
   background: #f8fafc;
-  border: 2px solid var(--border);
+  border: 3px solid var(--border);
   border-radius: 16px 16px 12px 12px;
   position: relative; overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,.06);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.06), 0 0 0 2px rgba(30,201,255,.14);
 }
 
 /* Level indicator lines */
@@ -373,12 +375,23 @@ td.cwt { color: var(--green); }
 
 /* ── Status bar ───────────────────────────────── */
 .status-bar {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--surface); border: 2px solid var(--border);
   border-radius: var(--radius); padding: 6px 16px; margin-top: 12px;
   display: flex; gap: 24px; font-size: 11px; color: var(--muted);
-  box-shadow: var(--shadow);
+  box-shadow: 0 0 0 1px rgba(30,201,255,.1), var(--shadow);
 }
 .status-bar span { font-weight: 600; color: var(--text); margin-left: 4px; }
+
+.alarm-banner {
+  position: fixed; top: 18px; right: 18px; z-index: 1200;
+  max-width: 290px; min-width: 180px; padding: 8px 12px;
+  border-radius: 10px; border: 2px solid var(--border);
+  background: rgba(255,255,255,.96); color: var(--text);
+  font-size: 11px; font-weight: 700; letter-spacing: .7px;
+  text-transform: uppercase; box-shadow: 0 8px 22px rgba(15, 23, 42, .15);
+}
+.alarm-banner.active { background: #fff4f4; border-color: var(--red); color: var(--red); }
+.alarm-banner.idle { background: rgba(240,255,245,.96); border-color: var(--green); color: var(--green); }
 
 /* ── Toast ────────────────────────────────────── */
 .toast {
@@ -395,7 +408,8 @@ td.cwt { color: var(--green); }
 <body>
 <div class="page">
 
- 
+<div id="alarm-banner" class="alarm-banner idle" aria-live="polite">System normal</div>
+
 <!-- TABS -->
 <div class="tabs">
   <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
@@ -425,7 +439,7 @@ td.cwt { color: var(--green); }
         <span class="value" id="in-run-val">STOP</span>
       </button>
       <div class="vol-wrap">
-        <span class="vol-label">Infeed Volume (L)</span>
+        <span class="vol-label">Infeed Volume (Kg)</span>
         <input type="number" class="vol-input" id="in-vol" value="25.00" step="0.01" min="0">
         <button class="apply-btn" onclick="applyVol('infeed')">Apply Infeed</button>
       </div>
@@ -522,7 +536,7 @@ td.cwt { color: var(--green); }
         <span class="value" id="out-run-val">STOP</span>
       </button>
       <div class="vol-wrap">
-        <span class="vol-label">Outfeed Volume (L)</span>
+        <span class="vol-label">Outfeed Volume (Kg)</span>
         <input type="number" class="vol-input" id="out-vol" value="0.00" step="0.01" min="0">
         <button class="apply-btn" onclick="applyVol('outfeed')">Apply Outfeed</button>
       </div>
@@ -711,10 +725,6 @@ td.cwt { color: var(--green); }
   <div>Status: <span id="sb-status">--</span></div>
   <div>Last update: <span id="sb-ts">--</span></div>
   <div>Line: <span id="sb-line" style="font-weight:600;color:var(--text);">--</span></div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
-    <div style="font-size:11px;color:var(--muted)">MQTT last: <span id="sb-mqtt-ts" style="font-weight:600;color:var(--text)">--</span></div>
-    <span class="badge badge-red" id="sb-mqtt"><span class="dot"></span>MQTT OFF</span>
-  </div>
 </div>
 
 </div><!-- /page -->
@@ -841,19 +851,7 @@ loL.className = "slbl" + (loSns ? " lo-alm" : "");
   const rawLine = d.serial && d.serial.line ? String(d.serial.line).trim() : "--";
   document.getElementById("sb-line").textContent = rawLine.length > 80 ? rawLine.slice(0, 77) + "..." : rawLine;
 
-  // MQTT status badge
-  const mq = d.mqtt || {};
-  const mqEl = document.getElementById("sb-mqtt");
-  const mqTs = document.getElementById("sb-mqtt-ts");
-  if (mqEl) {
-    let mqLabel, mqCls;
-    if (mq.serial_error)        { mqLabel = "SENSOR ERR"; mqCls = "badge badge-red";   }
-    else if (mq.connected)      { mqLabel = "MQTT OK";    mqCls = "badge badge-green"; }
-    else                        { mqLabel = "MQTT OFF";   mqCls = "badge badge-red";   }
-    mqEl.className = mqCls;
-    mqEl.innerHTML = `<span class="dot ${mq.connected && !mq.serial_error ? "pulse" : ""}"></span>${mqLabel}`;
-  }
-  if (mqTs) mqTs.textContent = mq.last_ts ? mq.last_ts.replace("T"," ").slice(0,19) : "--";
+  renderAlarmBanner(d);
 
   // Update volume inputs — only when user is NOT typing
   if (!inVolDirty)  document.getElementById("in-vol").value  = (d.infeed?.manual_vol_L  || 0).toFixed(2);
@@ -861,6 +859,21 @@ loL.className = "slbl" + (loSns ? " lo-alm" : "");
 
   // Sync settings inputs (once)
   syncSettings(d);
+}
+
+function renderAlarmBanner(d) {
+  const banner = document.getElementById("alarm-banner");
+  const tk = d && d.tank ? d.tank : {};
+  const active = tk.hi_alarm ? "HI ALARM" : tk.lo_alarm ? "LO ALARM" : "";
+
+  if (!active) {
+    banner.className = "alarm-banner idle";
+    banner.textContent = "System normal";
+    return;
+  }
+
+  banner.className = "alarm-banner active";
+  banner.textContent = active + " — check tank level";
 }
 
 function renderValve(side, open) {
@@ -901,12 +914,25 @@ function renderPanel(side, s) {
 // ═════════════════════════════════════════════════
 // CONTROLS → POST to server → simulator reads
 // ═════════════════════════════════════════════════
+async function clearAlarmsSilently() {
+  try {
+    await fetch("/api/alarms", { method: "DELETE" });
+  } catch (e) {
+    console.warn("Could not clear alarms silently:", e);
+  }
+}
+
 async function ctrl(side, action) {
+  const stopPressed = action === "run" && !!(D && D[side] && D[side].running);
   await fetch("/api/control", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ side, action })
   });
+  if (stopPressed) {
+    await clearAlarmsSilently();
+    renderAlarmBanner(D);
+  }
   poll(); // immediate refresh
 }
 

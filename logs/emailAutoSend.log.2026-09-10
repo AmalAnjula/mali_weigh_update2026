@@ -1,0 +1,7 @@
+2026-09-10 18:39:58 [INFO] =======================================================
+2026-09-10 18:39:58 [INFO]   OLS Email Auto-Send started
+2026-09-10 18:39:58 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-10 18:39:58 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-10 18:39:58 [INFO]   Poll   : every 30s
+2026-09-10 18:39:58 [INFO] =======================================================
+2026-09-10 18:40:00 [INFO] No new emails.
