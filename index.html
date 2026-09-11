@@ -710,6 +710,7 @@ td.cwt { color: var(--green); }
   <div>Capacity: <span id="sb-cap">-- kg</span></div>
   <div>Status: <span id="sb-status">--</span></div>
   <div>Last update: <span id="sb-ts">--</span></div>
+  <div>Line: <span id="sb-line" style="font-weight:600;color:var(--text);">--</span></div>
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
     <div style="font-size:11px;color:var(--muted)">MQTT last: <span id="sb-mqtt-ts" style="font-weight:600;color:var(--text)">--</span></div>
     <span class="badge badge-red" id="sb-mqtt"><span class="dot"></span>MQTT OFF</span>
@@ -836,6 +837,9 @@ loL.className = "slbl" + (loSns ? " lo-alm" : "");
   document.getElementById("sb-status").textContent = status;
   const ts = d.timestamp ? d.timestamp.replace("T"," ").slice(0,19) : "--";
   document.getElementById("sb-ts").textContent = ts;
+
+  const rawLine = d.serial && d.serial.line ? String(d.serial.line).trim() : "--";
+  document.getElementById("sb-line").textContent = rawLine.length > 80 ? rawLine.slice(0, 77) + "..." : rawLine;
 
   // MQTT status badge
   const mq = d.mqtt || {};

@@ -28,6 +28,7 @@ import smtplib
 import sqlite3
 import tempfile
 import logging
+from logging.handlers import TimedRotatingFileHandler
 
 from datetime import datetime
 from email import message_from_bytes
@@ -45,9 +46,9 @@ IMAP_HOST   = os.getenv("EMAIL_IMAP_HOST",   "imap.gmail.com")
 IMAP_PORT   = int(os.getenv("EMAIL_IMAP_PORT", "993"))
 SMTP_HOST   = os.getenv("EMAIL_SMTP_HOST",   "smtp.gmail.com")
 SMTP_PORT   = int(os.getenv("EMAIL_SMTP_PORT", "587"))
-EMAIL_USER  = os.getenv("EMAIL_USER",  "sprayer01weighingpo@gmail.com")
-EMAIL_PASS  = os.getenv("EMAIL_PASS",  "kqwalbufyepwfnpt")
-EMAIL_NAME  = os.getenv("EMAIL_NAME",  "OLS Production System")
+EMAIL_USER  = os.getenv("EMAIL_USER",  "sprayer01weighingco@gmail.com")
+EMAIL_PASS  = os.getenv("EMAIL_PASS",  "wkdbfbnnuipytoep")
+EMAIL_NAME  = os.getenv("EMAIL_NAME",  "Coconut Production System")
 
  
 
@@ -57,13 +58,61 @@ POLL_EVERY  = int(os.getenv("POLL_EVERY_SEC", "30"))   # seconds between inbox c
 
 # ══════════════════════════════════════════════════════════════════
 #  LOGGING
+#  - Rotate after 200 MB
+#  - Keep a small number of backup files
+#  - Deduplicate repeated identical messages to avoid burning disk space
 # ══════════════════════════════════════════════════════════════════
-logging.basicConfig(
-    level   = logging.INFO,
-    format  = "%(asctime)s [%(levelname)s] %(message)s",
-    datefmt = "%Y-%m-%d %H:%M:%S",
-)
+class DedupFilter(logging.Filter):
+    """Suppress exact duplicate log messages in a row."""
+    def __init__(self):
+        super().__init__()
+        self._last_msg = None
+        self._last_record = None
+
+    def filter(self, record):
+        msg = record.getMessage()
+        if msg == self._last_msg:
+            return False
+        self._last_msg = msg
+        return True
+
+
+os.makedirs(LOG_DIR, exist_ok=True)
+
 log = logging.getLogger("emailAutoSend")
+log.setLevel(logging.INFO)
+log.propagate = False
+
+formatter = logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
+# Main daily-rotating log for operational activity, keeping only the last 30 days
+info_handler = TimedRotatingFileHandler(
+    os.path.join(LOG_DIR, "emailAutoSend.log"),
+    when="midnight",
+    interval=1,
+    backupCount=30,
+    encoding="utf-8",
+)
+info_handler.setLevel(logging.INFO)
+info_handler.setFormatter(formatter)
+info_handler.addFilter(DedupFilter())
+log.addHandler(info_handler)
+
+# Error-only daily-rotating log, keeping only the last 30 days
+error_handler = TimedRotatingFileHandler(
+    os.path.join(LOG_DIR, "emailAutoSend_error.log"),
+    when="midnight",
+    interval=1,
+    backupCount=30,
+    encoding="utf-8",
+)
+error_handler.setLevel(logging.ERROR)
+error_handler.setFormatter(formatter)
+error_handler.addFilter(DedupFilter())
+log.addHandler(error_handler)
 
 # ══════════════════════════════════════════════════════════════════
 #  HELPERS
@@ -285,6 +334,7 @@ def process_email(subject_or_uid, email_msg_or_sender=None):
     Test use (call directly from terminal with plain strings):
         process_email("sendme 20260501000000 20260502000000", "you@example.com")
     """
+    
     # ── Detect test mode: both args are plain strings ──────────────
     if isinstance(subject_or_uid, str) and isinstance(email_msg_or_sender, str):
         subject = subject_or_uid
@@ -395,7 +445,7 @@ def poll_inbox():
             uid_list = uids[0].split()
 
             if not uid_list:
-                log.debug("No new emails.")
+                log.info("No new emails.")
                 return
 
             log.info("Found %d unread email(s).", len(uid_list))

@@ -1,18 +1,28 @@
+import serial
 import re
-import serial  # pip install pyserial
+import time
 
-# --- Option 1: From a real serial port ---
 ser = serial.Serial('/dev/ttyUSB0', 1200, timeout=1)  # adjust port/baud
 
-buffer = ""
+pattern = re.compile(r'([A-Z]{2}),([A-Z]{2})\s+([\d.]+)\s*KG')
+
 while True:
-    chunk = ser.read(64).decode('utf-8', errors='ignore')
-    buffer += chunk
+    try:
+        line = ser.readline().decode('utf-8', errors='ignore').strip()
+        if not line:
+            continue
 
-    # Extract all numbers from the buffer
-    numbers = re.findall(r'=\s*([\d.]+)', buffer)
-    for n in numbers:
-        print(float(n))  # e.g. 99.8
+        match = pattern.search(line)
+        if not match:
+            continue
 
-    # Keep only the last partial token (in case it's mid-stream)
-    buffer = re.split(r'=\s*[\d.]+', buffer)[-1]
+        status, mode, raw = match.groups()
+
+        if status != "ST":
+            continue  # skip unstable readings
+
+        weight = float(raw)
+        print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> Stable weight: {weight} KG")
+
+    except Exception as e:
+        print(e)

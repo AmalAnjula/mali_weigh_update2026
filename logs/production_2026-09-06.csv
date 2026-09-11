@@ -1,0 +1,26 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-06,19:51:27,SN.C&C,2.0,200.0,2.0,FAIL,[Infeed] remote stop
+2026-09-06,19:51:42,SN.C&C,2.0,200.0,2.0,FAIL,[Infeed] remote stop
+2026-09-06,20:14:25,SN.C&C,2.0,200.0,2.0,FAIL,[Infeed] remote stop
+2026-09-06,20:18:08,SN.C&C,1.5,200.0,4.5,FAIL,[Infeed] remote stop
+2026-09-06,20:18:50,SN.C&C,4.5,200.0,4.5,FAIL,[Infeed] mode change
+2026-09-06,20:19:18,SN.C&C,4.5,200.0,6.5,FAIL,[Infeed] remote stop
+2026-09-06,20:19:18,SN.C&C,4.5,200.0,6.5,FAIL,[Infeed] remote stop
+2026-09-06,20:20:36,SN.C&C,6.5,200.0,8.5,FAIL,[Infeed] remote stop
+2026-09-06,20:39:45,SN.C&C,9.0,180.0,17.5,FAIL,[Infeed] Oil add TIMEOUT
+2026-09-06,20:47:02,SN.C&C,17.5,180.0,20.0,FAIL,[Infeed] Oil add TIMEOUT
+2026-09-06,21:25:49,SN.C&C,20.0,180.0,99.0,FAIL,[Infeed] remote stop
+2026-09-06,21:26:12,SN.C&C,99.0,60.0,99.0,FAIL,[outfeed] Remote stop
+2026-09-06,23:24:13,SN.C&C,101.5,180.0,101.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-06,23:24:20,SN.C&C,101.5,180.0,101.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-06,23:24:38,SN.C&C,101.5,180.0,101.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-06,23:24:39,SN.C&C,101.5,180.0,101.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:58:53,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:58:59,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:59:07,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:59:09,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:59:10,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:59:10,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:59:11,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:59:11,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level
+2026-09-07,05:59:12,SN.C&C,102.5,180.0,102.5,FAIL,[Infeed] weight exceeded hi level

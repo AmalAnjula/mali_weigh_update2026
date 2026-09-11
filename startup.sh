@@ -3,7 +3,7 @@
 # Runs on Raspberry Pi 5 boot via systemd or autostart
 # ──────────────────────────────────────────────────────────────
 
-cd /home/palmoil/stuff
+cd /home/coco_oil/stuff
 
 source venv/bin/activate
 
@@ -37,8 +37,8 @@ echo "[OLS] emailAutoSend.py started (PID $!)"
 
 sleep 2
 
-python remoteRec.py &
-echo "[OLS] remoteRec.py started (PID $!)"
+#python remoteRec.py &
+#echo "[OLS] remoteRec.py started (PID $!)"
 
 # 5. speed_test service 
 #python speed_test.py &

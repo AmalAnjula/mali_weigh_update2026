@@ -1,0 +1,51 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-08,17:16:47,KRISCO,139.0,180.0,146.0,FAIL,[Infeed] mode change
+2026-09-08,18:26:26,KRISCO,146.0,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-08,22:08:24,KRISCO,180.0,60.0,169.5,Sucess,[outfeed] Oven request to stop
+2026-09-08,22:31:02,KRISCO,169.0,60.0,158.0,Sucess,[outfeed] Oven request to stop
+2026-09-08,22:42:38,KRISCO,157.5,60.0,148.0,Sucess,[outfeed] Oven request to stop
+2026-09-08,22:53:45,KRISCO,148.0,60.0,138.5,Sucess,[outfeed] Oven request to stop
+2026-09-08,23:04:26,KRISCO,138.5,60.0,129.0,Sucess,[outfeed] Oven request to stop
+2026-09-08,23:14:24,KRISCO,129.0,60.0,120.0,Sucess,[outfeed] Oven request to stop
+2026-09-08,23:24:29,KRISCO,120.0,60.0,110.5,Sucess,[outfeed] Oven request to stop
+2026-09-08,23:31:10,KRISCO,10.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-08,23:34:50,KRISCO,180.0,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-08,23:45:36,KRISCO,170.0,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-08,23:56:14,KRISCO,160.0,60.0,150.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,00:06:36,KRISCO,150.0,60.0,140.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,00:16:34,KRISCO,140.5,60.0,131.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,00:26:54,KRISCO,131.0,60.0,121.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,00:36:50,KRISCO,121.5,60.0,112.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,00:46:52,KRISCO,112.0,60.0,102.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,00:56:34,KRISCO,102.5,60.0,93.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,00:59:24,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-09,01:06:28,KRISCO,179.5,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,01:16:35,KRISCO,170.0,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,01:27:03,KRISCO,160.0,60.0,150.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,01:37:11,KRISCO,150.5,60.0,140.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,01:47:37,KRISCO,140.5,60.0,131.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,01:57:37,KRISCO,131.0,60.0,121.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,02:07:37,KRISCO,121.5,60.0,112.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,02:17:48,KRISCO,112.0,60.0,103.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,02:21:41,KRISCO,12.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-09,02:27:35,KRISCO,179.5,60.0,169.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,02:38:04,KRISCO,169.5,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,02:48:10,KRISCO,159.5,60.0,150.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,02:49:19,KRISCO,15.0,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-09,02:58:26,KRISCO,180.0,60.0,169.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,03:08:54,KRISCO,169.5,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,03:18:54,KRISCO,160.0,60.0,150.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,03:29:03,KRISCO,150.5,60.0,140.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,03:39:23,KRISCO,140.5,60.0,131.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,03:49:34,KRISCO,131.0,60.0,121.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,04:03:48,KRISCO,121.5,60.0,112.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,04:13:39,KRISCO,112.0,60.0,103.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,04:23:29,KRISCO,103.0,60.0,95.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,04:28:14,KRISCO,99.5,180.0,95.5,FAIL,[Infeed] high level sensor
+2026-09-09,04:38:13,KRISCO,95.5,60.0,95.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,04:38:41,KRISCO,95.5,180.0,95.5,FAIL,[Infeed] high level sensor
+2026-09-09,04:49:28,KRISCO,95.5,60.0,95.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,04:49:55,KRISCO,95.5,180.0,95.5,FAIL,[Infeed] high level sensor
+2026-09-09,05:08:13,KRISCO,0,180.0,0,FAIL,[Infeed] high level sensor
+2026-09-09,05:10:58,KRISCO,0,180.0,0,FAIL,[Infeed] high level sensor
+2026-09-09,05:13:55,KRISCO,0,180.0,0,FAIL,[Infeed] high level sensor

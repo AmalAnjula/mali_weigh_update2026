@@ -117,7 +117,6 @@ def mqtt_publish(topic: str, payload, retain: bool = False, qos: int = 0):
 # ══════════════════════════════════════════════════════════════════
 
 DB_PATH      = os.path.join(LOG_DIR, "production.db")
-print("DB_PATH =", DB_PATH)
 DB_MAX_BYTES = 500 * 1024 * 1024   # 500 MB hard ceiling
  
 # ── Remote sync config ─────────────────────────────────────────────
@@ -344,7 +343,6 @@ state = {
     "serial": {
         "port":     CONFIG.get("serial", {}).get("port",     "/dev/ttyUSB0"),
         "baudrate": CONFIG.get("serial", {}).get("baudrate", 9600),
-        "line":     "",
     },
 
     "tank": {
@@ -879,7 +877,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     infeed_open(True)
     infeed_run_state(True)
     gpio.output_on("in_solv")
-    
+
     while not done:
         elapsed = time.time() - start_time
         print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg ", end="\r")
@@ -887,7 +885,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
 
 
         diff= weiVal-intial_weight
-        
+
         if elapsed > INFEED_TIMEOUT:
             done = True
             result=False
@@ -1682,9 +1680,33 @@ class DiffFilter:
 
         return number if diff <= self.threshold else None
 
+def parse_weight_line(line: str):
+    """
+    Parses lines like: 'ST,GS 1.50KG'
+    Returns (status, mode, weight) or None if it doesn't match.
+    """
+    line = line.strip()
+    # Match: STATUS,MODE  <number>KG  (allow flexible spacing)
+    match = re.match(r'^([A-Z]{2}),([A-Z]{2})\s+([\d.]+)\s*KG', line, re.IGNORECASE)
+    if not match:
+        return None
 
+    status, mode, weight_str = match.groups()
+    weight = float(weight_str)
+    return status.upper(), mode.upper(), weight
 
- 
+def get_stable_weight(line: str):
+    """
+    Returns the weight only if status is ST (stable), else None.
+    """
+    parsed = parse_weight_line(line)
+    if parsed is None:
+        return None
+    status, mode, weight = parsed
+    if status == "ST":
+        return weight
+    return None
+
 def serial_read_data():
     global client,diff
     tech_log.info("Serial read thread started.")
@@ -1696,42 +1718,84 @@ def serial_read_data():
     ser = serial.Serial(serial_port, serial_baud)
     SPIKE_LIMIT = CONFIG["serial"]["diff"]
     f = DiffFilter(threshold=SPIKE_LIMIT)
-    pattern = re.compile(r'([A-Z]{2}),([A-Z]{2})\s+([\d.]+)\s*KG')
-
+    buffer      = ""
     while True:
         try:
-            line = ser.readline().decode('utf-8', errors='ignore').strip()
-            if not line:
+            
+            raw = ser.readline().decode('utf-8', errors='ignore')
+            if not raw:
                 continue
 
-            with _lock:
-                state["serial"]["line"] = line
-
-            match = pattern.search(line)
-            if not match:
-                continue
-            status, mode, raw = match.groups()
-
-            raw_val = float(raw)
-            weight = f.feed(raw_val)
-
-            if weight is not None  :
-                weiVal = float(weight)
-
-                with _lock:
-                    state["tank"]["weight_kg"]    = weiVal
-                    state["mqtt"]["serial_error"] = False
-                    state["mqtt"]["last_value"]   = weiVal
-                    state["mqtt"]["last_ts"]      = _now()
-                    _recalc_alarms()
-
-                print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
-            else:
-                print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> SPIKE/REJECTED: {raw_val} \r", end="")
-
+            weight = get_stable_weight(raw)   
+            print(weight)
+            
+           
+            #weight=0
+            mqtt_send_flag=False
+            for raw in numbers:
+                #weight = float(raw)
                 
-                  
-         
+                weight = f.feed( float(raw))
+                '''
+                # ── Spike filter ──────────────────────────────────────
+                if last_weight is not None:
+                    diff = abs(weight - last_weight)
+                    if diff > SPIKE_LIMIT:
+                        msg = (f"IGNORED spike: prev={last_weight:.2f}  "
+                            f"new={weight:.2f}  diff={diff:.2f}")
+                        print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> {msg}")
+                        logging.warning(msg)
+                        continue          # skip, keep last_weight unchanged
+
+                if clear_now:
+                    logging.info("Clearing spike filter after previous spike")
+                # ─────────────────────────────────────────────────────
+
+                last_weight = weight
+                '''
+                print(weight)
+                if weight is not None:
+                    weiVal= float(weight)
+                    print(weiVal)
+                    with _lock:
+                        # Push weight into tank state
+                        state["tank"]["weight_kg"]    = weiVal
+                        state["mqtt"]["serial_error"] = False
+                        state["mqtt"]["last_value"]   = weiVal
+                        state["mqtt"]["last_ts"]      = _now()
+                        # Recalculate level % and alarms from new weight
+                        _recalc_alarms()
+
+                    #log_msg = f"Weight published: {weight}"
+                    
+                    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
+
+                    now = datetime.now()
+                    seconds = now.second
+
+                    
+                    if seconds % 5 == 0 and mqtt_send_flag==False:  # every 10 second   
+                        mqtt_send_flag=True
+                        try:
+                            payload = {
+                                "w": weight,
+                                "in":    busyFlagInfeedBusy,
+                                "out":   busyFlagOutfeedBusy,
+                                "d":    diff
+                            }
+                            #weight,runflag,diff
+                            client.publish("serial/weight", json.dumps(payload),qos=0, retain=False)
+                            client.publish("serial/weight", weight, qos=0, retain=False)
+                            #print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> Published to MQTT: {payload}")
+                        except Exception as e:
+                            print (e)
+                            pass
+                    
+                    if seconds % 5 != 0 and mqtt_send_flag==True:
+                        mqtt_send_flag=False
+
+                #logging.info(log_msg)
+
         except Exception as e:
             err_msg = f"Error reading from serial or publishing to MQTT: {e}"
              
@@ -2715,11 +2779,11 @@ def daily_6am_scheduler():
                 For old log files, please contact your admin.
 
                 --------------------------------------------------
-                DAILY PRODUCTION SUMMARY 
+                DAILY PRODUCTION SUMMARY
                 
                 --------------------------------------------------
 
-                    No production data found for yesterday for coconut oil (6 AM to next day 5.59 AM).
+                    No production data found for yesterday (6 AM to next day 5.59 AM).
                 --------------------------------------------------
 
                 Have a nice day!

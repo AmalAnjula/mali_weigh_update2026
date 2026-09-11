@@ -1,0 +1,10 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-09,07:55:50,KRISCO,0,180.0,0,FAIL,[Infeed] mode change
+2026-09-09,08:01:08,KRISCO,0,180.0,0,FAIL,[Infeed] remote stop
+2026-09-09,08:32:04,KRISCO,47.5,180.0,81.5,FAIL,[Infeed] remote stop
+2026-09-09,08:33:21,KRISCO,81.0,60.0,72.5,Sucess,[outfeed] Oven request to stop
+2026-09-09,08:42:51,KRISCO,72.5,180.0,80.5,FAIL,[Infeed] remote stop
+2026-09-09,12:09:45,KRISCO,79.0,60.0,76.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,12:13:00,KRISCO,76.0,180.0,180.5,Sucess,[Infeed] Required weight reached
+2026-09-09,12:28:11,KRISCO,180.0,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-09,12:45:46,KRISCO,170.0,60.0,159.5,Sucess,[outfeed] Oven request to stop
