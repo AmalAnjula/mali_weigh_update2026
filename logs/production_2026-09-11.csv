@@ -1,0 +1,5 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-11,18:47:20,KRISCO,161.5,180.0,162.5,FAIL,[Infeed] oil_add Local stop
+2026-09-11,19:00:30,KRISCO,163.0,180.0,163.5,FAIL,[Infeed] oil_add Local stop
+2026-09-11,19:02:00,KRISCO,163.5,180.0,164.5,FAIL,[Infeed] oil_add Local stop
+2026-09-11,21:41:55,KRISCO,163.5,180.0,164.0,FAIL,[Infeed] oil_add Local stop

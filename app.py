@@ -54,9 +54,7 @@ client = None
 # ── ALARMS LIST (in-memory) ──────────────────────────────────
 # Each element: {"timestamp": "YYYY-MM-DD HH:MM:SS", "message": "alarm text"}
 alarms_list = [
-    {"timestamp": "2026-04-06 14:30:45", "message": "HI ALARM - Tank level too high"},
-    {"timestamp": "2026-04-06 14:25:30", "message": "Low level sensor triggered"},
-    {"timestamp": "202ds20:15", "message": "Outfesaration failed"}
+    
 ]
 
 with open("config.yml") as f:
@@ -661,14 +659,30 @@ def _log(event, **extras):
     state["log"].insert(0, entry)
     state["log"] = state["log"][:200]
 
+def _log_alarm(message: str):
+    """Append an alarm to the in-memory alarms list (shown on the Alarms page and banner)."""
+    global alarms_list
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    alarms_list.append({"timestamp": ts, "message": message})
+    tech_log.info("[ALARM] %s", message)
+
 def _recalc_alarms():
     """Recalculate level_pct and hi/lo alarms from weight_kg."""
     tk  = state["tank"]
     net = max(0.0, tk["weight_kg"] - tk["tare_kg"])
     tk["level_pct"] = round(min(100.0, net / tk["max_kg"] * 100.0), 2) \
                       if tk["max_kg"] > 0 else 0.0
+
+    prev_hi = tk.get("hi_alarm", False)
+    prev_lo = tk.get("lo_alarm", False)
     tk["hi_alarm"]  = tk["level_pct"] >= tk["hi_threshold_pct"]
     tk["lo_alarm"]  = tk["level_pct"] <= tk["lo_threshold_pct"]
+
+    # Log to the alarms list on the rising edge only, so it doesn't spam on every recalc
+    if tk["hi_alarm"] and not prev_hi:
+        _log_alarm(f"HI ALARM - tank level {tk['level_pct']:.1f}% reached high threshold ({tk['hi_threshold_pct']}%)")
+    if tk["lo_alarm"] and not prev_lo:
+        _log_alarm(f"LO ALARM - tank level {tk['level_pct']:.1f}% reached low threshold ({tk['lo_threshold_pct']}%)")
 
 def _print_event(payload: dict):
     print(f"\n[BUTTON EVENT] {json.dumps(payload, indent=2)}")
