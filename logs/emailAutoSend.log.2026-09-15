@@ -1,0 +1,25 @@
+2026-09-15 06:14:15 [INFO] =======================================================
+2026-09-15 06:14:15 [INFO]   OLS Email Auto-Send started
+2026-09-15 06:14:15 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-15 06:14:15 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-15 06:14:15 [INFO]   Poll   : every 30s
+2026-09-15 06:14:15 [INFO] =======================================================
+2026-09-15 06:14:17 [INFO] No new emails.
+2026-09-15 12:46:53 [INFO] =======================================================
+2026-09-15 12:46:53 [INFO]   OLS Email Auto-Send started
+2026-09-15 12:46:53 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-15 12:46:53 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-15 12:46:53 [INFO]   Poll   : every 30s
+2026-09-15 12:46:53 [INFO] =======================================================
+2026-09-15 12:46:55 [INFO] No new emails.
+2026-09-15 14:16:20 [INFO] Found 1 unread email(s).
+2026-09-15 14:17:07 [INFO] Processing email from noreply@email.openai.com | Subject: '4 new image styles to try'
+2026-09-15 14:17:07 [WARNING] Rejected — subject does not start with 'sendme': '4 new image styles to try'
+2026-09-15 14:17:11 [INFO] Email sent → noreply@email.openai.com | Subject: Re: 4 new image styles to try
+2026-09-15 14:17:49 [INFO] Found 1 unread email(s).
+2026-09-15 14:17:50 [INFO] Processing email from mailer-daemon@googlemail.com | Subject: 'Delivery Status Notification (Failure)'
+2026-09-15 14:17:50 [WARNING] Rejected — subject does not start with 'sendme': 'Delivery Status Notification (Failure)'
+2026-09-15 14:17:54 [INFO] Email sent → mailer-daemon@googlemail.com | Subject: Re: Delivery Status Notification (Failure)
+2026-09-15 14:18:26 [INFO] No new emails.
+2026-09-15 23:56:45 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-15 23:59:12 [INFO] No new emails.

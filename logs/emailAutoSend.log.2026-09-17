@@ -1,0 +1,6 @@
+2026-09-17 00:52:20 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-17 00:54:37 [INFO] No new emails.
+2026-09-17 01:14:21 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-17 01:16:37 [INFO] No new emails.
+2026-09-17 21:14:14 [ERROR] Unexpected error in poll_inbox: [Errno 104] Connection reset by peer
+2026-09-17 21:14:50 [INFO] No new emails.

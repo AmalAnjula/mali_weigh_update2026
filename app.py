@@ -2040,8 +2040,10 @@ def api_control():
 
                 elif not s["running"]:
                     outfeed_local_stop = True
+                    state["tank"]["hi_alarm"] = False
+                    state["tank"]["lo_alarm"] = False
                     alarms_list.clear()
-                    tech_log.info("[outfeed] Local stop signalled. Alarm list cleared.")
+                    tech_log.info("[outfeed] Local stop signalled. Tank alarms cleared.")
                  
 
 
@@ -2709,9 +2711,9 @@ def daily_6am_scheduler():
                 body = em.build_body(csv_file)
 
                 em.send_email(
-                    "PLANT_01_COCONUT_OIL",
+                    "PLANT 01 COCONUT OIL",
                     body,
-                    "sprayer01weighingpo@malibangroup.lk",
+                    "sprayer01weighingco@malibangroup.lk",
                     csv_file
                 )
                 time.sleep(2)

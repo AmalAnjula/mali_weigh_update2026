@@ -9,23 +9,37 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #d8d8d8;
-  --surface:  #f4f4f4;
-  --border:   #3a3a3a;
-  --text:     #101010;
-  --muted:    #1e1e1e;
-  --green:    #00ffaa;
-  --green-bg: #8fe7d4;
-  --red:      #b91c1c;
-  --red-bg:   #f8ba00;
-  --amber:    #8d4b00;
-  --amber-bg: #00570777;
-  --blue:     #2f3d4c;
-  --blue-bg:  #dfeaf8;
-  --tank:     #e91ed2;
-  --tank-dark:#c318b5;
-  --radius:   10px;
-  --shadow:   0 3px 8px rgba(0,0,0,0.12);
+  --bg:            #d8d8d8;
+  --surface:       #f4f4f4;
+  --border:        #3a3a3a;
+  --text:          #101010;
+  --muted:         #1e1e1e;
+  --green:         #00ffaa;
+  --green-bg:      #8fe7d4;
+  --red:           #b91c1c;
+  --red-bg:        #f8ba00;
+  --amber:         #8d4b00;
+  --amber-bg:      #00570777;
+  --blue:          #2f3d4c;
+  --blue-bg:       #dfeaf8;
+  --tank:          #e91ed2;
+  --tank-dark:     #c318b5;
+  /* Infeed control buttons */
+  --infeed-manual-bg: #C42000;
+  --infeed-auto-bg:   #E91E63;
+  --infeed-local-bg:  #FF00FF;
+  --infeed-remote-bg: #101BC2;
+  --infeed-start-bg:  #FF6A00;
+  --infeed-stop-bg:   #10C237;
+  /* Outfeed control buttons */
+  --outfeed-manual-bg: #C42000;
+  --outfeed-auto-bg:   #E91E63;
+  --outfeed-local-bg:  #FF00FF;
+  --outfeed-remote-bg: #101BC2;
+  --outfeed-start-bg:  #FF6A00;
+  --outfeed-stop-bg:   #10C237;
+  --radius:        10px;
+  --shadow:        0 3px 8px rgba(0,0,0,0.12);
 }
 
 body {
@@ -67,8 +81,11 @@ header {
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
 
 /* ── Tabs ─────────────────────────────────────── */
+.tabs-row {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+}
 .tabs {
-  display: flex; gap: 4px; margin-bottom: 14px;
+  display: flex; gap: 4px;
 }
 .tab {
   padding: 9px 18px; border-radius: 0;
@@ -127,21 +144,48 @@ header {
 .ctrl-btn .label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
 .ctrl-btn .value { font-size: 18px; font-weight: 700; }
 
-.ctrl-btn.st-manual { border-color: #1aeb51; background: color-mix(in srgb, #1aeb51 18%, white); }
-.ctrl-btn.st-auto   { border-color: #e004d5; background: color-mix(in srgb, #e004d5 18%, white); }
-.ctrl-btn.st-local  { border-color: #ebd005; background: color-mix(in srgb, #ebd005 22%, white); }
-.ctrl-btn.st-remote { border-color: #eb3705; background: color-mix(in srgb, #eb3705 18%, white); }
-.ctrl-btn.st-start  { border-color: #05eb70; background: color-mix(in srgb, #05eb70 18%, white); }
-.ctrl-btn.st-stop   { border-color: #b3020b; background: color-mix(in srgb, #b3020b 14%, white); }
+#in-mode-btn.st-manual  { border-color: var(--infeed-manual-bg); background: var(--infeed-manual-bg); }
+#in-mode-btn.st-auto    { border-color: var(--infeed-auto-bg);   background: var(--infeed-auto-bg); }
+#in-op-btn.st-local     { border-color: var(--infeed-local-bg);  background: var(--infeed-local-bg); }
+#in-op-btn.st-remote    { border-color: var(--infeed-remote-bg); background: var(--infeed-remote-bg); }
+#in-run-btn.st-start    { border-color: var(--infeed-start-bg);  background: var(--infeed-start-bg); }
+#in-run-btn.st-stop     { border-color: var(--infeed-stop-bg);   background: var(--infeed-stop-bg); }
+
+#out-mode-btn.st-manual { border-color: var(--outfeed-manual-bg); background: var(--outfeed-manual-bg); }
+#out-mode-btn.st-auto   { border-color: var(--outfeed-auto-bg);   background: var(--outfeed-auto-bg); }
+#out-op-btn.st-local    { border-color: var(--outfeed-local-bg);  background: var(--outfeed-local-bg); }
+#out-op-btn.st-remote   { border-color: var(--outfeed-remote-bg); background: var(--outfeed-remote-bg); }
+#out-run-btn.st-start   { border-color: var(--outfeed-start-bg);  background: var(--outfeed-start-bg); }
+#out-run-btn.st-stop    { border-color: var(--outfeed-stop-bg);   background: var(--outfeed-stop-bg); }
 .ctrl-btn.st-manual .value,
 .ctrl-btn.st-auto .value,
 .ctrl-btn.st-local .value,
 .ctrl-btn.st-remote .value,
 .ctrl-btn.st-start .value,
-.ctrl-btn.st-stop .value { color: #000; }
-/* Disabled — keep the state color as an outline only, no fill */
-.ctrl-btn.disabled { cursor: not-allowed; pointer-events: none; background: var(--surface); }
-.ctrl-btn.disabled .value { color: var(--muted); }
+.ctrl-btn.st-stop .value,
+.ctrl-btn.st-manual .label,
+.ctrl-btn.st-auto .label,
+.ctrl-btn.st-local .label,
+.ctrl-btn.st-remote .label,
+.ctrl-btn.st-start .label,
+.ctrl-btn.st-stop .label { color: #fff; }
+/* Disabled — fade each state's color into a gradient, text turns black */
+.ctrl-btn.disabled { cursor: not-allowed; pointer-events: none; border-color: var(--border); }
+#in-mode-btn.st-manual.disabled  { background: linear-gradient(135deg, var(--infeed-manual-bg) 0%, #d9d9d9 100%); }
+#in-mode-btn.st-auto.disabled    { background: linear-gradient(135deg, var(--infeed-auto-bg)   0%, #d9d9d9 100%); }
+#in-op-btn.st-local.disabled     { background: linear-gradient(135deg, var(--infeed-local-bg)  0%, #d9d9d9 100%); }
+#in-op-btn.st-remote.disabled    { background: linear-gradient(135deg, var(--infeed-remote-bg) 0%, #d9d9d9 100%); }
+#in-run-btn.st-start.disabled    { background: linear-gradient(135deg, var(--infeed-start-bg)  0%, #d9d9d9 100%); }
+#in-run-btn.st-stop.disabled     { background: linear-gradient(135deg, var(--infeed-stop-bg)   0%, #d9d9d9 100%); }
+
+#out-mode-btn.st-manual.disabled { background: linear-gradient(135deg, var(--outfeed-manual-bg) 0%, #d9d9d9 100%); }
+#out-mode-btn.st-auto.disabled   { background: linear-gradient(135deg, var(--outfeed-auto-bg)   0%, #d9d9d9 100%); }
+#out-op-btn.st-local.disabled    { background: linear-gradient(135deg, var(--outfeed-local-bg)  0%, #d9d9d9 100%); }
+#out-op-btn.st-remote.disabled   { background: linear-gradient(135deg, var(--outfeed-remote-bg) 0%, #d9d9d9 100%); }
+#out-run-btn.st-start.disabled   { background: linear-gradient(135deg, var(--outfeed-start-bg)  0%, #d9d9d9 100%); }
+#out-run-btn.st-stop.disabled    { background: linear-gradient(135deg, var(--outfeed-stop-bg)   0%, #d9d9d9 100%); }
+.ctrl-btn.disabled .value,
+.ctrl-btn.disabled .label { color: #000; }
 
 /* Volume input */
 .vol-wrap { display: flex; flex-direction: column; gap: 5px; }
@@ -214,19 +258,19 @@ header {
 .sensor-row.corner {
   position: absolute; z-index: 6; white-space: nowrap;
 }
-.sensor-row.hi-pos { top: 20%;    right: calc(100% + 12px); transform: translateY(-50%); }
+.sensor-row.hi-pos { top: 2%;     right: calc(100% + 4px); transform: translateY(-8px); }
 .sensor-row.lo-pos { bottom: 20%; right: calc(100% + 12px); transform: translateY(50%); }
 .sdot {
-  width: 11px; height: 11px; border-radius: 50%;
-  background: #d0d5dd; border: 1.5px solid #b0b8c4;
-  flex-shrink: 0; transition: all .3s;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #d0d5dd; border: 3.5px solid #000000;
+  flex-shrink: 0; transition: all2 .3s;
 }
-.sdot.alarm  { background: var(--red);   border-color: var(--red);   box-shadow: 0 0 8px rgb(54, 1, 1); }
-.sdot.ok     { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px rgba(1, 49, 19, 0.952); }
+.sdot.alarm  { background: var(--red);   border-color: var(--red);   box-shadow: 0 0 20px rgb(54, 1, 1); }
+.sdot.ok     { background: var(--green); border-color: var(--black); box-shadow: 0 0 8px rgb(145, 255, 0); }
 .slbl { font-size: 11px; font-weight: 600; color: var(--black); letter-spacing: .5px; }
 .slbl.alarm  { color: var(--red); }
 .slbl.ok     { color: var(--green); }
-
+/* amal pahala dot eka */
 /* Horizontal pipe — flanks the sideways-mounted valve */
 .pipe-h {
   flex: 1; height: 10px;
@@ -234,7 +278,7 @@ header {
   position: relative; overflow: hidden; transition: background .2s;
   width: 50%;
 }
-.pipe-h.flowing { background: #0d6efd; }
+.pipe-h.flowing { background: #34ff01; }
 .pipe-h.flowing::after {
   content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
@@ -319,6 +363,9 @@ header {
   padding: 10px 0; z-index: 4; pointer-events: none;
 }
 .scale span { font-size: 9px; font-weight: 600; color: var(--muted); line-height: 1; }
+.scale span:first-child {
+  transform: translateY(8px);
+}
 
 /* Oil fill */
 .oil-fill {
@@ -431,15 +478,18 @@ td.cwt { color: var(--green); }
 .status-bar span { font-weight: 600; color: var(--text); margin-left: 4px; }
 
 .alarm-banner {
-  position: fixed; top: 18px; right: 18px; z-index: 1200;
-  max-width: 50vw; min-width: 260px; padding: 14px 20px;
-  border-radius: 12px; border: 3px solid var(--border);
+  flex: 1; min-width: 0; padding: 0 16px; height: 38px;
+  border-radius: 8px; border: 2px solid var(--border);
   background: rgba(255,255,255,.96); color: var(--text);
-  font-size: 15px; font-weight: 700; letter-spacing: .7px;
-  text-transform: uppercase; box-shadow: 0 8px 22px rgba(15, 23, 42, .15);
-  display: none; flex-direction: column; gap: 4px;
+  font-size: 13px; font-weight: 700; letter-spacing: .5px;
+  text-transform: uppercase; box-shadow: 0 2px 6px rgba(15, 23, 42, .12);
+  display: none; flex-direction: row; align-items: center; gap: 10px;
+  overflow: hidden;
 }
 .alarm-banner.active { display: flex; background: #fff4f4; border-color: var(--red); color: var(--red); }
+.alarm-banner .ab-count { flex-shrink: 0; }
+.alarm-banner .ab-msg   { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+.alarm-banner .ab-time  { flex-shrink: 0; font-weight: 600; opacity: .75; font-size: 11px; }
 
 /* ── Toast ────────────────────────────────────── */
 .toast {
@@ -449,21 +499,22 @@ td.cwt { color: var(--green); }
   pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.12);
 }
 .toast.show { opacity: 1; transform: translateY(0); }
-.toast.ok   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
-.toast.warn { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red);   }
+.toast.ok   { background: #000; color: var(--green); border: 1px solid var(--green); }
+.toast.warn { background: #000; color: var(--red);   border: 1px solid var(--red);   }
 </style>
 </head>
 <body>
 <div class="page">
 
-<div id="alarm-banner" class="alarm-banner" aria-live="polite"></div>
-
 <!-- TABS -->
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
-  <button class="tab" onclick="switchTab('setting',this)">Settings</button>
-  <button class="tab" onclick="switchTab('alarms',this)">Alarms</button>
-  <button class="tab" onclick="switchTab('log',this)">Log</button>
+<div class="tabs-row">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
+    <button class="tab" onclick="switchTab('setting',this)">Settings</button>
+    <button class="tab" onclick="switchTab('alarms',this)">Alarms</button>
+    <button class="tab" onclick="switchTab('log',this)">Log</button>
+  </div>
+  <div id="alarm-banner" class="alarm-banner" aria-live="polite"></div>
 </div>
 
 <!-- ═══ MONITOR ═══ -->
@@ -521,7 +572,7 @@ td.cwt { color: var(--green); }
       <!-- HI sensor -->
       <div class="sensor-row corner hi-pos" id="hi-sensor">
         <div class="sdot" id="hi-dot"></div>
-        <span class="slbl" id="hi-lbl">HIGH</span>
+        <span class="slbl" id="hi-lbl">.</span>
       </div>
 
       <div class="tank-shell">
@@ -549,20 +600,19 @@ td.cwt { color: var(--green); }
       <!-- LO sensor -->
       <div class="sensor-row corner lo-pos" id="lo-sensor">
         <div class="sdot" id="lo-dot"></div>
-        <span class="slbl" id="lo-lbl">LOW</span>
+        <span class="slbl" id="lo-lbl">.</span>
       </div>
 
       <!-- External level scale -->
       <div class="scale">
-        <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+          <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
       </div>
     </div>
 
     <div class="port-stub bot" id="port-bot"></div>
 
-    <!-- Output valve — centered, pipe starts at the valve and runs left -->
-    <div class="valve-row" style="justify-content:center; margin-left:30px;">
-      <div class="pipe-h" id="out-pipe-l" style="width:96px; margin-right:0;"></div>
+    <!-- Output valve — centered, pipe starts at the valve and runs right -->
+    <div class="valve-row" style="justify-content:center; margin-right:30px;">
       <div class="vgate" id="out-valve" onclick="ctrlValve('outfeed')" title="Output Valve">
         <svg viewBox="0 0 24 40" fill="currentColor" stroke-width="1.5" stroke-linejoin="round">
           <line x1="12" y1="0" x2="12" y2="6" stroke="var(--border)" stroke-width="2"/>
@@ -570,6 +620,7 @@ td.cwt { color: var(--green); }
           <line x1="12" y1="34" x2="12" y2="40" stroke="var(--border)" stroke-width="2"/>
         </svg>
       </div>
+      <div class="pipe-h" id="out-pipe-l" style="width:96px; margin-left:0;"></div>
     </div>
   </div><!-- /tank-wrap-outer -->
 
@@ -825,6 +876,54 @@ loadProducts();
 document.getElementById("in-vol").addEventListener("input",  () => { inVolDirty  = true; });
 document.getElementById("out-vol").addEventListener("input", () => { outVolDirty = true; });
 
+// ── HI/LO threshold bar ↔ external scale alignment ─────────────────
+// The "0 100%" scale on the right isn't laid out on a plain linear
+// 0-420px axis (flex space-between + a manual nudge on the top label),
+// so a bar placed with a naive bottom:X% drifts from the matching scale
+// mark (e.g. 100% lands at the tank's literal top edge, not at the
+// "100%" label). Instead, read the scale labels' actual rendered
+// position and place the bar at that same pixel height.
+function scaleAnchors() {
+  const shell = document.querySelector('.tank-shell');
+  const spans = document.querySelectorAll('.scale span');
+  if (!shell || !spans.length) return null;
+  const shellTop = shell.getBoundingClientRect().top;
+  const pcts = [100, 75, 50, 25, 0]; // fixed markup order, top → bottom
+  return Array.from(spans).map((sp, i) => {
+    const r = sp.getBoundingClientRect();
+    return { pct: pcts[i], y: (r.top + r.bottom) / 2 - shellTop };
+  });
+}
+
+function pctToBarPx(pct, anchors) {
+  pct = Math.max(0, Math.min(100, pct));
+  for (let i = 0; i < anchors.length - 1; i++) {
+    const a = anchors[i], b = anchors[i + 1];
+    if (pct <= a.pct && pct >= b.pct) {
+      const t = a.pct === b.pct ? 0 : (a.pct - pct) / (a.pct - b.pct);
+      return a.y + t * (b.y - a.y);
+    }
+  }
+  return anchors[anchors.length - 1].y;
+}
+
+function placeThresholdBar(lineId, tagId, pct) {
+  const anchors = scaleAnchors();
+  const line = document.getElementById(lineId);
+  const tag  = document.getElementById(tagId);
+  if (!anchors) {
+    line.style.bottom = pct + "%";
+    tag.style.bottom  = pct + "%";
+    return;
+  }
+  const px = pctToBarPx(pct, anchors);
+  line.style.bottom = "auto";
+  line.style.top    = px + "px";
+  tag.style.bottom  = "auto";
+  tag.style.top     = px + "px";
+  tag.style.transform = "translateY(-50%)";
+}
+
 // ═════════════════════════════════════════════════
 // RENDER (called every 1 Hz with fresh data)
 // ═════════════════════════════════════════════════
@@ -858,15 +957,13 @@ function render(d) {
   // Tank fill + wave
   document.getElementById("oil-fill").style.height = pct + "%";
 
-  // Level lines
-  document.getElementById("hi-line").style.bottom = tk.hi_threshold_pct + "%";
-  document.getElementById("hi-tag").style.bottom  = tk.hi_threshold_pct + "%";
-  document.getElementById("lo-line").style.bottom = tk.lo_threshold_pct + "%";
-  document.getElementById("lo-tag").style.bottom  = tk.lo_threshold_pct + "%";
+  // Level lines — placed to match the external scale's actual rendered marks
+  placeThresholdBar("hi-line", "hi-tag", tk.hi_threshold_pct);
+  placeThresholdBar("lo-line", "lo-tag", tk.lo_threshold_pct);
 
-  // Sensor badges — line up with their actual trip level
-  document.getElementById("hi-sensor").style.top    = (100 - tk.hi_threshold_pct) + "%";
-  document.getElementById("lo-sensor").style.bottom = tk.lo_threshold_pct + "%";
+  // Keep HIGH sensor fixed near the tank top edge; the threshold line is the moving indicator.
+  document.getElementById("hi-sensor").style.top    = "2%";
+  document.getElementById("lo-sensor").style.bottom = "9%";
 
   // Sensors
   const hiD = document.getElementById("hi-dot");
@@ -920,6 +1017,13 @@ loL.className = "slbl" + (loSns ? " alarm" : " ok");
   // Sync settings inputs (once)
   syncSettings(d);
 
+  // Acknowledge tracking — only ever driven by real server state (this poll),
+  // never by locally-mutated D, so a fresh rising edge always unmutes correctly.
+  if (tk.hi_alarm && !prevHiLive) hiAcked = false;
+  if (tk.lo_alarm && !prevLoLive) loAcked = false;
+  prevHiLive = !!tk.hi_alarm;
+  prevLoLive = !!tk.lo_alarm;
+
   renderAlarmBanner();
 }
 
@@ -929,17 +1033,24 @@ loL.className = "slbl" + (loSns ? " alarm" : " ok");
 let alarmRows = [];
 let alarmIdx  = 0;
 
+// Pressing Stop acknowledges whichever alarm is active at that moment — the banner
+// stays hidden even if the tank is still physically high/low, until that alarm
+// clears and freshly re-triggers (a new rising edge unmutes it again).
+let hiAcked = false, loAcked = false;
+let prevHiLive = false, prevLoLive = false;
+
 function renderAlarmBanner() {
   const banner = document.getElementById("alarm-banner");
   const tk = (D && D.tank) ? D.tank : {};
-  const liveActive = !!(tk.hi_alarm || tk.lo_alarm);
+
+  const liveActive = !!((tk.hi_alarm && !hiAcked) || (tk.lo_alarm && !loAcked));
 
   let list = alarmRows;
   if (!list.length && liveActive) {
     const ts = D && D.timestamp ? D.timestamp.replace("T", " ").slice(0, 19) : "";
     list = [];
-    if (tk.hi_alarm) list.push({ message: "HI ALARM — tank level above high threshold", timestamp: ts });
-    if (tk.lo_alarm) list.push({ message: "LO ALARM — tank level below low threshold",  timestamp: ts });
+    if (tk.hi_alarm && !hiAcked) list.push({ message: "HI ALARM — tank level above high threshold", timestamp: ts });
+    if (tk.lo_alarm && !loAcked) list.push({ message: "LO ALARM — tank level below low threshold",  timestamp: ts });
   }
 
   if (!liveActive && !list.length) {
@@ -959,9 +1070,9 @@ function renderAlarmBanner() {
   banner.className = "alarm-banner active";
   banner.style.display = "flex";
   banner.innerHTML =
-    `<div style="font-size:13px;letter-spacing:.5px;">${countLabel}</div>` +
-    `<div style="font-size:18px;">${current.message || "—"}</div>` +
-    `<div style="font-size:12px;font-weight:600;opacity:.75;letter-spacing:.3px;">${current.timestamp || ""}</div>`;
+    `<span class="ab-count">${countLabel}</span>` +
+    `<span class="ab-msg">${current.message || "—"}</span>` +
+    `<span class="ab-time">${current.timestamp || ""}</span>`;
 }
 
 function clearLocalAlarmState() {
@@ -1036,8 +1147,13 @@ async function ctrl(side, action) {
     body: JSON.stringify({ side, action })
   });
   if (stopPressed) {
+    const tk = (D && D.tank) ? D.tank : {};
+    if (tk.hi_alarm) hiAcked = true;
+    if (tk.lo_alarm) loAcked = true;
+    alarmRows = [];
+    alarmIdx  = 0;
+    renderAlarmBanner();
     await clearAlarmsSilently();
-    renderAlarmBanner(D);
   }
   poll(); // immediate refresh
 }
@@ -1400,7 +1516,7 @@ function showToast(msg, type = "") {
   t.textContent = msg;
   t.className = "toast show" + (type ? " " + type : "");
   clearTimeout(_tt);
-  _tt = setTimeout(() => { t.className = "toast"; }, 3000);
+  _tt = setTimeout(() => { t.className = "toast"; }, 10000);
 }
 
 function tick() {

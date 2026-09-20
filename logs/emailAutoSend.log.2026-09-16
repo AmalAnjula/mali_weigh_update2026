@@ -1,0 +1,10 @@
+2026-09-16 00:04:29 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-16 00:06:13 [INFO] No new emails.
+2026-09-16 04:16:22 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-16 04:18:38 [INFO] No new emails.
+2026-09-16 04:25:25 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-16 04:27:44 [INFO] No new emails.
+2026-09-16 07:56:55 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-16 07:59:10 [INFO] No new emails.
+2026-09-16 08:05:19 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-16 08:07:03 [INFO] No new emails.

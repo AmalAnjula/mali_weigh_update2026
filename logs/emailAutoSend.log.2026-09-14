@@ -1,0 +1,11 @@
+2026-09-14 06:32:25 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-14 06:34:45 [INFO] No new emails.
+2026-09-14 09:52:54 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-14 09:55:13 [INFO] No new emails.
+2026-09-14 21:52:31 [INFO] =======================================================
+2026-09-14 21:52:31 [INFO]   OLS Email Auto-Send started
+2026-09-14 21:52:31 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-14 21:52:31 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-14 21:52:31 [INFO]   Poll   : every 30s
+2026-09-14 21:52:31 [INFO] =======================================================
+2026-09-14 21:52:33 [INFO] No new emails.

@@ -1,0 +1,132 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-16,06:08:08,KRISCO,170.5,60.0,161.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,06:16:16,KRISCO,160.5,60.0,151.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,06:24:52,KRISCO,151.0,60.0,141.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,06:34:06,KRISCO,141.5,60.0,132.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,06:42:56,KRISCO,132.0,60.0,123.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,06:51:41,KRISCO,123.0,60.0,114.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:00:10,KRISCO,114.0,60.0,105.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:08:22,KRISCO,105.5,60.0,96.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:11:05,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,07:11:05,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,07:16:40,KRISCO,180.0,60.0,170.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:24:48,KRISCO,170.5,60.0,160.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:33:05,KRISCO,161.0,60.0,151.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:41:21,KRISCO,151.5,60.0,141.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:49:40,KRISCO,141.5,60.0,132.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,07:57:55,KRISCO,132.0,60.0,122.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,08:16:15,KRISCO,123.0,60.0,114.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,08:24:09,KRISCO,114.0,60.0,105.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,08:31:51,KRISCO,105.0,60.0,96.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,08:34:43,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,08:34:43,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,08:39:22,KRISCO,180.0,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,08:48:01,KRISCO,170.0,60.0,160.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,08:56:15,KRISCO,160.5,60.0,151.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,09:04:33,KRISCO,151.0,60.0,141.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,09:12:46,KRISCO,141.5,60.0,132.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,09:20:55,KRISCO,132.5,60.0,123.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,09:29:08,KRISCO,122.5,60.0,113.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,09:37:06,KRISCO,113.5,60.0,104.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,09:44:45,KRISCO,104.0,60.0,95.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,09:47:43,KRISCO,99.7,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,09:47:43,KRISCO,99.7,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,09:52:25,KRISCO,180.0,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:01:09,KRISCO,170.0,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:09:29,KRISCO,160.0,60.0,150.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:18:00,KRISCO,150.5,60.0,141.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:26:24,KRISCO,141.0,60.0,131.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:34:37,KRISCO,131.5,60.0,122.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:42:43,KRISCO,122.0,60.0,112.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:50:47,KRISCO,112.5,60.0,103.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,10:58:35,KRISCO,103.5,60.0,94.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,11:01:29,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,11:01:29,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,11:06:24,KRISCO,180.0,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,11:15:01,KRISCO,170.0,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,11:23:18,KRISCO,159.5,60.0,150.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,11:31:40,KRISCO,150.0,60.0,140.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,11:40:00,KRISCO,140.5,60.0,130.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,11:48:15,KRISCO,130.5,60.0,121.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,11:56:17,KRISCO,121.0,60.0,112.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,12:04:10,KRISCO,112.0,60.0,102.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,12:11:54,KRISCO,102.5,60.0,94.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,12:14:35,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,12:14:35,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,12:19:16,KRISCO,180.0,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,12:27:58,KRISCO,169.5,60.0,159.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,12:36:37,KRISCO,159.5,60.0,149.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,12:45:13,KRISCO,149.5,60.0,139.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,12:53:45,KRISCO,139.5,60.0,130.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:01:52,KRISCO,130.0,60.0,121.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:09:40,KRISCO,121.0,60.0,111.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:17:40,KRISCO,111.5,60.0,102.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:25:26,KRISCO,103.0,60.0,93.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:28:09,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,13:28:09,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,13:33:20,KRISCO,180.5,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:42:12,KRISCO,169.5,60.0,159.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:50:48,KRISCO,159.5,60.0,149.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,13:59:30,KRISCO,149.5,60.0,139.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,14:07:54,KRISCO,139.5,60.0,130.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,14:16:11,KRISCO,130.5,60.0,121.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,14:24:29,KRISCO,121.0,60.0,111.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,14:32:42,KRISCO,111.5,60.0,102.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,14:40:36,KRISCO,102.5,60.0,93.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,14:43:22,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,14:43:22,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,14:48:21,KRISCO,180.5,60.0,170.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,14:57:13,KRISCO,170.5,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:05:55,KRISCO,160.0,60.0,150.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:14:37,KRISCO,150.0,60.0,140.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:23:10,KRISCO,140.0,60.0,130.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:31:26,KRISCO,131.0,60.0,121.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:39:46,KRISCO,121.0,60.0,111.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:47:58,KRISCO,111.5,60.0,102.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:56:05,KRISCO,102.0,60.0,92.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,15:58:55,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,15:58:55,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,16:04:10,KRISCO,180.0,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,16:12:50,KRISCO,170.0,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,16:21:22,KRISCO,160.5,60.0,150.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,16:29:51,KRISCO,150.0,60.0,140.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,16:38:06,KRISCO,140.5,60.0,131.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,16:46:21,KRISCO,131.0,60.0,121.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,16:54:34,KRISCO,121.5,60.0,112.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:02:40,KRISCO,112.5,60.0,103.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:10:42,KRISCO,103.0,60.0,93.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:15:46,KRISCO,99.5,180.0,94.0,FAIL,[Infeed] Oil add TIMEOUT
+2026-09-16,17:15:46,KRISCO,99.5,180.0,94.0,FAIL,[Infeed] Oil add TIMEOUT
+2026-09-16,17:18:37,KRISCO,94.0,60.0,85.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:23:41,KRISCO,85.0,180.0,85.0,FAIL,[Infeed] Oil add TIMEOUT
+2026-09-16,17:26:17,KRISCO,85.0,60.0,76.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:31:22,KRISCO,76.0,180.0,164.0,FAIL,[Infeed] Oil add TIMEOUT
+2026-09-16,17:34:16,KRISCO,164.0,60.0,153.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:43:07,KRISCO,154.0,60.0,144.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:51:20,KRISCO,144.5,60.0,134.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,17:59:39,KRISCO,135.0,60.0,125.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,18:07:44,KRISCO,125.5,60.0,116.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,18:15:52,KRISCO,116.0,60.0,106.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,18:24:02,KRISCO,107.0,60.0,97.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,18:26:39,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,18:32:14,KRISCO,180.5,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,18:41:12,KRISCO,170.0,60.0,159.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,18:49:59,KRISCO,160.0,60.0,150.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,18:58:32,KRISCO,150.0,60.0,140.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,19:06:55,KRISCO,140.5,60.0,130.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,19:15:14,KRISCO,131.0,60.0,121.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,19:23:19,KRISCO,121.5,60.0,112.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,19:31:39,KRISCO,112.0,60.0,102.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,19:39:33,KRISCO,102.5,60.0,93.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,19:42:12,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,19:47:29,KRISCO,180.5,60.0,170.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,19:56:01,KRISCO,170.5,60.0,160.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:04:37,KRISCO,160.5,60.0,150.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:13:07,KRISCO,150.5,60.0,140.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:21:37,KRISCO,140.5,60.0,131.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:29:49,KRISCO,131.0,60.0,121.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:37:48,KRISCO,121.5,60.0,112.5,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:46:05,KRISCO,112.5,60.0,103.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:53:58,KRISCO,103.5,60.0,94.0,Sucess,[outfeed] Oven request to stop
+2026-09-16,20:56:43,KRISCO,99.5,180.0,180.0,Sucess,[Infeed] Required weight reached
+2026-09-16,21:01:44,KRISCO,180.5,60.0,170.0,Sucess,[outfeed] Oven request to stop

@@ -94,7 +94,7 @@ def get_latest_csv(log_dir):
 def send_email(subject, body, to_email, attachment_path=None):
     sender_email = "sprayer01weighingco@gmail.com"
     sender_password = "wkdbfbnnuipytoep"
-
+    print(f"Sending email to {to_email} with subject '{subject}' and attachment '{attachment_path}'")
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = sender_email

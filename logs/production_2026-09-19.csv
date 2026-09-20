@@ -1,0 +1,2 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-19,14:57:41,KRISCO,180.0,60.0,180.0,Sucess,[outfeed] Oven request to stop

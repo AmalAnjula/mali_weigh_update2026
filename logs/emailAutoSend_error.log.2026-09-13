@@ -1,0 +1,3 @@
+2026-09-13 07:31:13 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 13:06:45 [ERROR] Unexpected error in poll_inbox: [Errno 101] Network is unreachable
+2026-09-13 13:32:48 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution

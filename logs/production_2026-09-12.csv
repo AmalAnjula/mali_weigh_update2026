@@ -1,0 +1,4 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-12,10:20:41,KRISCO,164.5,180.0,165.5,FAIL,[Infeed] mode change
+2026-09-12,10:21:15,KRISCO,166.0,60.0,166.0,Sucess,[outfeed] Oven request to stop
+2026-09-12,21:59:01,KRISCO,166.5,180.0,166.5,FAIL,[Infeed] oil_add Local stop

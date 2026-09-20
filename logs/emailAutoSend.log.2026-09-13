@@ -1,0 +1,18 @@
+2026-09-13 07:31:13 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 07:31:45 [INFO] No new emails.
+2026-09-13 12:55:37 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 13:03:54 [INFO] No new emails.
+2026-09-13 13:06:45 [ERROR] Unexpected error in poll_inbox: [Errno 101] Network is unreachable
+2026-09-13 13:07:17 [INFO] No new emails.
+2026-09-13 13:32:48 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 13:35:38 [INFO] No new emails.
+2026-09-13 14:58:59 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 15:03:04 [INFO] No new emails.
+2026-09-13 16:54:17 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 17:21:08 [INFO] No new emails.
+2026-09-13 19:09:38 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 19:27:42 [INFO] No new emails.
+2026-09-13 19:43:24 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 19:46:15 [INFO] No new emails.
+2026-09-13 19:51:12 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-13 20:10:06 [INFO] No new emails.

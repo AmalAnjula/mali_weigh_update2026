@@ -21,5 +21,5 @@ tank:
   infeed_valve: 1.0
   lo_level_kg: 20.0
   lo_threshold_pct: 20.0
-  max_kg: 180.0
+  max_kg: 200.0
   tare_kg: 0.0
