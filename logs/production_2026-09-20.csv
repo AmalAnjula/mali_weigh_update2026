@@ -1,0 +1,26 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-20,08:03:21,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:23,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:26,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:28,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:34,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:38,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:47,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:57,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:58,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:03:58,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:04:18,KRISCO,183.0,180.0,183.0,Sucess,[Infeed] Required weight reached
+2026-09-20,08:25:43,KRISCO,183.0,60.0,183.0,FAIL,[outfeed] Remote stop
+2026-09-20,12:47:15,KRISCO,182.5,180.0,182.5,Sucess,[Infeed] Required weight reached
+2026-09-20,12:47:19,KRISCO,182.5,180.0,182.5,Sucess,[Infeed] Required weight reached
+2026-09-20,12:47:26,KRISCO,182.5,60.0,182.5,FAIL,[outfeed] Remote stop
+2026-09-20,12:47:30,KRISCO,182.5,60.0,182.5,FAIL,[outfeed] Remote stop
+2026-09-20,12:47:35,KRISCO,182.5,60.0,182.5,FAIL,[outfeed] Remote stop
+2026-09-20,12:47:53,KRISCO,182.5,60.0,182.5,FAIL,[outfeed] Remote stop
+2026-09-20,12:47:56,KRISCO,182.5,60.0,182.5,FAIL,[outfeed] Remote stop
+2026-09-20,12:48:00,KRISCO,182.5,60.0,182.5,FAIL,[outfeed] Remote stop
+2026-09-20,12:49:06,KRISCO,182.5,180.0,182.5,Sucess,[Infeed] Required weight reached
+2026-09-20,12:49:07,KRISCO,182.5,180.0,182.5,Sucess,[Infeed] Required weight reached
+2026-09-20,12:49:07,KRISCO,182.5,180.0,182.5,Sucess,[Infeed] Required weight reached
+2026-09-20,12:49:08,KRISCO,182.5,180.0,182.5,Sucess,[Infeed] Required weight reached
+2026-09-20,12:49:09,KRISCO,182.5,180.0,182.5,Sucess,[Infeed] Required weight reached

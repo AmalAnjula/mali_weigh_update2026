@@ -57,6 +57,11 @@ alarms_list = [
     
 ]
 
+sensor_alarm_active = {
+    "low": False,
+    "high": False,
+}
+
 with open("config.yml") as f:
     CONFIG = yaml.safe_load(f)
 
@@ -560,6 +565,7 @@ def gpio_handler():
             if gpio.rising("outtk_stop"):
                 outfeed_remote_stop=True
                 tech_log.info("GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True")
+                alarms_list.clear()
 
             #if gpio.rising("outtk_start") and state["outfeed"]["operation"]=="REMOTE": #chnge button state amal 
             if gpio.rising("outtk_start") : #chnge button state amal 
@@ -627,6 +633,7 @@ def gpio_handler():
             state["sensors"]["hi_level"] = gpio.state("up_sns")      # assuming active HIGH sensor (1 when triggered)
             low_level_sensor = not state["sensors"]["lo_level"] 
             hi_level_sensor =not state["sensors"]["hi_level"] 
+            _check_sensor_alarm()
              
  
             #print("tank low level sensor:", inputs["lowr_sns"], "  tank up level sensor:", inputs["up_sns"])
@@ -639,6 +646,46 @@ def gpio_handler():
             tech_log.error(f"Error reading GPIO states: {e}")
         #time.sleep(1)   # poll interval
 
+
+
+def _update_alarm_led_state():
+    """Keep the physical alarm LED on while any active alarm exists."""
+    with _lock:
+        hi_alarm = bool(state["tank"].get("hi_alarm", False))
+        lo_alarm = bool(state["tank"].get("lo_alarm", False))
+        sensor_low = bool(sensor_alarm_active.get("low", False))
+        sensor_high = bool(sensor_alarm_active.get("high", False))
+        alarm_active = hi_alarm or lo_alarm or sensor_low or sensor_high
+
+    if alarm_active:
+        gpio.output_on("alm_led")
+    else:
+        gpio.output_off("alm_led")
+    return alarm_active
+
+
+def _check_sensor_alarm():
+    """Add separate rising-edge alarms for low and high sensor conditions."""
+    global sensor_alarm_active
+
+    with _lock:
+        low_active =  bool(state["sensors"]["hi_level"])
+        high_active =  not  bool(state["sensors"]["lo_level"])
+
+    active_alarms = (
+        ("low", low_active, "Tank high level"),
+        ("high", high_active, "Tank low level"),
+    )
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    for alarm_key, is_active, message in active_alarms:
+        if is_active and not sensor_alarm_active[alarm_key]:
+            with _lock:
+                alarms_list.append({"timestamp": now, "message": message})
+            tech_log.warning("[ALARM] %s", message)
+        sensor_alarm_active[alarm_key] = is_active
+
+    _update_alarm_led_state()
 
 # ══════════════════════════════════════════════════════════════════
 #  HELPERS
@@ -683,6 +730,8 @@ def _recalc_alarms():
         _log_alarm(f"HI ALARM - tank level {tk['level_pct']:.1f}% reached high threshold ({tk['hi_threshold_pct']}%)")
     if tk["lo_alarm"] and not prev_lo:
         _log_alarm(f"LO ALARM - tank level {tk['level_pct']:.1f}% reached low threshold ({tk['lo_threshold_pct']}%)")
+
+    _update_alarm_led_state()
 
 def _print_event(payload: dict):
     print(f"\n[BUTTON EVENT] {json.dumps(payload, indent=2)}")
@@ -2043,6 +2092,7 @@ def api_control():
                     state["tank"]["hi_alarm"] = False
                     state["tank"]["lo_alarm"] = False
                     alarms_list.clear()
+                    _update_alarm_led_state()
                     tech_log.info("[outfeed] Local stop signalled. Tank alarms cleared.")
                  
 
@@ -2189,6 +2239,11 @@ def api_add_alarm():
 def api_clear_alarms():
     global alarms_list
     alarms_list.clear()
+    state["tank"]["hi_alarm"] = False
+    state["tank"]["lo_alarm"] = False
+    sensor_alarm_active["low"] = False
+    sensor_alarm_active["high"] = False
+    _update_alarm_led_state()
     tech_log.info("[ALARM] Cleared all alarms")
     return jsonify({"success": True})
 

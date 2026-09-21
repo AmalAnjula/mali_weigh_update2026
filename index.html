@@ -22,22 +22,29 @@
   --amber-bg:      #00570777;
   --blue:          #2f3d4c;
   --blue-bg:       #dfeaf8;
-  --tank:          #e91ed2;
-  --tank-dark:     #c318b5;
+  --tank:          #f1058f;
+  --tank-dark:     #f1058f;
   /* Infeed control buttons */
-  --infeed-manual-bg: #C42000;
-  --infeed-auto-bg:   #E91E63;
+  --infeed-manual-bg:#9e50e3;
+  --infeed-auto-bg:   #9e50e3;
   --infeed-local-bg:  #FF00FF;
   --infeed-remote-bg: #101BC2;
   --infeed-start-bg:  #FF6A00;
   --infeed-stop-bg:   #10C237;
   /* Outfeed control buttons */
-  --outfeed-manual-bg: #C42000;
-  --outfeed-auto-bg:   #E91E63;
+  --outfeed-manual-bg: #9e50e3;
+  --outfeed-auto-bg:   #9e50e3;
   --outfeed-local-bg:  #FF00FF;
   --outfeed-remote-bg: #101BC2;
   --outfeed-start-bg:  #FF6A00;
   --outfeed-stop-bg:   #10C237;
+  /* Text colors for the six control states */
+  --state-manual-text: #fff4f0;
+  --state-auto-text:   #fff0f7;
+  --state-local-text:  #ffe6ff;
+  --state-remote-text: #e6e9ff;
+  --state-start-text:  #fff1e6;
+  --state-stop-text:   #003d12;
   --radius:        10px;
   --shadow:        0 3px 8px rgba(0,0,0,0.12);
 }
@@ -51,7 +58,7 @@ body {
 }
 
 /* ── Layout ───────────────────────────────────── */
-.page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.page { max-width: 1200px; margin: 0 auto; padding: 0 16px 16px; }
 
 /* ── Header ───────────────────────────────────── */
 header {
@@ -88,8 +95,8 @@ header {
   display: flex; gap: 4px;
 }
 .tab {
-  padding: 9px 18px; border-radius: 0;
-  font-size: 14px; font-weight: 700;
+  padding: 5px 12px; border-radius: 0;
+  font-size: 12px; font-weight: 700;
   border: 1px solid var(--border);
   background: #b8b8b8; color: var(--text);
   cursor: pointer; transition: all .15s;
@@ -141,8 +148,8 @@ header {
   align-items: center;
 }
 .ctrl-btn:hover { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(0,0,0,.06); }
-.ctrl-btn .label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
-.ctrl-btn .value { font-size: 18px; font-weight: 700; }
+.ctrl-btn .label { font-size: 1px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
+.ctrl-btn .value { font-size: 30px; font-weight: 700; }
 
 #in-mode-btn.st-manual  { border-color: var(--infeed-manual-bg); background: var(--infeed-manual-bg); }
 #in-mode-btn.st-auto    { border-color: var(--infeed-auto-bg);   background: var(--infeed-auto-bg); }
@@ -157,35 +164,48 @@ header {
 #out-op-btn.st-remote   { border-color: var(--outfeed-remote-bg); background: var(--outfeed-remote-bg); }
 #out-run-btn.st-start   { border-color: var(--outfeed-start-bg);  background: var(--outfeed-start-bg); }
 #out-run-btn.st-stop    { border-color: var(--outfeed-stop-bg);   background: var(--outfeed-stop-bg); }
-.ctrl-btn.st-manual .value,
+.ctrl-btn.st-manual .value ,
 .ctrl-btn.st-auto .value,
 .ctrl-btn.st-local .value,
 .ctrl-btn.st-remote .value,
-.ctrl-btn.st-start .value,
-.ctrl-btn.st-stop .value,
 .ctrl-btn.st-manual .label,
 .ctrl-btn.st-auto .label,
 .ctrl-btn.st-local .label,
-.ctrl-btn.st-remote .label,
-.ctrl-btn.st-start .label,
-.ctrl-btn.st-stop .label { color: #fff; }
-/* Disabled — fade each state's color into a gradient, text turns black */
+.ctrl-btn.st-remote .label { color: #fff; }
+.ctrl-btn.st-start .value,
+.ctrl-btn.st-start .label { color: #dae6da; }
+.ctrl-btn.st-stop .value,
+.ctrl-btn.st-stop .label { color: var(--red); }
+/* Disabled buttons keep the same flat state colors. */
 .ctrl-btn.disabled { cursor: not-allowed; pointer-events: none; border-color: var(--border); }
-#in-mode-btn.st-manual.disabled  { background: linear-gradient(135deg, var(--infeed-manual-bg) 0%, #d9d9d9 100%); }
-#in-mode-btn.st-auto.disabled    { background: linear-gradient(135deg, var(--infeed-auto-bg)   0%, #d9d9d9 100%); }
-#in-op-btn.st-local.disabled     { background: linear-gradient(135deg, var(--infeed-local-bg)  0%, #d9d9d9 100%); }
-#in-op-btn.st-remote.disabled    { background: linear-gradient(135deg, var(--infeed-remote-bg) 0%, #d9d9d9 100%); }
-#in-run-btn.st-start.disabled    { background: linear-gradient(135deg, var(--infeed-start-bg)  0%, #d9d9d9 100%); }
-#in-run-btn.st-stop.disabled     { background: linear-gradient(135deg, var(--infeed-stop-bg)   0%, #d9d9d9 100%); }
-
-#out-mode-btn.st-manual.disabled { background: linear-gradient(135deg, var(--outfeed-manual-bg) 0%, #d9d9d9 100%); }
-#out-mode-btn.st-auto.disabled   { background: linear-gradient(135deg, var(--outfeed-auto-bg)   0%, #d9d9d9 100%); }
-#out-op-btn.st-local.disabled    { background: linear-gradient(135deg, var(--outfeed-local-bg)  0%, #d9d9d9 100%); }
-#out-op-btn.st-remote.disabled   { background: linear-gradient(135deg, var(--outfeed-remote-bg) 0%, #d9d9d9 100%); }
-#out-run-btn.st-start.disabled   { background: linear-gradient(135deg, var(--outfeed-start-bg)  0%, #d9d9d9 100%); }
-#out-run-btn.st-stop.disabled    { background: linear-gradient(135deg, var(--outfeed-stop-bg)   0%, #d9d9d9 100%); }
+#in-mode-btn.st-manual.disabled  { background: var(--infeed-manual-bg); }
+#in-mode-btn.st-auto.disabled    { background: var(--infeed-auto-bg); }
+#in-op-btn.st-local.disabled     { background: var(--infeed-local-bg); }
+#in-op-btn.st-remote.disabled    { background: var(--infeed-remote-bg); }
+#in-run-btn.st-start.disabled    { background: var(--infeed-start-bg); }
+#in-run-btn.st-stop.disabled     { background: var(--infeed-stop-bg); }
+#out-mode-btn.st-manual.disabled { background: var(--outfeed-manual-bg); }
+#out-mode-btn.st-auto.disabled   { background: var(--outfeed-auto-bg); }
+#out-op-btn.st-local.disabled    { background: var(--outfeed-local-bg); }
+#out-op-btn.st-remote.disabled   { background: var(--outfeed-remote-bg); }
+#out-run-btn.st-start.disabled   { background: var(--outfeed-start-bg); }
+#out-run-btn.st-stop.disabled    { background: var(--outfeed-stop-bg); }
 .ctrl-btn.disabled .value,
 .ctrl-btn.disabled .label { color: #000; }
+
+/* Each state uses one matching text color for both sides and both text parts. */
+.ctrl-btn.st-manual .label,
+.ctrl-btn.st-manual .value { color: var(--state-manual-text); }
+.ctrl-btn.st-auto .label,
+.ctrl-btn.st-auto .value { color: var(--state-auto-text); }
+.ctrl-btn.st-local .label,
+.ctrl-btn.st-local .value { color: var(--state-local-text); }
+.ctrl-btn.st-remote .label,
+.ctrl-btn.st-remote .value { color: var(--state-remote-text); }
+.ctrl-btn.st-start .label,
+.ctrl-btn.st-start .value { color: var(--state-start-text); }
+.ctrl-btn.st-stop .label,
+.ctrl-btn.st-stop .value { color: var(--state-stop-text); }
 
 /* Volume input */
 .vol-wrap { display: flex; flex-direction: column; gap: 5px; }
@@ -318,11 +338,11 @@ header {
 /* Tank shell */
 .tank-shell {
   width: 320px; height: 420px;
-  background: linear-gradient(90deg, #dcdcdc 0%, #fbfbfb 14%, #fbfbfb 48%, #eaeaea 78%, #cfcfcf 100%);
+  background: #fbfbfb;
   border: 4px solid var(--border);
   border-radius: 18px;
   position: relative; overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,.08), 0 14px 26px rgba(0,0,0,.2), 0 0 0 2px rgba(0,0,0,.06);
+  box-shadow: none;
 }
 /* 3D shading overlay — cylindrical light/dark falloff across the width */
 .tank-shell::before {
@@ -343,11 +363,13 @@ header {
   background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
   filter: blur(1px);
 }
+.tank-shell::before,
+.tank-shell::after { display: none; }
 
 /* Level indicator lines */
 .lvl-line { position: absolute; left: 0; right: 0; height: 3px; z-index: 4; pointer-events: none; }
-.lvl-line.hi { background: var(--blue); opacity: .8; }
-.lvl-line.lo { background: var(--blue); opacity: .8; }
+.lvl-line.hi { background: var(--blue); opacity: .0; }
+.lvl-line.lo { background: var(--blue); opacity: .0; }
 .lvl-tag {
   position: absolute; right: 4px; z-index: 5;
   font-size: 8px; font-weight: 700; letter-spacing: .5px;
@@ -478,18 +500,18 @@ td.cwt { color: var(--green); }
 .status-bar span { font-weight: 600; color: var(--text); margin-left: 4px; }
 
 .alarm-banner {
-  flex: 1; min-width: 0; padding: 0 16px; height: 38px;
+  flex: 1; min-width: 0; padding: 0 20px; height: 48px;
   border-radius: 8px; border: 2px solid var(--border);
   background: rgba(255,255,255,.96); color: var(--text);
-  font-size: 13px; font-weight: 700; letter-spacing: .5px;
+  font-size: 15px; font-weight: 700; letter-spacing: .5px;
   text-transform: uppercase; box-shadow: 0 2px 6px rgba(15, 23, 42, .12);
   display: none; flex-direction: row; align-items: center; gap: 10px;
   overflow: hidden;
 }
 .alarm-banner.active { display: flex; background: #fff4f4; border-color: var(--red); color: var(--red); }
 .alarm-banner .ab-count { flex-shrink: 0; }
-.alarm-banner .ab-msg   { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
-.alarm-banner .ab-time  { flex-shrink: 0; font-weight: 600; opacity: .75; font-size: 11px; }
+.alarm-banner .ab-msg   { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; }
+.alarm-banner .ab-time  { flex-shrink: 0; font-weight: 600; opacity: .75; font-size: 12px; }
 
 /* ── Toast ────────────────────────────────────── */
 .toast {
@@ -1039,19 +1061,29 @@ let alarmIdx  = 0;
 let hiAcked = false, loAcked = false;
 let prevHiLive = false, prevLoLive = false;
 
+function getAlarmRows() {
+  const tk = (D && D.tank) ? D.tank : {};
+  const ts = D && D.timestamp ? D.timestamp.replace("T", " ").slice(0, 19) : "";
+  const list = [...alarmRows];
+  const liveRows = [];
+  if (tk.hi_alarm && !hiAcked) {
+    liveRows.push({ message: "HI ALARM — tank level above high threshold", timestamp: ts });
+  }
+  if (tk.lo_alarm && !loAcked) {
+    liveRows.push({ message: "LO ALARM — tank level below low threshold", timestamp: ts });
+  }
+  liveRows.forEach(liveRow => {
+    if (!list.some(row => row.message === liveRow.message)) list.push(liveRow);
+  });
+  return list;
+}
+
 function renderAlarmBanner() {
   const banner = document.getElementById("alarm-banner");
   const tk = (D && D.tank) ? D.tank : {};
 
   const liveActive = !!((tk.hi_alarm && !hiAcked) || (tk.lo_alarm && !loAcked));
-
-  let list = alarmRows;
-  if (!list.length && liveActive) {
-    const ts = D && D.timestamp ? D.timestamp.replace("T", " ").slice(0, 19) : "";
-    list = [];
-    if (tk.hi_alarm && !hiAcked) list.push({ message: "HI ALARM — tank level above high threshold", timestamp: ts });
-    if (tk.lo_alarm && !loAcked) list.push({ message: "LO ALARM — tank level below low threshold",  timestamp: ts });
-  }
+  const list = getAlarmRows();
 
   if (!liveActive && !list.length) {
     banner.className = "alarm-banner";
@@ -1078,17 +1110,15 @@ function renderAlarmBanner() {
 function clearLocalAlarmState() {
   alarmRows = [];
   alarmIdx = 0;
-  if (D && D.tank) {
-    D.tank.hi_alarm = false;
-    D.tank.lo_alarm = false;
-  }
+  // Keep the live tank flags unchanged so an active alarm stays visible.
   renderAlarmBanner();
 }
 
 // Cycle through multiple active alarms in the banner
 setInterval(() => {
-  if (alarmRows.length > 1) {
-    alarmIdx = (alarmIdx + 1) % alarmRows.length;
+  const totalCount = getAlarmRows().length;
+  if (totalCount > 1) {
+    alarmIdx = (alarmIdx + 1) % totalCount;
     renderAlarmBanner();
   }
 }, 2500);
@@ -1433,8 +1463,7 @@ async function clearAlarms() {
       throw new Error(text || "Failed to clear alarms");
     }
 
-    // clear the UI banner immediately; if the level is still above threshold,
-    // the next data poll will restore the live alarm state naturally.
+    // Clear the history, but keep any currently active live alarm visible.
     clearLocalAlarmState();
     showToast("Alarms cleared ✓", "ok");
     await fetchAlarms();
