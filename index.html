@@ -9,21 +9,44 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #f0f2f5;
-  --surface:  #ffffff;
-  --border:   #00bcbf;
-  --text:     #1a1d23;
-  --muted:    #f30000;
-  --green:    #041a0c;  /* control mode auto text col*/
-  --green-bg: #09df4d;
-  --red:      #dc2626;
-  --red-bg:   #c4f003;
-  --amber:    #ecb80a;
-  --amber-bg: #2330ea;
-  --blue:     #03410b;
-  --blue-bg:  #0fe4b2;
-  --radius:   8px;
-  --shadow:   0 1px 3px rgba(0,0,0,0.1);
+  --bg:            #d8d8d8;
+  --surface:       #f4f4f4;
+  --border:        #3a3a3a;
+  --text:          #101010;
+  --muted:         #1e1e1e;
+  --green:         #00ffaa;
+  --green-bg:      #8fe7d4;
+  --red:           #b91c1c;
+  --red-bg:        #f8ba00;
+  --amber:         #8d4b00;
+  --amber-bg:      #00570777;
+  --blue:          #2f3d4c;
+  --blue-bg:       #dfeaf8;
+  --tank:          #f1058f;
+  --tank-dark:     #f1058f;
+  /* Infeed control buttons */
+  --infeed-manual-bg:#9e50e3;
+  --infeed-auto-bg:   #9e50e3;
+  --infeed-local-bg:  #FF00FF;
+  --infeed-remote-bg: #101BC2;
+  --infeed-start-bg:  #FF6A00;
+  --infeed-stop-bg:   #10C237;
+  /* Outfeed control buttons */
+  --outfeed-manual-bg: #9e50e3;
+  --outfeed-auto-bg:   #9e50e3;
+  --outfeed-local-bg:  #FF00FF;
+  --outfeed-remote-bg: #101BC2;
+  --outfeed-start-bg:  #FF6A00;
+  --outfeed-stop-bg:   #10C237;
+  /* Text colors for the six control states */
+  --state-manual-text: #fff4f0;
+  --state-auto-text:   #fff0f7;
+  --state-local-text:  #ffe6ff;
+  --state-remote-text: #e6e9ff;
+  --state-start-text:  #fff1e6;
+  --state-stop-text:   #003d12;
+  --radius:        10px;
+  --shadow:        0 3px 8px rgba(0,0,0,0.12);
 }
 
 body {
@@ -35,19 +58,19 @@ body {
 }
 
 /* ── Layout ───────────────────────────────────── */
-.page { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.page { max-width: 1200px; margin: 0 auto; padding: 0 16px 16px; }
 
 /* ── Header ───────────────────────────────────── */
 header {
-  background: var(--surface);
+  background: #efefef;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 20px;
+  border-radius: 0;
+  padding: 10px 16px;
   margin-bottom: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: var(--shadow);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
 }
 .hdr-left h1 { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: .3px; }
 .hdr-left p  { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -65,86 +88,143 @@ header {
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
 
 /* ── Tabs ─────────────────────────────────────── */
+.tabs-row {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+}
 .tabs {
-  display: flex; gap: 4px; margin-bottom: 14px;
+  display: flex; gap: 4px;
 }
 .tab {
-  padding: 7px 18px; border-radius: 6px;
-  font-size: 13px; font-weight: 500;
+  padding: 5px 12px; border-radius: 0;
+  font-size: 12px; font-weight: 700;
   border: 1px solid var(--border);
-  background: var(--surface); color: var(--muted);
+  background: #b8b8b8; color: var(--text);
   cursor: pointer; transition: all .15s;
+  text-transform: uppercase;
 }
 .tab:hover { border-color: var(--blue); color: var(--blue); }
-.tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.tab.active { background: #5fdc7d; border-color: var(--border); color: var(--text); }
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
 /* ── Monitor layout ───────────────────────────── */
 .monitor {
   display: grid;
-  grid-template-columns: 1fr 220px 1fr;
-  gap: 14px;
+  grid-template-columns: minmax(170px, 240px) 460px minmax(170px, 240px);
+  gap: 10px;
   align-items: start;
+  justify-content: space-between;
 }
+.monitor > .card:first-child { justify-self: start; }
+.monitor > .card:last-child  { justify-self: end; }
 
 /* ── Cards ────────────────────────────────────── */
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  background: #f5f5f5;
+  border: 2px solid var(--border);
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4), var(--shadow);
 }
 .card-head {
   padding: 5px 10px 8px;
   border-bottom: 1px solid var(--border);
-  font-size: 11px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
   display: flex; align-items: center; gap: 2px;
 }
-.card-body { padding: 12px 14px; }
+.card-body { padding: 10px 12px; }
 
 /* ── Control panel ────────────────────────────── */
 .ctrl { display: flex; flex-direction: column; gap: 8px; }
 
 /* Button rows */
 .ctrl-btn {
-  width: 100%; padding: 12px 14px; border-radius: 7px;
-  border: 1.5px solid var(--border); background: var(--surface);
-  cursor: pointer; text-align: left; transition: all .15s;
+  width: 100%; min-width: 0; max-width: 100%;
+  padding: 10px 12px; border-radius: 0;
+  border: 2px solid var(--border); background: #f0f0f0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5);
+  cursor: pointer; text-align: center; transition: all .15s;
   display: flex; flex-direction: column; gap: 2px;
+  align-items: center;
 }
-.ctrl-btn:hover { border-color: var(--blue); }
-.ctrl-btn .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
-.ctrl-btn .value { font-size: 20px; font-weight: 700; }
+.ctrl-btn:hover { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(0,0,0,.06); }
+.ctrl-btn .label { font-size: 1px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
+.ctrl-btn .value { font-size: 30px; font-weight: 700; }
 
-.ctrl-btn.st-green  { border-color: var(--green); background: var(--green-bg); }
-.ctrl-btn.st-green .value { color: var(--green); }
-.ctrl-btn.st-red    { border-color: var(--red);   background: var(--red-bg);   }
-.ctrl-btn.st-red .value   { color: var(--red);   }
-.ctrl-btn.st-amber  { border-color: var(--amber); background: var(--amber-bg); }
-.ctrl-btn.st-amber .value { color: var(--amber); }
-.ctrl-btn.st-blue   { border-color: var(--blue);  background: var(--blue-bg);  }
-.ctrl-btn.st-blue .value  { color: var(--blue);  }
-.ctrl-btn.disabled  { opacity: .35; cursor: not-allowed; pointer-events: none; }
+#in-mode-btn.st-manual  { border-color: var(--infeed-manual-bg); background: var(--infeed-manual-bg); }
+#in-mode-btn.st-auto    { border-color: var(--infeed-auto-bg);   background: var(--infeed-auto-bg); }
+#in-op-btn.st-local     { border-color: var(--infeed-local-bg);  background: var(--infeed-local-bg); }
+#in-op-btn.st-remote    { border-color: var(--infeed-remote-bg); background: var(--infeed-remote-bg); }
+#in-run-btn.st-start    { border-color: var(--infeed-start-bg);  background: var(--infeed-start-bg); }
+#in-run-btn.st-stop     { border-color: var(--infeed-stop-bg);   background: var(--infeed-stop-bg); }
+
+#out-mode-btn.st-manual { border-color: var(--outfeed-manual-bg); background: var(--outfeed-manual-bg); }
+#out-mode-btn.st-auto   { border-color: var(--outfeed-auto-bg);   background: var(--outfeed-auto-bg); }
+#out-op-btn.st-local    { border-color: var(--outfeed-local-bg);  background: var(--outfeed-local-bg); }
+#out-op-btn.st-remote   { border-color: var(--outfeed-remote-bg); background: var(--outfeed-remote-bg); }
+#out-run-btn.st-start   { border-color: var(--outfeed-start-bg);  background: var(--outfeed-start-bg); }
+#out-run-btn.st-stop    { border-color: var(--outfeed-stop-bg);   background: var(--outfeed-stop-bg); }
+.ctrl-btn.st-manual .value ,
+.ctrl-btn.st-auto .value,
+.ctrl-btn.st-local .value,
+.ctrl-btn.st-remote .value,
+.ctrl-btn.st-manual .label,
+.ctrl-btn.st-auto .label,
+.ctrl-btn.st-local .label,
+.ctrl-btn.st-remote .label { color: #fff; }
+.ctrl-btn.st-start .value,
+.ctrl-btn.st-start .label { color: #dae6da; }
+.ctrl-btn.st-stop .value,
+.ctrl-btn.st-stop .label { color: var(--red); }
+/* Disabled buttons keep the same flat state colors. */
+.ctrl-btn.disabled { cursor: not-allowed; pointer-events: none; border-color: var(--border); }
+#in-mode-btn.st-manual.disabled  { background: var(--infeed-manual-bg); }
+#in-mode-btn.st-auto.disabled    { background: var(--infeed-auto-bg); }
+#in-op-btn.st-local.disabled     { background: var(--infeed-local-bg); }
+#in-op-btn.st-remote.disabled    { background: var(--infeed-remote-bg); }
+#in-run-btn.st-start.disabled    { background: var(--infeed-start-bg); }
+#in-run-btn.st-stop.disabled     { background: var(--infeed-stop-bg); }
+#out-mode-btn.st-manual.disabled { background: var(--outfeed-manual-bg); }
+#out-mode-btn.st-auto.disabled   { background: var(--outfeed-auto-bg); }
+#out-op-btn.st-local.disabled    { background: var(--outfeed-local-bg); }
+#out-op-btn.st-remote.disabled   { background: var(--outfeed-remote-bg); }
+#out-run-btn.st-start.disabled   { background: var(--outfeed-start-bg); }
+#out-run-btn.st-stop.disabled    { background: var(--outfeed-stop-bg); }
+.ctrl-btn.disabled .value,
+.ctrl-btn.disabled .label { color: #000; }
+
+/* Each state uses one matching text color for both sides and both text parts. */
+.ctrl-btn.st-manual .label,
+.ctrl-btn.st-manual .value { color: var(--state-manual-text); }
+.ctrl-btn.st-auto .label,
+.ctrl-btn.st-auto .value { color: var(--state-auto-text); }
+.ctrl-btn.st-local .label,
+.ctrl-btn.st-local .value { color: var(--state-local-text); }
+.ctrl-btn.st-remote .label,
+.ctrl-btn.st-remote .value { color: var(--state-remote-text); }
+.ctrl-btn.st-start .label,
+.ctrl-btn.st-start .value { color: var(--state-start-text); }
+.ctrl-btn.st-stop .label,
+.ctrl-btn.st-stop .value { color: var(--state-stop-text); }
 
 /* Volume input */
 .vol-wrap { display: flex; flex-direction: column; gap: 5px; }
 .vol-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
 .vol-input {
-  width: 100%; padding: 10px 12px; border-radius: 6px;
-  border: 1.5px solid var(--border); background: var(--bg);
+  width: 100%; padding: 10px 12px; border-radius: 0;
+  border: 2px solid var(--border); background: #efefef;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
   font-size: 18px; font-weight: 600; text-align: center; color: var(--text);
   outline: none; transition: border .15s;
 }
 .vol-input:focus { border-color: var(--blue); background: #fff; }
 .apply-btn {
   width: 100%; padding: 10px;
-  border-radius: 6px; border: 1.5px solid var(--blue);
-  background: var(--blue); color: #fff;
-  font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s;
+  border-radius: 0; border: 1.5px solid var(--green);
+  background: #0a5f47; color: #fff;
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: all .15s;
 }
-.apply-btn:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.apply-btn:hover { background: #0b4c39; border-color: #0b4c39; }
 
 /* ── Stat tiles ───────────────────────────────── */
 .stat-tile {
@@ -190,70 +270,106 @@ header {
 
 /* ── TANK ─────────────────────────────────────── */
 .tank-wrap-outer {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 
+.tank-frame { position: relative; }
 .sensor-row { display: flex; align-items: center; gap: 7px; }
-.sdot {
-  width: 11px; height: 11px; border-radius: 50%;
-  background: #d0d5dd; border: 1.5px solid #b0b8c4;
-  flex-shrink: 0; transition: all .3s;
+.sensor-row.corner {
+  position: absolute; z-index: 6; white-space: nowrap;
 }
-.sdot.alarm  { background: var(--red);   border-color: var(--red);   box-shadow: 0 0 8px rgba(220,38,38,.35); animation: blink .8s infinite; }
-.sdot.lo-alm { background: var(--amber); border-color: var(--amber); box-shadow: 0 0 8px rgba(217,119,6,.35);  animation: blink .8s infinite; }
-@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
-.slbl { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .5px; }
+.sensor-row.hi-pos { top: 2%;     right: calc(100% + 4px); transform: translateY(-8px); }
+.sensor-row.lo-pos { bottom: 20%; right: calc(100% + 12px); transform: translateY(50%); }
+.sdot {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #d0d5dd; border: 3.5px solid #000000;
+  flex-shrink: 0; transition: all2 .3s;
+}
+.sdot.alarm  { background: var(--red);   border-color: var(--red);   box-shadow: 0 0 20px rgb(54, 1, 1); }
+.sdot.ok     { background: var(--green); border-color: var(--black); box-shadow: 0 0 8px rgb(145, 255, 0); }
+.slbl { font-size: 11px; font-weight: 600; color: var(--black); letter-spacing: .5px; }
 .slbl.alarm  { color: var(--red); }
-.slbl.lo-alm { color: var(--amber); }
-
-/* Pipe */
-.pipe-h { width: 100%; height: 8px; background: #e5e7eb; border-radius: 2px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+.slbl.ok     { color: var(--green); }
+/* amal pahala dot eka */
+/* Horizontal pipe — flanks the sideways-mounted valve */
+.pipe-h {
+  flex: 1; height: 10px;
+  background: #d7dbe1; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden; transition: background .2s;
+  width: 50%;
+}
+.pipe-h.flowing { background: #34ff01; }
 .pipe-h.flowing::after {
   content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(37,99,235,.4), transparent);
-  animation: flow .8s linear infinite;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent);
+  animation: flow-h .7s linear infinite;
 }
-@keyframes flow { to { left: 150%; } }
+@keyframes flow-h { to { left: 150%; } }
 
-/* Valve */
-.valve-row { display: flex; align-items: center; gap: 0; width: 200px; }
-.vpipe     { flex: 1; height: 8px; background: #e5e7eb; border: 1px solid var(--border); }
+/* Valve — mounted sideways in the horizontal run, saves vertical space above/below the tank */
+.valve-row {
+  display: flex; align-items: center; justify-content: center;
+  width: 220px; margin: 0 auto; position: relative; gap: 0;
+}
 .vgate {
-  width: 36px; height: 36px; border-radius: 7px;
-  border: 2px solid var(--border); background: var(--surface);
+  width: 46px; height: 26px; border-radius: 6px;
+  border: none; background: transparent;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all .2s; flex-shrink: 0;
+  position: relative; z-index: 2;
+  margin: 0;
 }
-.vgate:hover { border-color: var(--blue); }
-.vgate.open  { border-color: var(--green); background: var(--green-bg); }
-.vgate svg   { width: 16px; height: 16px; color: var(--muted); transition: color .2s; }
-.vgate.open svg { color: var(--green); }
+.vgate:hover svg { color: var(--blue); }
+.vgate svg   { width: 22px; height: 42px; color: #9aa1ac; stroke: var(--border); transition: color .2s, stroke .2s; transform: rotate(90deg); }
+.vgate.open svg { color: color-mix(in srgb, #0d6efd 35%, white); stroke: #0d6efd; }
 
 /* Port stub */
-.port-stub { width: 20px; height: 14px; background: #e5e7eb; border: 1px solid var(--border); margin: 0 auto; position: relative; overflow: hidden; }
+.port-stub { width: 20px; height: 14px; background: #e5e7eb; border: 1px solid var(--border); margin: 0 auto; position: relative; overflow: hidden; transition: background .2s; }
 .port-stub.top  { border-radius: 4px 4px 0 0; border-bottom: none; }
 .port-stub.bot  { border-radius: 0 0 4px 4px; border-top:    none; }
+.port-stub.flowing { background: #0d6efd; }
 .port-stub.flowing::after {
   content: ''; position: absolute; left: 50%; transform: translateX(-50%);
   width: 5px; height: 5px; border-radius: 50%;
-  background: var(--green); animation: drip .6s infinite;
+  background: #fff; animation: drip .6s infinite;
 }
 @keyframes drip { 0%{opacity:0;top:0;} 50%{opacity:1;} 100%{opacity:0;top:10px;} }
 
 /* Tank shell */
 .tank-shell {
-  width: 200px; height: 330px;
-  background: #f8fafc;
-  border: 2px solid var(--border);
-  border-radius: 16px 16px 12px 12px;
+  width: 320px; height: 420px;
+  background: #fbfbfb;
+  border: 4px solid var(--border);
+  border-radius: 18px;
   position: relative; overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,.06);
+  box-shadow: none;
 }
+/* 3D shading overlay — cylindrical light/dark falloff across the width */
+.tank-shell::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.55) 0%,
+    rgba(255,255,255,.18) 10%,
+    rgba(255,255,255,0)   26%,
+    rgba(0,0,0,0)         68%,
+    rgba(0,0,0,.14)       90%,
+    rgba(0,0,0,.28)       100%);
+}
+/* Glossy highlight streak */
+.tank-shell::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; left: 16%; width: 9%; z-index: 5; pointer-events: none;
+  background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.55), rgba(255,255,255,0));
+  filter: blur(1px);
+}
+.tank-shell::before,
+.tank-shell::after { display: none; }
 
 /* Level indicator lines */
-.lvl-line { position: absolute; left: 0; right: 0; height: 1.5px; z-index: 4; pointer-events: none; }
-.lvl-line.hi { background: var(--red);   opacity: .6; }
-.lvl-line.lo { background: var(--amber); opacity: .6; }
+.lvl-line { position: absolute; left: 0; right: 0; height: 3px; z-index: 4; pointer-events: none; }
+.lvl-line.hi { background: var(--blue); opacity: .0; }
+.lvl-line.lo { background: var(--blue); opacity: .0; }
 .lvl-tag {
   position: absolute; right: 4px; z-index: 5;
   font-size: 8px; font-weight: 700; letter-spacing: .5px;
@@ -262,23 +378,26 @@ header {
 .lvl-tag.hi { color: var(--red);   background: rgba(220,38,38,.12);  }
 .lvl-tag.lo { color: var(--amber); background: rgba(217,119,6,.12);  }
 
-/* Scale marks */
+/* Scale marks — outside the tank, on the right */
 .scale {
-  position: absolute; right: 7px; top: 0; bottom: 0;
+  position: absolute; left: calc(100% + 10px); top: 0; bottom: 0;
   display: flex; flex-direction: column; justify-content: space-between;
   padding: 10px 0; z-index: 4; pointer-events: none;
 }
-.scale span { font-size: 7px; color: #9ca3af; line-height: 1; }
+.scale span { font-size: 9px; font-weight: 600; color: var(--muted); line-height: 1; }
+.scale span:first-child {
+  transform: translateY(8px);
+}
 
 /* Oil fill */
 .oil-fill {
   position: absolute; bottom: 0; left: 0; right: 0;
   transition: height 1s ease;
-  overflow: hidden; border-radius: 0 0 10px 10px;
+  overflow: hidden; border-radius: 0 0 14px 14px;
 }
 .oil-body {
   position: absolute; bottom: 0; left: 0; right: 0; top: 30px;
-  background: linear-gradient(180deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  background: var(--tank);
 }
 .wave-box { position: absolute; top: 0; left: 0; right: 0; height: 34px; overflow: hidden; }
 .wv       { position: absolute; top: 0; width: 300%; left: -100%; height: 34px; }
@@ -373,12 +492,26 @@ td.cwt { color: var(--green); }
 
 /* ── Status bar ───────────────────────────────── */
 .status-bar {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--surface); border: 2px solid var(--border);
   border-radius: var(--radius); padding: 6px 16px; margin-top: 12px;
   display: flex; gap: 24px; font-size: 11px; color: var(--muted);
-  box-shadow: var(--shadow);
+  box-shadow: 0 0 0 1px rgba(30,201,255,.1), var(--shadow);
 }
 .status-bar span { font-weight: 600; color: var(--text); margin-left: 4px; }
+
+.alarm-banner {
+  flex: 1; min-width: 0; padding: 0 20px; height: 48px;
+  border-radius: 8px; border: 2px solid var(--border);
+  background: rgba(255,255,255,.96); color: var(--text);
+  font-size: 15px; font-weight: 700; letter-spacing: .5px;
+  text-transform: uppercase; box-shadow: 0 2px 6px rgba(15, 23, 42, .12);
+  display: none; flex-direction: row; align-items: center; gap: 10px;
+  overflow: hidden;
+}
+.alarm-banner.active { display: flex; background: #fff4f4; border-color: var(--red); color: var(--red); }
+.alarm-banner .ab-count { flex-shrink: 0; }
+.alarm-banner .ab-msg   { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; }
+.alarm-banner .ab-time  { flex-shrink: 0; font-weight: 600; opacity: .75; font-size: 12px; }
 
 /* ── Toast ────────────────────────────────────── */
 .toast {
@@ -388,20 +521,22 @@ td.cwt { color: var(--green); }
   pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.12);
 }
 .toast.show { opacity: 1; transform: translateY(0); }
-.toast.ok   { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
-.toast.warn { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red);   }
+.toast.ok   { background: #000; color: var(--green); border: 1px solid var(--green); }
+.toast.warn { background: #000; color: var(--red);   border: 1px solid var(--red);   }
 </style>
 </head>
 <body>
 <div class="page">
 
- 
 <!-- TABS -->
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
-  <button class="tab" onclick="switchTab('setting',this)">Settings</button>
-  <button class="tab" onclick="switchTab('alarms',this)">Alarms</button>
-  <button class="tab" onclick="switchTab('log',this)">Log</button>
+<div class="tabs-row">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('monitor',this)">Monitor</button>
+    <button class="tab" onclick="switchTab('setting',this)">Settings</button>
+    <button class="tab" onclick="switchTab('alarms',this)">Alarms</button>
+    <button class="tab" onclick="switchTab('log',this)">Log</button>
+  </div>
+  <div id="alarm-banner" class="alarm-banner" aria-live="polite"></div>
 </div>
 
 <!-- ═══ MONITOR ═══ -->
@@ -412,20 +547,20 @@ td.cwt { color: var(--green); }
   <div class="card">
     <div class="card-head">◀ Infeed</div>
     <div class="card-body ctrl">
-      <button class="ctrl-btn st-green" id="in-mode-btn" onclick="ctrl('infeed','mode')">
+      <button class="ctrl-btn st-auto" id="in-mode-btn" onclick="ctrl('infeed','mode')">
         <span class="label">Now Mode</span>
         <span class="value" id="in-mode-val">AUTO</span>
       </button>
-      <button class="ctrl-btn" id="in-op-btn" onclick="ctrl('infeed','operation')">
+      <button class="ctrl-btn st-local" id="in-op-btn" onclick="ctrl('infeed','operation')">
         <span class="label">Now Working</span>
         <span class="value" id="in-op-val">LOCAL</span>
       </button>
-      <button class="ctrl-btn st-red" id="in-run-btn" onclick="ctrl('infeed','run')">
+      <button class="ctrl-btn st-stop" id="in-run-btn" onclick="ctrl('infeed','run')">
         <span class="label">Press to</span>
         <span class="value" id="in-run-val">STOP</span>
       </button>
       <div class="vol-wrap">
-        <span class="vol-label">Infeed Volume (L)</span>
+        <span class="vol-label">Infeed Volume (Kg)</span>
         <input type="number" class="vol-input" id="in-vol" value="25.00" step="0.01" min="0">
         <button class="apply-btn" onclick="applyVol('infeed')">Apply Infeed</button>
       </div>
@@ -440,68 +575,74 @@ td.cwt { color: var(--green); }
 
   <!-- TANK -->
   <div class="tank-wrap-outer">
-    <!-- HI sensor -->
-    <div class="sensor-row">
-      <div class="sdot" id="hi-dot"></div>
-      <span class="slbl" id="hi-lbl">HI LEVEL</span>
-    </div>
-
-    <!-- Input valve -->
-    <div class="valve-row">
-      <div class="vpipe"></div>
+    <!-- Input valve — centered, pipe starts at the valve and runs left -->
+    <div class="valve-row" style="justify-content:center; margin-left:30px;">
+      <div class="pipe-h" id="in-pipe-l" style="width:96px; margin-right:0;"></div>
       <div class="vgate" id="in-valve" onclick="ctrlValve('infeed')" title="Input Valve">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="3" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/>
+        <svg viewBox="0 0 24 40" fill="currentColor" stroke-width="1.5" stroke-linejoin="round">
+          <line x1="12" y1="0" x2="12" y2="6" stroke="var(--border)" stroke-width="2"/>
+          <path d="M6,6 L18,6 L12,20 Z M6,34 L18,34 L12,20 Z"/>
+          <line x1="12" y1="34" x2="12" y2="40" stroke="var(--border)" stroke-width="2"/>
         </svg>
       </div>
-      <div class="vpipe"></div>
     </div>
 
     <div class="port-stub top" id="port-top"></div>
 
     <!-- Tank body -->
-    <div class="tank-shell">
-      <div class="lvl-line hi" id="hi-line" style="bottom:80%"></div>
-      <div class="lvl-tag  hi" id="hi-tag"  style="bottom:80%;transform:translateY(50%)">HI</div>
-      <div class="lvl-line lo" id="lo-line" style="bottom:20%"></div>
-      <div class="lvl-tag  lo" id="lo-tag"  style="bottom:20%;transform:translateY(50%)">LO</div>
-      <div class="scale">
-        <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
+    <div class="tank-frame">
+      <!-- HI sensor -->
+      <div class="sensor-row corner hi-pos" id="hi-sensor">
+        <div class="sdot" id="hi-dot"></div>
+        <span class="slbl" id="hi-lbl">.</span>
       </div>
-      <div class="oil-fill" id="oil-fill" style="height:35%">
-        <div class="oil-body"></div>
-        <div class="wave-box">
-          <div class="wv wv1">
-            <svg viewBox="0 0 300 34" preserveAspectRatio="none">
-              <path d="M0,17 C25,5 50,29 75,17 C100,5 125,29 150,17 C175,5 200,29 225,17 C250,5 275,29 300,17 L300,34 L0,34 Z" fill="#e59400"/>
-            </svg>
-          </div>
-          <div class="wv wv2">
-            <svg viewBox="0 0 300 34" preserveAspectRatio="none">
-              <path d="M0,22 C25,9 50,34 75,22 C100,9 125,34 150,22 C175,9 200,34 225,22 C250,9 275,34 300,22 L300,34 L0,34 Z" fill="#f59e0b" fill-opacity=".5"/>
-            </svg>
+
+      <div class="tank-shell">
+        <div class="lvl-line hi" id="hi-line" style="bottom:80%"></div>
+        <div class="lvl-tag  hi" id="hi-tag"  style="bottom:80%;transform:translateY(50%)">HI</div>
+        <div class="lvl-line lo" id="lo-line" style="bottom:20%"></div>
+        <div class="lvl-tag  lo" id="lo-tag"  style="bottom:20%;transform:translateY(50%)">LO</div>
+        <div class="oil-fill" id="oil-fill" style="height:35%">
+          <div class="oil-body"></div>
+          <div class="wave-box">
+            <div class="wv wv1">
+              <svg viewBox="0 0 300 34" preserveAspectRatio="none">
+                <path d="M0,17 C25,5 50,29 75,17 C100,5 125,29 150,17 C175,5 200,29 225,17 C250,5 275,29 300,17 L300,34 L0,34 Z" fill="var(--tank)"/>
+              </svg>
+            </div>
+            <div class="wv wv2">
+              <svg viewBox="0 0 300 34" preserveAspectRatio="none">
+                <path d="M0,22 C25,9 50,34 75,22 C100,9 125,34 150,22 C175,9 200,34 225,22 C250,9 275,34 300,22 L300,34 L0,34 Z" fill="var(--tank)" fill-opacity=".5"/>
+              </svg>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- LO sensor -->
+      <div class="sensor-row corner lo-pos" id="lo-sensor">
+        <div class="sdot" id="lo-dot"></div>
+        <span class="slbl" id="lo-lbl">.</span>
+      </div>
+
+      <!-- External level scale -->
+      <div class="scale">
+          <span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span>
       </div>
     </div>
 
     <div class="port-stub bot" id="port-bot"></div>
 
-    <!-- Output valve -->
-    <div class="valve-row">
-      <div class="vpipe"></div>
+    <!-- Output valve — centered, pipe starts at the valve and runs right -->
+    <div class="valve-row" style="justify-content:center; margin-right:30px;">
       <div class="vgate" id="out-valve" onclick="ctrlValve('outfeed')" title="Output Valve">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="3" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/>
+        <svg viewBox="0 0 24 40" fill="currentColor" stroke-width="1.5" stroke-linejoin="round">
+          <line x1="12" y1="0" x2="12" y2="6" stroke="var(--border)" stroke-width="2"/>
+          <path d="M6,6 L18,6 L12,20 Z M6,34 L18,34 L12,20 Z"/>
+          <line x1="12" y1="34" x2="12" y2="40" stroke="var(--border)" stroke-width="2"/>
         </svg>
       </div>
-      <div class="vpipe"></div>
-    </div>
-
-    <!-- LO sensor -->
-    <div class="sensor-row">
-      <div class="sdot" id="lo-dot"></div>
-      <span class="slbl" id="lo-lbl">LO LEVEL</span>
+      <div class="pipe-h" id="out-pipe-l" style="width:96px; margin-left:0;"></div>
     </div>
   </div><!-- /tank-wrap-outer -->
 
@@ -509,20 +650,20 @@ td.cwt { color: var(--green); }
   <div class="card">
     <div class="card-head">Outfeed ▶</div>
     <div class="card-body ctrl">
-      <button class="ctrl-btn st-green" id="out-mode-btn" onclick="ctrl('outfeed','mode')">
+      <button class="ctrl-btn st-auto" id="out-mode-btn" onclick="ctrl('outfeed','mode')">
         <span class="label">Now Working</span>
         <span class="value" id="out-mode-val">AUTO</span>
       </button>
-      <button class="ctrl-btn" id="out-op-btn" onclick="ctrl('outfeed','operation')">
+      <button class="ctrl-btn st-local" id="out-op-btn" onclick="ctrl('outfeed','operation')">
         <span class="label">Now working</span>
         <span class="value" id="out-op-val">LOCAL</span>
       </button>
-      <button class="ctrl-btn st-red" id="out-run-btn" onclick="ctrl('outfeed','run')">
+      <button class="ctrl-btn st-stop" id="out-run-btn" onclick="ctrl('outfeed','run')">
         <span class="label">Press to</span>
         <span class="value" id="out-run-val">STOP</span>
       </button>
       <div class="vol-wrap">
-        <span class="vol-label">Outfeed Volume (L)</span>
+        <span class="vol-label">Outfeed Volume (Kg)</span>
         <input type="number" class="vol-input" id="out-vol" value="0.00" step="0.01" min="0">
         <button class="apply-btn" onclick="applyVol('outfeed')">Apply Outfeed</button>
       </div>
@@ -651,10 +792,9 @@ td.cwt { color: var(--green); }
 
 <!-- ═══ ALARMS ═══ -->
 <div id="tab-alarms" class="tab-panel">
-  <!-- Clear Alarms Button -->
-  <div style="margin-bottom: 16px; display: flex; gap: 8px;">
+  <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
     <button class="ltb" onclick="fetchAlarms()">↻ Refresh</button>
-    <button class="ltb danger" onclick="clearAlarms()" style="margin-left: auto;">🗑 Clear All</button>
+    <button class="ltb danger" onclick="clearAlarms()">🗑 Clear All</button>
   </div>
 
   <!-- Alarms List -->
@@ -710,10 +850,7 @@ td.cwt { color: var(--green); }
   <div>Capacity: <span id="sb-cap">-- kg</span></div>
   <div>Status: <span id="sb-status">--</span></div>
   <div>Last update: <span id="sb-ts">--</span></div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:12px;">
-    <div style="font-size:11px;color:var(--muted)">MQTT last: <span id="sb-mqtt-ts" style="font-weight:600;color:var(--text)">--</span></div>
-    <span class="badge badge-red" id="sb-mqtt"><span class="dot"></span>MQTT OFF</span>
-  </div>
+  <div>Line: <span id="sb-line" style="font-weight:600;color:var(--text);">--</span></div>
 </div>
 
 </div><!-- /page -->
@@ -747,6 +884,7 @@ async function poll() {
 
 function setConn(ok) {
   const b = document.getElementById("conn-badge");
+  if (!b) return;
   b.className = "badge " + (ok ? "badge-green" : "badge-red");
   b.innerHTML = `<span class="dot ${ok?"pulse":""}"></span>${ok?"ONLINE":"OFFLINE"}`;
 }
@@ -759,6 +897,54 @@ loadProducts();
 // ── Attach dirty-flag listeners once DOM is ready ─────────────────
 document.getElementById("in-vol").addEventListener("input",  () => { inVolDirty  = true; });
 document.getElementById("out-vol").addEventListener("input", () => { outVolDirty = true; });
+
+// ── HI/LO threshold bar ↔ external scale alignment ─────────────────
+// The "0 100%" scale on the right isn't laid out on a plain linear
+// 0-420px axis (flex space-between + a manual nudge on the top label),
+// so a bar placed with a naive bottom:X% drifts from the matching scale
+// mark (e.g. 100% lands at the tank's literal top edge, not at the
+// "100%" label). Instead, read the scale labels' actual rendered
+// position and place the bar at that same pixel height.
+function scaleAnchors() {
+  const shell = document.querySelector('.tank-shell');
+  const spans = document.querySelectorAll('.scale span');
+  if (!shell || !spans.length) return null;
+  const shellTop = shell.getBoundingClientRect().top;
+  const pcts = [100, 75, 50, 25, 0]; // fixed markup order, top → bottom
+  return Array.from(spans).map((sp, i) => {
+    const r = sp.getBoundingClientRect();
+    return { pct: pcts[i], y: (r.top + r.bottom) / 2 - shellTop };
+  });
+}
+
+function pctToBarPx(pct, anchors) {
+  pct = Math.max(0, Math.min(100, pct));
+  for (let i = 0; i < anchors.length - 1; i++) {
+    const a = anchors[i], b = anchors[i + 1];
+    if (pct <= a.pct && pct >= b.pct) {
+      const t = a.pct === b.pct ? 0 : (a.pct - pct) / (a.pct - b.pct);
+      return a.y + t * (b.y - a.y);
+    }
+  }
+  return anchors[anchors.length - 1].y;
+}
+
+function placeThresholdBar(lineId, tagId, pct) {
+  const anchors = scaleAnchors();
+  const line = document.getElementById(lineId);
+  const tag  = document.getElementById(tagId);
+  if (!anchors) {
+    line.style.bottom = pct + "%";
+    tag.style.bottom  = pct + "%";
+    return;
+  }
+  const px = pctToBarPx(pct, anchors);
+  line.style.bottom = "auto";
+  line.style.top    = px + "px";
+  tag.style.bottom  = "auto";
+  tag.style.top     = px + "px";
+  tag.style.transform = "translateY(-50%)";
+}
 
 // ═════════════════════════════════════════════════
 // RENDER (called every 1 Hz with fresh data)
@@ -793,11 +979,13 @@ function render(d) {
   // Tank fill + wave
   document.getElementById("oil-fill").style.height = pct + "%";
 
-  // Level lines
-  document.getElementById("hi-line").style.bottom = tk.hi_threshold_pct + "%";
-  document.getElementById("hi-tag").style.bottom  = tk.hi_threshold_pct + "%";
-  document.getElementById("lo-line").style.bottom = tk.lo_threshold_pct + "%";
-  document.getElementById("lo-tag").style.bottom  = tk.lo_threshold_pct + "%";
+  // Level lines — placed to match the external scale's actual rendered marks
+  placeThresholdBar("hi-line", "hi-tag", tk.hi_threshold_pct);
+  placeThresholdBar("lo-line", "lo-tag", tk.lo_threshold_pct);
+
+  // Keep HIGH sensor fixed near the tank top edge; the threshold line is the moving indicator.
+  document.getElementById("hi-sensor").style.top    = "2%";
+  document.getElementById("lo-sensor").style.bottom = "9%";
 
   // Sensors
   const hiD = document.getElementById("hi-dot");
@@ -808,12 +996,12 @@ function render(d) {
   // AFTER — uses physical sensor state (falls back to alarm if no sensor data)
 const sns = d.sensors || {};
 const hiSns = sns.hi_level || false;
-const loSns = sns.lo_level || false;
+const loSns = 1-sns.lo_level || false;
 
-hiD.className = "sdot" + (hiSns ? " alarm"  : "");
-loD.className = "sdot" + (loSns ? " lo-alm" : "");
-hiL.className = "slbl" + (hiSns ? " alarm"  : "");
-loL.className = "slbl" + (loSns ? " lo-alm" : "");
+hiD.className = "sdot" + (hiSns ? " alarm" : "");
+loD.className = "sdot" + (loSns ? " alarm" : " ok");
+hiL.className = "slbl" + (hiSns ? " alarm" : "");
+loL.className = "slbl" + (loSns ? " alarm" : " ok");
 
   // Valves
   renderValve("in",  ifd.valve_open && ifd.running);
@@ -822,6 +1010,10 @@ loL.className = "slbl" + (loSns ? " lo-alm" : "");
   const flowOut = ofd.valve_open && ofd.running;
   document.getElementById("port-top").className = "port-stub top" + (flowIn  ? " flowing" : "");
   document.getElementById("port-bot").className = "port-stub bot" + (flowOut ? " flowing" : "");
+  const inPipe = document.getElementById("in-pipe-l");
+  const outPipe = document.getElementById("out-pipe-l");
+  if (inPipe) inPipe.className = "pipe-h" + (flowIn ? " flowing" : "");
+  if (outPipe) outPipe.className = "pipe-h" + (flowOut ? " flowing" : "");
 
   // Panels
   renderPanel("in",  ifd);
@@ -837,19 +1029,8 @@ loL.className = "slbl" + (loSns ? " lo-alm" : "");
   const ts = d.timestamp ? d.timestamp.replace("T"," ").slice(0,19) : "--";
   document.getElementById("sb-ts").textContent = ts;
 
-  // MQTT status badge
-  const mq = d.mqtt || {};
-  const mqEl = document.getElementById("sb-mqtt");
-  const mqTs = document.getElementById("sb-mqtt-ts");
-  if (mqEl) {
-    let mqLabel, mqCls;
-    if (mq.serial_error)        { mqLabel = "SENSOR ERR"; mqCls = "badge badge-red";   }
-    else if (mq.connected)      { mqLabel = "MQTT OK";    mqCls = "badge badge-green"; }
-    else                        { mqLabel = "MQTT OFF";   mqCls = "badge badge-red";   }
-    mqEl.className = mqCls;
-    mqEl.innerHTML = `<span class="dot ${mq.connected && !mq.serial_error ? "pulse" : ""}"></span>${mqLabel}`;
-  }
-  if (mqTs) mqTs.textContent = mq.last_ts ? mq.last_ts.replace("T"," ").slice(0,19) : "--";
+  const rawLine = d.serial && d.serial.line ? String(d.serial.line).trim() : "--";
+  document.getElementById("sb-line").textContent = rawLine.length > 80 ? rawLine.slice(0, 77) + "..." : rawLine;
 
   // Update volume inputs — only when user is NOT typing
   if (!inVolDirty)  document.getElementById("in-vol").value  = (d.infeed?.manual_vol_L  || 0).toFixed(2);
@@ -857,7 +1038,104 @@ loL.className = "slbl" + (loSns ? " lo-alm" : "");
 
   // Sync settings inputs (once)
   syncSettings(d);
+
+  // Acknowledge tracking — only ever driven by real server state (this poll),
+  // never by locally-mutated D, so a fresh rising edge always unmutes correctly.
+  if (tk.hi_alarm && !prevHiLive) hiAcked = false;
+  if (tk.lo_alarm && !prevLoLive) loAcked = false;
+  prevHiLive = !!tk.hi_alarm;
+  prevLoLive = !!tk.lo_alarm;
+
+  renderAlarmBanner();
 }
+
+// Alarm banner — the live tank flags decide whether an alarm is active *right now*
+// (500ms poll, always correct); the alarm log (alarmRows, synced by renderAlarms)
+// supplies the count and real occurrence timestamps when it has matching entries.
+let alarmRows = [];
+let alarmIdx  = 0;
+
+// Pressing Stop acknowledges whichever alarm is active at that moment — the banner
+// stays hidden even if the tank is still physically high/low, until that alarm
+// clears and freshly re-triggers (a new rising edge unmutes it again).
+let hiAcked = false, loAcked = false;
+let prevHiLive = false, prevLoLive = false;
+
+function getAlarmRows() {
+  const tk  = (D && D.tank) ? D.tank : {};
+  const sns = (D && D.sensors) ? D.sensors : {};
+  const ts = D && D.timestamp ? D.timestamp.replace("T", " ").slice(0, 19) : "";
+  const list = [...alarmRows];
+  const liveRows = [];
+  if (tk.hi_alarm && !hiAcked) {
+    liveRows.push({ message: "HI ALARM — tank level above high threshold", timestamp: ts });
+  }
+  if (tk.lo_alarm && !loAcked) {
+    liveRows.push({ message: "LO ALARM — tank level below low threshold", timestamp: ts });
+  }
+  // Sensor alarms: the server already accounts for the outfeed-stop override
+  // (a still-active but overridden condition reports false here), so these
+  // are shown exactly as-is — no separate client-side ack needed.
+  if (sns.hi_level_alarm) {
+    liveRows.push({ message: "Tank high level sensor alarm", timestamp: ts });
+  }
+  if (sns.lo_level_alarm) {
+    liveRows.push({ message: "Tank low level sensor alarm", timestamp: ts });
+  }
+  liveRows.forEach(liveRow => {
+    if (!list.some(row => row.message === liveRow.message)) list.push(liveRow);
+  });
+  return list;
+}
+
+function renderAlarmBanner() {
+  const banner = document.getElementById("alarm-banner");
+  const tk  = (D && D.tank) ? D.tank : {};
+  const sns = (D && D.sensors) ? D.sensors : {};
+
+  const liveActive = !!(
+    (tk.hi_alarm && !hiAcked) || (tk.lo_alarm && !loAcked) ||
+    sns.hi_level_alarm || sns.lo_level_alarm
+  );
+  const list = getAlarmRows();
+
+  if (!liveActive && !list.length) {
+    banner.className = "alarm-banner";
+    banner.style.display = "none";
+    banner.textContent = "";
+    return;
+  }
+
+  if (alarmIdx >= list.length) alarmIdx = 0;
+  const idx     = alarmIdx % list.length;
+  const current = list[idx];
+  const countLabel = list.length > 1
+    ? `${list.length} ALARMS (${idx + 1}/${list.length})`
+    : `1 ALARM`;
+
+  banner.className = "alarm-banner active";
+  banner.style.display = "flex";
+  banner.innerHTML =
+    `<span class="ab-count">${countLabel}</span>` +
+    `<span class="ab-msg">${current.message || "—"}</span>` +
+    `<span class="ab-time">${current.timestamp || ""}</span>`;
+}
+
+function clearLocalAlarmState() {
+  alarmRows = [];
+  alarmIdx = 0;
+  // Keep the live tank flags unchanged so an active alarm stays visible.
+  renderAlarmBanner();
+}
+
+// Cycle through multiple active alarms in the banner
+setInterval(() => {
+  const totalCount = getAlarmRows().length;
+  if (totalCount > 1) {
+    alarmIdx = (alarmIdx + 1) % totalCount;
+    renderAlarmBanner();
+  }
+}, 2500);
 
 function renderValve(side, open) {
   const el = document.getElementById(side + "-valve");
@@ -877,18 +1155,18 @@ function renderPanel(side, s) {
 
   // Mode btn
   const mb = document.getElementById(side + "-mode-btn");
-  mb.className = "ctrl-btn " + (s.mode === "AUTO" ? "st-green" : "st-blue")
+  mb.className = "ctrl-btn " + (s.mode === "AUTO" ? "st-auto" : "st-manual")
                + (remote || apiDisMode ? " disabled" : "");
   document.getElementById(side + "-mode-val").textContent = s.mode;
 
   // Op btn
   const ob = document.getElementById(side + "-op-btn");
-  ob.className = "ctrl-btn " + (remote ? "st-amber" : "") + (apiDisOp ? " disabled" : "");
+  ob.className = "ctrl-btn " + (remote ? "st-remote" : "st-local") + (apiDisOp ? " disabled" : "");
   document.getElementById(side + "-op-val").textContent = s.operation;
 
   // Run btn
   const rb = document.getElementById(side + "-run-btn");
-  rb.className = "ctrl-btn " + (running ? "st-green" : "st-red")
+  rb.className = "ctrl-btn " + (running ? "st-stop" : "st-start")
                + (remote || apiDisRun ? " disabled" : "");
   // show "STOP" when running, otherwise "START"
   document.getElementById(side + "-run-val").textContent = running ? "STOP" : "START";
@@ -897,12 +1175,31 @@ function renderPanel(side, s) {
 // ═════════════════════════════════════════════════
 // CONTROLS → POST to server → simulator reads
 // ═════════════════════════════════════════════════
+async function clearAlarmsSilently() {
+  try {
+    await fetch("/api/alarms", { method: "DELETE" });
+  } catch (e) {
+    console.warn("Could not clear alarms silently:", e);
+  }
+}
+
 async function ctrl(side, action) {
+  // Only the outfeed stop button acknowledges/clears alarms — infeed stop no longer does.
+  const stopPressed = side === "outfeed" && action === "run" && !!(D && D[side] && D[side].running);
   await fetch("/api/control", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ side, action })
   });
+  if (stopPressed) {
+    const tk = (D && D.tank) ? D.tank : {};
+    if (tk.hi_alarm) hiAcked = true;
+    if (tk.lo_alarm) loAcked = true;
+    alarmRows = [];
+    alarmIdx  = 0;
+    renderAlarmBanner();
+    await clearAlarmsSilently();
+  }
   poll(); // immediate refresh
 }
 
@@ -1157,25 +1454,19 @@ function renderAlarms(rows) {
   const tbody = document.getElementById("alarms-tbody");
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;padding:20px;color:#9ca3af;">No alarms</td></tr>';
-    return;
+  } else {
+    tbody.innerHTML = rows.map((r, idx) => {
+      return `<tr>
+        <td style="color:#9ca3af;font-size:11px;white-space:nowrap;font-weight:600;">${r.timestamp || "—"}</td>
+        <td class="ca" style="color:var(--red);font-weight:600;">${r.message || "—"}</td>
+      </tr>`;
+    }).join("");
   }
-  tbody.innerHTML = rows.map((r, idx) => {
-    return `<tr>
-      <td style="color:#9ca3af;font-size:11px;white-space:nowrap;font-weight:600;">${r.timestamp || "—"}</td>
-      <td class="ca" style="color:var(--red);font-weight:600;">${r.message || "—"}</td>
-    </tr>`;
-  }).join("");
-}
 
-async function fetchAlarms() {
-  try {
-    const r = await fetch("/api/alarms", { cache: "no-store" });
-    if (!r.ok) return;
-    const rows = await r.json();
-    renderAlarms(rows);
-  } catch(e) {
-    console.warn("Alarms fetch failed:", e);
-  }
+  // Keep the top banner in sync with the alarm log
+  alarmRows = rows;
+  if (alarmIdx >= alarmRows.length) alarmIdx = 0;
+  renderAlarmBanner();
 }
 
 async function clearAlarms() {
@@ -1183,12 +1474,15 @@ async function clearAlarms() {
   try {
     const r = await fetch("/api/alarms", { method: "DELETE" });
     if (!r.ok) {
-      showToast("Failed to clear alarms", "warn");
-      return;
+      const text = await r.text().catch(() => "");
+      throw new Error(text || "Failed to clear alarms");
     }
+
+    // Clear the history, but keep any currently active live alarm visible.
+    clearLocalAlarmState();
     showToast("Alarms cleared ✓", "ok");
-    fetchAlarms();
-  } catch(e) {
+    await fetchAlarms();
+  } catch (e) {
     console.error("Clear error:", e);
     showToast("Error clearing alarms", "warn");
   }
@@ -1227,16 +1521,13 @@ async function exportCsv() {
   }
 }
 
-// Poll CSV log every 5 seconds when log tab is visible
+// Poll CSV log every 5 seconds when log tab is visible; alarms always refresh (banner is visible on every tab)
 setInterval(() => {
   const logTab = document.getElementById("tab-log");
-  const alarmsTab = document.getElementById("tab-alarms");
   if (logTab && logTab.classList.contains("active")) {
     fetchCsvLog();
   }
-  if (alarmsTab && alarmsTab.classList.contains("active")) {
-    fetchAlarms();
-  }
+  fetchAlarms();
 }, 5000);
 
 // Initial fetch when page loads
@@ -1269,7 +1560,7 @@ function showToast(msg, type = "") {
   t.textContent = msg;
   t.className = "toast show" + (type ? " " + type : "");
   clearTimeout(_tt);
-  _tt = setTimeout(() => { t.className = "toast"; }, 3000);
+  _tt = setTimeout(() => { t.className = "toast"; }, 10000);
 }
 
 function tick() {

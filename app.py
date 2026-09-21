@@ -54,10 +54,24 @@ client = None
 # ── ALARMS LIST (in-memory) ──────────────────────────────────
 # Each element: {"timestamp": "YYYY-MM-DD HH:MM:SS", "message": "alarm text"}
 alarms_list = [
-    {"timestamp": "2026-04-06 14:30:45", "message": "HI ALARM - Tank level too high"},
-    {"timestamp": "2026-04-06 14:25:30", "message": "Low level sensor triggered"},
-    {"timestamp": "202ds20:15", "message": "Outfesaration failed"}
+     
 ]
+
+alarm_low_level=False
+alarm_hi_level=False
+alarm_serial_error=False
+alarm_feed_error=False
+alarm_outfeed_error=False
+alarm_common=False
+
+sensor_alarm_active = {
+    "hi_level": False,   # tracks the raw critical condition, for edge detection
+    "lo_level": False,
+}
+sensor_alarm_acked = {
+    "hi_level": False,   # True = condition still active but overridden/cleared — suppressed
+    "lo_level": False,
+}
 
 with open("config.yml") as f:
     CONFIG = yaml.safe_load(f)
@@ -316,6 +330,11 @@ tech_log = logging.getLogger("ols.tech")
 tech_log.addHandler(_make_file_handler("ols_tech.log"))
 tech_log.setLevel(logging.DEBUG)
 
+# Dedicated alarm logger → writes to ols_alarms.log, 30 days of history kept
+alarm_log = logging.getLogger("ols.alarm")
+alarm_log.addHandler(_make_file_handler("ols_alarms.log"))
+alarm_log.setLevel(logging.DEBUG)
+
 # ── Silence Flask/Werkzeug access log lines ────────────────────────
 # Suppresses:  192.168.x.x - - [..] "GET /api/data HTTP/1.1" 200 -
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -326,7 +345,7 @@ logging.getLogger("werkzeug").propagate = False
 #  FLASK APP
 # ══════════════════════════════════════════════════════════════════
 app   = Flask(__name__, static_folder=".")
-_lock = threading.Lock()
+_lock = threading.RLock()
 
 # ══════════════════════════════════════════════════════════════════
 #  SHARED STATE  (all UI data lives here)
@@ -368,6 +387,8 @@ state = {
     "sensors": {
         "lo_level": False,   # True = float switch triggered
         "hi_level": False,
+        "lo_level_alarm": False,   # True = low level critical AND currently alerting
+        "hi_level_alarm": False,   # True = high level critical AND currently alerting
     },
 
     "infeed": {
@@ -560,6 +581,8 @@ def gpio_handler():
             if gpio.rising("outtk_stop"):
                 outfeed_remote_stop=True
                 tech_log.info("GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True")
+                _override_outfeed_alarms()
+                gpio.output_off("alm_led")
 
             #if gpio.rising("outtk_start") and state["outfeed"]["operation"]=="REMOTE": #chnge button state amal 
             if gpio.rising("outtk_start") : #chnge button state amal 
@@ -621,12 +644,20 @@ def gpio_handler():
 
                 #tech_log.info("GPIO: intke_stop_pin triggered — setting local_stop=True")
 
-  
+
+
+           
                 #tech_log.info("GPIO: intke_remot_pin triggered — setting remote_stop=True")
             state["sensors"]["lo_level"] =  gpio.state("lowr_sns")   # assuming active LOW sensor (0 when triggered)
             state["sensors"]["hi_level"] = gpio.state("up_sns")      # assuming active HIGH sensor (1 when triggered)
             low_level_sensor = not state["sensors"]["lo_level"] 
-            hi_level_sensor =not state["sensors"]["hi_level"] 
+            hi_level_sensor =not state["sensors"][  "hi_level"] 
+
+         
+
+
+
+            _check_sensor_alarm()
              
  
             #print("tank low level sensor:", inputs["lowr_sns"], "  tank up level sensor:", inputs["up_sns"])
@@ -667,11 +698,85 @@ def _recalc_alarms():
                       if tk["max_kg"] > 0 else 0.0
     tk["hi_alarm"]  = tk["level_pct"] >= tk["hi_threshold_pct"]
     tk["lo_alarm"]  = tk["level_pct"] <= tk["lo_threshold_pct"]
+    _update_alarm_led()
+
+
+def _update_alarm_led():
+    """Keep the physical alarm LED on while any alarm is active."""
+    with _lock:
+        alarm_active = (
+            state["tank"]["hi_alarm"]
+            or state["tank"]["lo_alarm"]
+            or state["sensors"]["hi_level_alarm"]
+            or state["sensors"]["lo_level_alarm"]
+        )
+
+    if alarm_active:
+        gpio.output_on("alm_led")
+     
+        
 
 def _print_event(payload: dict):
     print(f"\n[BUTTON EVENT] {json.dumps(payload, indent=2)}")
 
 
+def _check_sensor_alarm():
+    """Rising/falling-edge alarms for the tank level float switches.
+
+    hi_level: NOT hi_level_sensor  -> critical, raise alarm.
+              hi_level_sensor True -> ok, clear alarm.
+    lo_level: low_level_sensor     -> critical, raise alarm and log.
+              NOT low_level_sensor -> ok, clear alarm.
+
+    An outfeed-stop override (see _override_outfeed_alarms) can mark a still-active
+    condition as "acked" so it stops alerting; the ack is dropped again as soon as
+    the condition clears, so the next fresh trip alerts normally.
+    """
+    global sensor_alarm_active, sensor_alarm_acked
+
+    hi_critical = not hi_level_sensor
+    lo_critical = bool(low_level_sensor)
+
+    checks = (
+        ("hi_level", hi_critical, "Tank high level sensor alarm"),
+        ("lo_level", lo_critical, "Tank low level sensor alarm"),
+    )
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with _lock:
+        for key, is_active, message in checks:
+            was_active = sensor_alarm_active[key]
+            if is_active and not was_active:
+                alarms_list.append({"timestamp": now, "message": message})
+                alarm_log.warning("[ALARM] %s", message)
+                sensor_alarm_acked[key] = False
+            elif not is_active and was_active:
+                alarm_log.info("[ALARM CLEARED] %s", message)
+                sensor_alarm_acked[key] = False
+            sensor_alarm_active[key] = is_active
+            state["sensors"][f"{key}_alarm"] = is_active and not sensor_alarm_acked[key]
+
+    _update_alarm_led()
+
+
+def _override_outfeed_alarms():
+    """Operator override via the physical outfeed-stop button.
+
+    Clears all current alarms and, for any sensor condition that is still
+    physically active, suppresses re-alerting until it clears and re-trips
+    (a fresh edge) — it will not re-appear just because it is still active.
+    """
+    global sensor_alarm_acked
+    with _lock:
+        alarms_list.clear()
+        for key in sensor_alarm_acked:
+            if sensor_alarm_active[key]:
+                sensor_alarm_acked[key] = True
+            state["sensors"][f"{key}_alarm"] = False
+
+    alarm_log.warning("[ALARM OVERRIDE] All alarms cleared via outfeed stop button")
+    tech_log.warning("[ALARM OVERRIDE] All alarms cleared via outfeed stop button")
+    _update_alarm_led()
 # ══════════════════════════════════════════════════════════════════
 #  INFEED HELPERS  (write directly to state — no HTTP round-trip)
 # ══════════════════════════════════════════════════════════════════
@@ -1349,6 +1454,8 @@ def oil_drain(requested_vol_L: float):
             "Sucess",
             "[outfeed] Oven request to stop"
             )
+
+            
             break
         # Tank too low — stop draining
         elif weiVal<= lo_level or low_level_sensor:
@@ -2192,7 +2299,7 @@ def api_add_alarm():
         if alarm_msg:
             ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             alarms_list.append({"timestamp": ts, "message": alarm_msg})
-            tech_log.info("[ALARM] Added: %s", alarm_msg)
+            alarm_log.info("[ALARM] Added: %s", alarm_msg)
 
         return jsonify({"success": True})
     except Exception as e:
@@ -2205,8 +2312,15 @@ def api_add_alarm():
 # ─────────────────────────────────────────────────────────────────
 @app.route("/api/alarms", methods=["DELETE"])
 def api_clear_alarms():
-    global alarms_list
-    alarms_list.clear()
+    global alarms_list, sensor_alarm_acked
+    with _lock:
+        alarms_list.clear()
+        for key in sensor_alarm_acked:
+            if sensor_alarm_active[key]:
+                sensor_alarm_acked[key] = True
+            state["sensors"][f"{key}_alarm"] = False
+    _update_alarm_led()
+    alarm_log.info("[ALARM] Cleared all alarms (manual)")
     tech_log.info("[ALARM] Cleared all alarms")
     return jsonify({"success": True})
 
