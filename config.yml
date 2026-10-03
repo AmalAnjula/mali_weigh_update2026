@@ -2,7 +2,7 @@ alarm_keywords: "\u26A0,ALARM,alarm,level,sensor,FAIL"
 daily_job_done: 0
 infeed:
   auto_start_level: 75
-  filling_time: 300
+  filling_time: 500
   manual_vol_L: 100.0
   min_level_kg: 100.0
 outfeed:
@@ -16,8 +16,8 @@ serial:
   port: /dev/ttyUSB0
 tank:
   density_kgl: 1.0
-  hi_level_kg: 90.0
-  hi_threshold_pct: 101.0
+  hi_level_kg: 105.0
+  hi_threshold_pct: 105.0
   infeed_valve: 1.0
   lo_level_kg: 65.0
   lo_threshold_pct: -20.0

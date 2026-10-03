@@ -1,0 +1,1 @@
+2026-09-22 00:00:15 [ERROR] ols.alarm: Error reading from serial or publishing to MQTT: 'utf-8' codec can't decode byte 0x82 in position 0: invalid start byte

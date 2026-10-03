@@ -1,0 +1,2 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-21,23:57:54,SN.C&C,86.0,100.0,90.6,FAIL,[Infeed] oil_add Local stop

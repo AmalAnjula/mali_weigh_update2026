@@ -48,6 +48,7 @@ import paho.mqtt.client as mqtt_client
 import paho.mqtt.publish as publish
 inputs = {}
 
+
 diff=0
 sync_now=False
 client = None

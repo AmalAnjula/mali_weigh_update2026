@@ -498,6 +498,13 @@ td.cwt { color: var(--green); }
   box-shadow: 0 0 0 1px rgba(30,201,255,.1), var(--shadow);
 }
 .status-bar span { font-weight: 600; color: var(--text); margin-left: 4px; }
+.mqtt-status { margin-left: auto; white-space: nowrap; }
+.mqtt-status.ok span { color: #087f23; }
+.mqtt-status.error span { color: var(--red); }
+@media (max-width: 760px) {
+  .status-bar { flex-wrap: wrap; gap: 8px 16px; }
+  .mqtt-status { margin-left: 0; flex-basis: 100%; }
+}
 
 .alarm-banner {
   flex: 1; min-width: 0; padding: 0 20px; height: 48px;
@@ -851,6 +858,7 @@ td.cwt { color: var(--green); }
   <div>Status: <span id="sb-status">--</span></div>
   <div>Last update: <span id="sb-ts">--</span></div>
   <div>Line: <span id="sb-line" style="font-weight:600;color:var(--text);">--</span></div>
+  <div class="mqtt-status" id="mqtt-status">MQTT: <span id="mqtt-state">--</span> · <span id="mqtt-value">--</span></div>
 </div>
 
 </div><!-- /page -->
@@ -1032,6 +1040,16 @@ loL.className = "slbl" + (loSns ? " alarm" : " ok");
   const rawLine = d.serial && d.serial.line ? String(d.serial.line).trim() : "--";
   document.getElementById("sb-line").textContent = rawLine.length > 80 ? rawLine.slice(0, 77) + "..." : rawLine;
 
+  const mqtt = d.mqtt || {};
+  const mqttStatus = document.getElementById("mqtt-status");
+  const mqttState = document.getElementById("mqtt-state");
+  const mqttValue = document.getElementById("mqtt-value");
+  const mqttError = !!mqtt.serial_error;
+  mqttStatus.className = "mqtt-status " + (mqttError || !mqtt.connected ? "error" : "ok");
+  mqttState.textContent = mqttError ? "SERIAL ERROR" : mqtt.connected ? "CONNECTED" : "DISCONNECTED";
+  const lastValue = mqtt.last_value;
+  mqttValue.textContent = typeof lastValue === "number" ? lastValue.toFixed(2) + " kg" : (lastValue || "--");
+
   // Update volume inputs — only when user is NOT typing
   if (!inVolDirty)  document.getElementById("in-vol").value  = (d.infeed?.manual_vol_L  || 0).toFixed(2);
   if (!outVolDirty) document.getElementById("out-vol").value = (d.outfeed?.manual_vol_L || 0).toFixed(2);
@@ -1065,7 +1083,6 @@ function getAlarmRows() {
   const tk  = (D && D.tank) ? D.tank : {};
   const sns = (D && D.sensors) ? D.sensors : {};
   const ts = D && D.timestamp ? D.timestamp.replace("T", " ").slice(0, 19) : "";
-  const list = [...alarmRows];
   const liveRows = [];
   if (tk.hi_alarm && !hiAcked) {
     liveRows.push({ message: "HI ALARM — tank level above high threshold", timestamp: ts });
@@ -1082,10 +1099,7 @@ function getAlarmRows() {
   if (sns.lo_level_alarm) {
     liveRows.push({ message: "Tank low level sensor alarm", timestamp: ts });
   }
-  liveRows.forEach(liveRow => {
-    if (!list.some(row => row.message === liveRow.message)) list.push(liveRow);
-  });
-  return list;
+  return liveRows;
 }
 
 function renderAlarmBanner() {
@@ -1099,7 +1113,7 @@ function renderAlarmBanner() {
   );
   const list = getAlarmRows();
 
-  if (!liveActive && !list.length) {
+  if (!liveActive) {
     banner.className = "alarm-banner";
     banner.style.display = "none";
     banner.textContent = "";
@@ -1377,19 +1391,21 @@ async function saveSettings() {
     },
   };
 
-  // Save to /api/settings (runtime)
-  await fetch("/api/settings", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-
-  // Save to config.yml on disk
-  await fetch("/api/config/save", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+  try {
+    const response = await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Settings save failed:", error);
+    showToast("Settings were not saved: " + error.message, "warn");
+    return;
+  }
 
   showToast("Settings saved ✓", "ok");
   settingsSynced = false;

@@ -1,0 +1,6 @@
+2026-09-27 12:53:30 [WARNING] ols.alarm: [ALARM OVERRIDE] All alarms cleared via outfeed stop button
+2026-09-27 12:53:30 [ERROR] ols.alarm: alarms cleared by outtk_stop_pin
+2026-09-27 12:53:51 [WARNING] ols.alarm: [ALARM] Tank low level sensor alarm
+2026-09-27 12:54:08 [INFO] ols.alarm: [ALARM CLEARED] Tank low level sensor alarm
+2026-09-27 12:58:08 [WARNING] ols.alarm: [ALARM OVERRIDE] All alarms cleared via outfeed stop button
+2026-09-27 12:58:08 [ERROR] ols.alarm: alarms cleared by outtk_stop_pin

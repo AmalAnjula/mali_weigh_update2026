@@ -1,0 +1,5 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-09-29,07:24:21,SN.C&C,90.8,60.0,85.0,Sucess,[outfeed] Oven request to stop
+2026-09-29,07:30:21,SN.C&C,85.0,60.0,75.0,Sucess,[outfeed] Oven request to stop
+2026-09-29,07:33:19,SN.C&C,75.2,60.0,65.8,Sucess,[outfeed] Oven request to stop
+2026-09-29,07:34:58,SN.C&C,74.0,100.0,99.8,Sucess,[Infeed] Required weight reached
