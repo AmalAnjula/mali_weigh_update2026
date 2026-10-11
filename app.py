@@ -2827,7 +2827,7 @@ def _generate_daily_csv():
 
 
 # ── DAILY 6 AM SCHEDULER THREAD ────────────────────────────────────
-def daily_6am_scheduler():
+def _daily_6am_scheduler_loop():
     """Polls time. Runs job once at/after 6 AM (flag=0), resets flag at 7 AM."""
     while True:
         now = datetime.now()
@@ -2954,6 +2954,18 @@ def daily_6am_scheduler():
             tech_log.info("[SCHEDULER] Flag reset to 0.")
 
         time.sleep(10)  # check every minute
+
+
+def daily_6am_scheduler():
+    """Keep the scheduler thread alive if an unexpected error escapes its loop."""
+    while True:
+        try:
+            _daily_6am_scheduler_loop()
+        except Exception:
+            tech_log.exception(
+                "[SCHEDULER] Scheduler stopped unexpectedly; restarting in 60 seconds"
+            )
+        time.sleep(60)
 
 
 # ══════════════════════════════════════════════════════════════════

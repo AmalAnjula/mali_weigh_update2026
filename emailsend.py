@@ -3,7 +3,33 @@ from email.message import EmailMessage
 import os
 import glob
 import csv
+import logging
+import time
+from logging.handlers import TimedRotatingFileHandler
 
+MAX_EMAIL_RETRIES = 3
+EMAIL_RETRY_DELAY_SECONDS = 5
+
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "email")
+os.makedirs(LOG_DIR, exist_ok=True)
+
+logger = logging.getLogger("emailsend")
+logger.setLevel(logging.INFO)
+logger.propagate = False
+
+if not logger.handlers:
+    log_handler = TimedRotatingFileHandler(
+        os.path.join(LOG_DIR, "emailsend.log"),
+        when="midnight",
+        interval=1,
+        backupCount=29,
+        encoding="utf-8",
+    )
+    log_handler.setFormatter(logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    ))
+    logger.addHandler(log_handler)
 
 
 def calculate_stats(csv_path):
@@ -95,29 +121,72 @@ def send_email(subject, body, to_email, attachment_path=None):
     sender_email = "sprayer01weighingpo@gmail.com"
     sender_password = "kqwalbufyepwfnpt"
 
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = sender_email
-    msg["To"] = to_email
-    msg.set_content(body)
-
-    if attachment_path and os.path.exists(attachment_path):
-        with open(attachment_path, "rb") as f:
-            file_data = f.read()
-            file_name = os.path.basename(attachment_path)
-        msg.add_attachment(
-            file_data,
-            maintype="application",
-            subtype="octet-stream",
-            filename=file_name
+    for attempt in range(1, MAX_EMAIL_RETRIES + 1):
+        stage = "message preparation"
+        logger.info(
+            "Email send started (attempt %s/%s): recipient=%s subject=%r attachment=%s",
+            attempt,
+            MAX_EMAIL_RETRIES,
+            to_email,
+            subject,
+            os.path.basename(attachment_path) if attachment_path else "none",
         )
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
-        smtp.starttls()
-        smtp.login(sender_email, sender_password)
-        smtp.send_message(msg)
+        try:
+            msg = EmailMessage()
+            msg["Subject"] = subject
+            msg["From"] = sender_email
+            msg["To"] = to_email
+            msg.set_content(body)
 
-    print("Email sent successfully")
+            if attachment_path:
+                if os.path.isfile(attachment_path):
+                    with open(attachment_path, "rb") as f:
+                        file_data = f.read()
+                    msg.add_attachment(
+                        file_data,
+                        maintype="application",
+                        subtype="octet-stream",
+                        filename=os.path.basename(attachment_path),
+                    )
+                    logger.info("Attached file: %s", os.path.basename(attachment_path))
+                else:
+                    logger.warning("Attachment not found; sending without it: %s", attachment_path)
+
+            stage = "SMTP connection"
+            with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
+                stage = "TLS negotiation"
+                smtp.starttls()
+
+                stage = "SMTP authentication"
+                smtp.login(sender_email, sender_password)
+
+                stage = "message submission"
+                refused_recipients = smtp.send_message(msg)
+                if refused_recipients:
+                    raise smtplib.SMTPRecipientsRefused(refused_recipients)
+
+            logger.info("Email sent successfully: recipient=%s subject=%r", to_email, subject)
+            print("Email sent successfully")
+            return
+        except Exception:
+            logger.exception(
+                "Email send failed during %s: recipient=%s subject=%r (attempt %s/%s)",
+                stage,
+                to_email,
+                subject,
+                attempt,
+                MAX_EMAIL_RETRIES,
+            )
+            if attempt == MAX_EMAIL_RETRIES:
+                raise
+            logger.warning(
+                "Retrying email send in %s seconds: recipient=%s subject=%r",
+                EMAIL_RETRY_DELAY_SECONDS,
+                to_email,
+                subject,
+            )
+            time.sleep(EMAIL_RETRY_DELAY_SECONDS)
 
 
 

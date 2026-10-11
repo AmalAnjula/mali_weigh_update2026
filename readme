@@ -1,8 +1,47 @@
 auto run
 
-nano  /etc/systemd/system/ols.service 
+sudo nano  /etc/systemd/system/ols.service 
+add this 
+[Unit]
+Description=OLS Monitor Startup
+After=network.target graphical.target
 
-sudo -u palmoil /bin/bash /home/palmoil/stuff/startup.sh
+[Service]
+Type=forking
+User=palmoil
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/coco_oil_p4/.Xauthority
+ExecStart=/bin/bash /home/coco_oil_p4/stuff/startup.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical.target
+
+
+run below for create link
+
+sudo -u coco_oil_p4 /bin/bash /home/coco_oil_p4/stuff/startup.sh
 sudo systemctl daemon-reload
 sudo systemctl enable ols.service
 sudo systemctl restart ols.service
+
+sudo timedatectl set-ntp false
+sudo timedatectl set-time "2026-10-04 6:10:00"
+
+rm -rf ~/.vscode-server
+rm -rf ~/.vscode-remote
+cat ~/.ssh/known_hosts
+ls -la ~/.ssh
+rm -rf ~/.vscode-server-insiders
+
+sudo apt update
+sudo apt install speedtest-cli -y
+
+speedtest-cli
+
+make venv
+
+python3 -m venv --system-site-packages venv
+sudo nano /etc/samba/smb.conf
+sudo systemctl restart smbd
