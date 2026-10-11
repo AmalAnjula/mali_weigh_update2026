@@ -1,6 +1,7 @@
 from gpiozero import OutputDevice, InputDevice
 from gpiozero.pins.lgpio import LGPIOFactory
 from gpiozero import Device
+import lgpio
 
 # ── RPi5: use lgpio pin factory (required for Raspberry Pi 5) ─────
 Device.pin_factory = LGPIOFactory()
@@ -70,29 +71,25 @@ INPUT_PINS = {
 }
 
 
-# ── Release any leftover GPIO handles at startup ──────────────
-def gpio_cleanup(chip=0):
-    try:
-        h = lgpio.gpiochip_open(chip)
-        lgpio.gpiochip_close(h)
-        print("GPIO cleanup done")
-    except Exception as e:
-        print(f"GPIO cleanup warning: {e}")
-
-gpio_cleanup()
-
 # ── Build gpiozero device objects ──────────────────────────────────
 # InputDevice(pin, pull_up=False) → equivalent to GPIO.PUD_DOWN
-_input_devices:  dict[str, InputDevice]  = {
-    name: InputDevice(pin, pull_up=False)
-    for name, pin in INPUT_PINS.items()
-}
+try:
+    _input_devices: dict[str, InputDevice] = {
+        name: InputDevice(pin, pull_up=False)
+        for name, pin in INPUT_PINS.items()
+    }
 
-# OutputDevice(pin, initial_value=False) → starts LOW
-_output_devices: dict[str, OutputDevice] = {
-    name: OutputDevice(pin, initial_value=False)
-    for name, pin in OUTPUT_PINS.items()
-}
+    # OutputDevice(pin, initial_value=False) → starts LOW
+    _output_devices: dict[str, OutputDevice] = {
+        name: OutputDevice(pin, initial_value=False)
+        for name, pin in OUTPUT_PINS.items()
+    }
+except lgpio.error as exc:
+    if "GPIO busy" in str(exc):
+        raise RuntimeError(
+            "A GPIO pin is already in use. Stop any other OLS app or GPIO test process before starting this app."
+        ) from exc
+    raise
 
 # ── Previous / current state — used for edge detection ────────────
 _prev: dict[str, int] = {name: 0 for name in INPUT_PINS}
@@ -173,4 +170,4 @@ def toggle_output(name: str):
     dev = _output_devices.get(name)
     if dev is None:
         raise ValueError(f"Unknown output pin: {name}")
-    dev.toggle()
+    dev.toggle() 

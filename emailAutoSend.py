@@ -53,6 +53,7 @@ EMAIL_NAME  = os.getenv("EMAIL_NAME",  "Coconut Production System")
  
 
 LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
+EMAIL_LOG_DIR = os.path.join(LOG_DIR, "email")
 DB_PATH      = os.path.join(LOG_DIR, "production.db")
 POLL_EVERY  = int(os.getenv("POLL_EVERY_SEC", "30"))   # seconds between inbox checks
 
@@ -77,7 +78,7 @@ class DedupFilter(logging.Filter):
         return True
 
 
-os.makedirs(LOG_DIR, exist_ok=True)
+os.makedirs(EMAIL_LOG_DIR, exist_ok=True)
 
 log = logging.getLogger("emailAutoSend")
 log.setLevel(logging.INFO)
@@ -90,7 +91,7 @@ formatter = logging.Formatter(
 
 # Main daily-rotating log for operational activity, keeping only the last 30 days
 info_handler = TimedRotatingFileHandler(
-    os.path.join(LOG_DIR, "emailAutoSend.log"),
+    os.path.join(EMAIL_LOG_DIR, "emailAutoSend.log"),
     when="midnight",
     interval=1,
     backupCount=30,
@@ -103,7 +104,7 @@ log.addHandler(info_handler)
 
 # Error-only daily-rotating log, keeping only the last 30 days
 error_handler = TimedRotatingFileHandler(
-    os.path.join(LOG_DIR, "emailAutoSend_error.log"),
+    os.path.join(EMAIL_LOG_DIR, "emailAutoSend_error.log"),
     when="midnight",
     interval=1,
     backupCount=30,
@@ -276,26 +277,42 @@ def _build_summary(rows: list, csv_filename: str) -> str:
 
 def _send_email(to_addr: str, subject: str, body: str, attachment_path: str = None):
     """Sends an email via SMTP, with an optional file attachment."""
-    msg = MIMEMultipart()
-    msg["From"]    = formataddr((EMAIL_NAME, EMAIL_USER))
-    msg["To"]      = to_addr
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body, "plain"))
+    stage = "building message"
+    try:
+        msg = MIMEMultipart()
+        msg["From"]    = formataddr((EMAIL_NAME, EMAIL_USER))
+        msg["To"]      = to_addr
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body, "plain"))
 
-    if attachment_path:
-        filename = os.path.basename(attachment_path)
-        with open(attachment_path, "rb") as f:
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(f.read())
-        encoders.encode_base64(part)
-        part.add_header("Content-Disposition", f'attachment; filename="{filename}"')
-        msg.attach(part)
+        if attachment_path:
+            stage = "reading attachment"
+            filename = os.path.basename(attachment_path)
+            with open(attachment_path, "rb") as f:
+                part = MIMEBase("application", "octet-stream")
+                part.set_payload(f.read())
+            encoders.encode_base64(part)
+            part.add_header("Content-Disposition", f'attachment; filename="{filename}"')
+            msg.attach(part)
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.ehlo()
-        server.starttls()
-        server.login(EMAIL_USER, EMAIL_PASS)
-        server.sendmail(EMAIL_USER, to_addr, msg.as_string())
+        stage = "connecting to SMTP server"
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            stage = "sending EHLO"
+            server.ehlo()
+            stage = "starting TLS"
+            server.starttls()
+            stage = "authenticating"
+            server.login(EMAIL_USER, EMAIL_PASS)
+            stage = "sending message"
+            server.sendmail(EMAIL_USER, to_addr, msg.as_string())
+    except Exception:
+        log.exception(
+            "Email send failed | stage=%s | recipient=%s | subject=%r",
+            stage,
+            to_addr,
+            subject,
+        )
+        raise
 
     log.info("Email sent → %s | Subject: %s", to_addr, subject)
 
@@ -437,6 +454,8 @@ def process_email(subject_or_uid, email_msg_or_sender=None):
 def poll_inbox():
     """Connects to IMAP, fetches all UNSEEN emails, processes each one."""
     try:
+        print("Connecting to IMAP server...")
+        #log.info("Connecting to IMAP server %s:%d", IMAP_HOST, IMAP_PORT)
         with imaplib.IMAP4_SSL(IMAP_HOST, IMAP_PORT) as imap:
             imap.login(EMAIL_USER, EMAIL_PASS)
             imap.select("INBOX")

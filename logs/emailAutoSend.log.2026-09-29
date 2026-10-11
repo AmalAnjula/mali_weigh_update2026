@@ -1,0 +1,88 @@
+2026-09-29 14:58:52 [INFO] =======================================================
+2026-09-29 14:58:52 [INFO]   OLS Email Auto-Send started
+2026-09-29 14:58:52 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 14:58:52 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 14:58:52 [INFO]   Poll   : every 30s
+2026-09-29 14:58:52 [INFO] =======================================================
+2026-09-29 14:58:55 [INFO] Found 3 unread email(s).
+2026-09-29 14:58:56 [INFO] Processing email from noreply@email.openai.com | Subject: 'Look what you can do now'
+2026-09-29 14:58:56 [WARNING] Rejected — subject does not start with 'sendme': 'Look what you can do now'
+2026-09-29 14:58:59 [INFO] Email sent → noreply@email.openai.com | Subject: Re: Look what you can do now
+2026-09-29 14:59:04 [INFO] Processing email from indika.baranasuriya@malibangroup.lk | Subject: 'sendme 20260928060000 20260929055959'
+2026-09-29 14:59:04 [INFO] Date range: 2026-09-28 06:00:00 → 2026-09-29 05:59:59
+2026-09-29 14:59:04 [INFO] Rows found: 174
+2026-09-29 14:59:14 [INFO] Email sent → indika.baranasuriya@malibangroup.lk | Subject: Re: sendme 20260928060000 20260929055959
+2026-09-29 14:59:14 [INFO] Temp CSV deleted: /tmp/production_20260928060000_20260929055959_btxc6bvl.csv
+2026-09-29 14:59:21 [INFO] Processing email from indika.baranasuriya@malibangroup.lk | Subject: 'send me 20260928060000 20260929055959'
+2026-09-29 14:59:21 [WARNING] Rejected — subject does not start with 'sendme': 'send me 20260928060000 20260929055959'
+2026-09-29 14:59:25 [INFO] Email sent → indika.baranasuriya@malibangroup.lk | Subject: Re: send me 20260928060000 20260929055959
+2026-09-29 14:59:59 [INFO] Found 1 unread email(s).
+2026-09-29 14:59:59 [INFO] Processing email from mailer-daemon@googlemail.com | Subject: 'Delivery Status Notification (Failure)'
+2026-09-29 14:59:59 [WARNING] Rejected — subject does not start with 'sendme': 'Delivery Status Notification (Failure)'
+2026-09-29 15:00:02 [INFO] Email sent → mailer-daemon@googlemail.com | Subject: Re: Delivery Status Notification (Failure)
+2026-09-29 15:00:40 [INFO] No new emails.
+2026-09-29 15:01:18 [INFO] =======================================================
+2026-09-29 15:01:18 [INFO]   OLS Email Auto-Send started
+2026-09-29 15:01:18 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 15:01:18 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 15:01:18 [INFO]   Poll   : every 30s
+2026-09-29 15:01:18 [INFO] =======================================================
+2026-09-29 15:01:19 [INFO] No new emails.
+2026-09-29 15:03:46 [ERROR] IMAP error: socket error: EOF
+2026-09-29 15:04:18 [INFO] No new emails.
+2026-09-29 15:14:59 [INFO] =======================================================
+2026-09-29 15:14:59 [INFO]   OLS Email Auto-Send started
+2026-09-29 15:14:59 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 15:14:59 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 15:14:59 [INFO]   Poll   : every 30s
+2026-09-29 15:14:59 [INFO] =======================================================
+2026-09-29 15:15:01 [INFO] No new emails.
+2026-09-29 15:19:57 [INFO] =======================================================
+2026-09-29 15:19:57 [INFO]   OLS Email Auto-Send started
+2026-09-29 15:19:57 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 15:19:57 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 15:19:57 [INFO]   Poll   : every 30s
+2026-09-29 15:19:57 [INFO] =======================================================
+2026-09-29 15:19:59 [INFO] No new emails.
+2026-09-29 16:43:36 [INFO] =======================================================
+2026-09-29 16:43:36 [INFO]   OLS Email Auto-Send started
+2026-09-29 16:43:36 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 16:43:36 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 16:43:36 [INFO]   Poll   : every 30s
+2026-09-29 16:43:36 [INFO] =======================================================
+2026-09-29 16:43:38 [INFO] No new emails.
+2026-09-29 17:00:40 [INFO] =======================================================
+2026-09-29 17:00:41 [INFO]   OLS Email Auto-Send started
+2026-09-29 17:00:41 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 17:00:41 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 17:00:41 [INFO]   Poll   : every 30s
+2026-09-29 17:00:41 [INFO] =======================================================
+2026-09-29 17:00:43 [INFO] No new emails.
+2026-09-29 18:41:35 [INFO] =======================================================
+2026-09-29 18:41:35 [INFO]   OLS Email Auto-Send started
+2026-09-29 18:41:35 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 18:41:35 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 18:41:35 [INFO]   Poll   : every 30s
+2026-09-29 18:41:35 [INFO] =======================================================
+2026-09-29 18:41:37 [INFO] No new emails.
+2026-09-29 18:42:11 [INFO] =======================================================
+2026-09-29 18:42:11 [INFO]   OLS Email Auto-Send started
+2026-09-29 18:42:11 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 18:42:11 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 18:42:11 [INFO]   Poll   : every 30s
+2026-09-29 18:42:11 [INFO] =======================================================
+2026-09-29 18:42:14 [INFO] No new emails.
+2026-09-29 18:53:13 [INFO] =======================================================
+2026-09-29 18:53:13 [INFO]   OLS Email Auto-Send started
+2026-09-29 18:53:13 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 18:53:13 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 18:53:13 [INFO]   Poll   : every 30s
+2026-09-29 18:53:13 [INFO] =======================================================
+2026-09-29 18:53:15 [INFO] No new emails.
+2026-09-29 19:37:38 [INFO] =======================================================
+2026-09-29 19:37:38 [INFO]   OLS Email Auto-Send started
+2026-09-29 19:37:38 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-29 19:37:38 [INFO]   DB     : /home/coco_oil/stuff/logs/production.db
+2026-09-29 19:37:38 [INFO]   Poll   : every 30s
+2026-09-29 19:37:38 [INFO] =======================================================
+2026-09-29 19:37:45 [INFO] No new emails.

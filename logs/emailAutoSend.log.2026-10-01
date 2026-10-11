@@ -1,0 +1,21 @@
+2026-10-01 01:08:12 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-01 01:08:44 [INFO] No new emails.
+2026-10-01 03:11:15 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-01 03:11:47 [INFO] No new emails.
+2026-10-01 06:15:33 [INFO] Found 1 unread email(s).
+2026-10-01 06:15:34 [INFO] Processing email from noreply@email.openai.com | Subject: 'Your photos, edited with ChatGPT'
+2026-10-01 06:15:34 [WARNING] Rejected — subject does not start with 'sendme': 'Your photos, edited with ChatGPT'
+2026-10-01 06:15:38 [INFO] Email sent → noreply@email.openai.com | Subject: Re: Your photos, edited with ChatGPT
+2026-10-01 06:16:10 [INFO] Found 1 unread email(s).
+2026-10-01 06:16:10 [INFO] Processing email from mailer-daemon@googlemail.com | Subject: 'Delivery Status Notification (Failure)'
+2026-10-01 06:16:10 [WARNING] Rejected — subject does not start with 'sendme': 'Delivery Status Notification (Failure)'
+2026-10-01 06:16:14 [INFO] Email sent → mailer-daemon@googlemail.com | Subject: Re: Delivery Status Notification (Failure)
+2026-10-01 06:16:46 [INFO] No new emails.
+2026-10-01 07:50:20 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-01 07:50:52 [INFO] No new emails.
+2026-10-01 08:57:15 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-01 08:57:47 [INFO] No new emails.
+2026-10-01 10:41:29 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-01 10:42:01 [INFO] No new emails.
+2026-10-01 16:03:42 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-01 16:04:15 [INFO] No new emails.

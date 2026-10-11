@@ -6,7 +6,7 @@ Serves the HTML UI and handles all API calls.
 A dedicated MQTT thread subscribes to the weight topic and pushes
 the value (weiVal) straight into the shared state every message.
 
-──────────────────────────────────────────────────────────────────
+────────────────────────────────────────────────────────ser──────────
   MQTT CONFIG  (edit section below or set environment variables)
 ──────────────────────────────────────────────────────────────────
   MQTT_BROKER   broker hostname / IP   default: localhost
@@ -330,7 +330,7 @@ logging.getLogger("werkzeug").propagate = False
 #  FLASK APP
 # ══════════════════════════════════════════════════════════════════
 app   = Flask(__name__, static_folder=".")
-_lock = threading.Lock()
+_lock = threading.RLock()
 
 # ══════════════════════════════════════════════════════════════════
 #  SHARED STATE  (all UI data lives here)
@@ -380,6 +380,7 @@ state = {
         "operation":    "LOCAL",
         "running":      False,
         "valve_open":   False,
+        "filling_time": CONFIG["infeed"].get("filling_time", 300),
          "manual_vol_L": CONFIG["infeed"].get("manual_vol_L", 25.0),
          "auto_start_level": CONFIG["infeed"].get("auto_start_level", 60.0),
          
@@ -392,6 +393,7 @@ state = {
         "operation":    "LOCAL",
         "running":      False,
         "valve_open":   False,
+        "draining_time": CONFIG["outfeed"].get("draining_time", 300),
         "manual_vol_L": CONFIG["outfeed"].get("manual_vol_L", 26.0),
     },
 
@@ -1760,7 +1762,7 @@ def serial_read_data():
     SPIKE_LIMIT = CONFIG["serial"]["diff"]
     f = DiffFilter(threshold=SPIKE_LIMIT)
     pattern = re.compile(r'([A-Z]{2}),([A-Z]{2})\s+([\d.]+)\s*KG')
-
+    
     while True:
         try:
             line = ser.readline().decode('utf-8', errors='ignore').strip()
@@ -1769,25 +1771,28 @@ def serial_read_data():
 
             with _lock:
                 state["serial"]["line"] = line
-
+            
+            
             match = pattern.search(line)
             if not match:
+                print("2")
                 continue
             status, mode, raw = match.groups()
-
+             
             raw_val = float(raw)
             weight = f.feed(raw_val)
-
+            
             if weight is not None  :
                 weiVal = float(weight)
-
+                
                 with _lock:
                     state["tank"]["weight_kg"]    = weiVal
                     state["mqtt"]["serial_error"] = False
                     state["mqtt"]["last_value"]   = weiVal
                     state["mqtt"]["last_ts"]      = _now()
+                    
                     _recalc_alarms()
-
+                    
                 print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
             else:
                 print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> SPIKE/REJECTED: {raw_val} \r", end="")
@@ -2305,6 +2310,7 @@ def api_products():
 # ─────────────────────────────────────────────────────────────────
 @app.route("/api/settings", methods=["POST"])
 def api_settings():
+    global INFEED_TIMEOUT, OUTFEED_TIMEOUT
     body = request.get_json(force=True)
 
     cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
@@ -2345,7 +2351,14 @@ def api_settings():
     if "infeed" in body:
         i = body["infeed"]
         cfg.setdefault("infeed", {})
-        if "filling_time" in i: cfg["infeed"]["filling_time"] = int(i["filling_time"])
+        if "filling_time" in i:
+            INFEED_TIMEOUT = int(i["filling_time"])
+            cfg["infeed"]["filling_time"] = INFEED_TIMEOUT
+            state["infeed"]["filling_time"] = INFEED_TIMEOUT
+        if "auto_start_level" in i:
+            auto_start_level = float(i["auto_start_level"])
+            cfg["infeed"]["auto_start_level"] = auto_start_level
+            state["infeed"]["auto_start_level"] = auto_start_level
         if "manual_vol_L" in i:
             cfg["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
             state["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
@@ -2353,7 +2366,10 @@ def api_settings():
     if "outfeed" in body:
         o = body["outfeed"]
         cfg.setdefault("outfeed", {})
-        if "draining_time" in o: cfg["outfeed"]["draining_time"] = int(o["draining_time"])
+        if "draining_time" in o:
+            OUTFEED_TIMEOUT = int(o["draining_time"])
+            cfg["outfeed"]["draining_time"] = OUTFEED_TIMEOUT
+            state["outfeed"]["draining_time"] = OUTFEED_TIMEOUT
         if "manual_vol_L"  in o:
             cfg["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
             state["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
@@ -2734,7 +2750,7 @@ def _generate_daily_csv():
 
 
 # ── DAILY 6 AM SCHEDULER THREAD ────────────────────────────────────
-def daily_6am_scheduler():
+def _daily_6am_scheduler_loop():
     """Polls time. Runs job once at/after 6 AM (flag=0), resets flag at 7 AM."""
     while True:
         now = datetime.now()
@@ -2834,9 +2850,19 @@ def daily_6am_scheduler():
             with open("config.yml", "w") as f:
                 yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=True)
             tech_log.info("[SCHEDULER] Flag reset to 0.")
-
+        #tech_log.info("[SCHEDULER] Current time: %s, hour=%d, daily_job_done=%d", now.strftime("%Y-%m-%d %H:%M:%S"), hour, cfg.get("daily_job_done", 0))
         time.sleep(10)  # check every minute
 
+def daily_6am_scheduler():
+    """Keep the scheduler thread alive if an unexpected error escapes its loop."""
+    while True:
+        try:
+            _daily_6am_scheduler_loop()
+        except Exception:
+            tech_log.exception(
+                "[SCHEDULER] Scheduler stopped unexpectedly; restarting in 60 seconds"
+            )
+        time.sleep(60)
 
 # ══════════════════════════════════════════════════════════════════
 #  ENTRY POINT

@@ -1322,9 +1322,9 @@ function syncSettings(d) {
   document.getElementById("s-hi").value                = tk.hi_threshold_pct;
   document.getElementById("s-lo-kg").value             = tk.lo_level_kg || tk.lo_level || 10;
   document.getElementById("s-lo").value                = tk.lo_threshold_pct;
-  document.getElementById("s-fill-time").value         = d.infeed?.filling_time || 300;
-  document.getElementById("s-auto-start-level").value  = d.infeed?.auto_start_level || 0;
-  document.getElementById("s-drain-time").value        = d.outfeed?.draining_time || 300;
+  document.getElementById("s-fill-time").value         = d.infeed?.filling_time ?? 300;
+  document.getElementById("s-auto-start-level").value  = d.infeed?.auto_start_level ?? 0;
+  document.getElementById("s-drain-time").value        = d.outfeed?.draining_time ?? 300;
   if (d.serial) {
     document.getElementById("s-serial-port").value = d.serial.port || "";
     document.getElementById("s-baudrate").value    = d.serial.baudrate || 9600;
@@ -1363,18 +1363,15 @@ async function saveSettings() {
   };
 
   // Save to /api/settings (runtime)
-  await fetch("/api/settings", {
+  const response = await fetch("/api/settings", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-
-  // Save to config.yml on disk
-  await fetch("/api/config/save", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+  if (!response.ok) {
+    showToast("Settings save failed", "warn");
+    return;
+  }
 
   showToast("Settings saved ✓", "ok");
   settingsSynced = false;

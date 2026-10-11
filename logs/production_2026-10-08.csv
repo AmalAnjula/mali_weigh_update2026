@@ -1,0 +1,2 @@
+date,time,product,now_weight,req_weight,final_weight,task_state,reason
+2026-10-08,09:45:48,KRISCO,112.0,200.0,200.0,Sucess,[Infeed] Required weight reached

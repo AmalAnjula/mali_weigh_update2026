@@ -1,0 +1,2 @@
+2026-10-09 21:20:57 [INFO] Email send started | recipient=amalanjula@gmail.com | subject='PLANT_01_COCONUT' | attachment=/home/coco_oil/stuff/logs/production_2026-10-08.csv
+2026-10-09 21:21:02 [INFO] Email sent successfully | recipient=amalanjula@gmail.com | subject='PLANT_01_COCONUT'
