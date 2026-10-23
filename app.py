@@ -559,7 +559,8 @@ def gpio_handler():
                      
             elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"] and auto_start_after_outfeed==False:
                     time.sleep(2)
-                    if gpio.state("intke_start"):
+                    
+                    if gpio.state("intke_start") and not gpio.state("ind_led_in"):
                         state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
                         _now_w = weiVal
                         _req_w = state["infeed"]["manual_vol_L"]
