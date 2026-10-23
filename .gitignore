@@ -208,7 +208,6 @@ __marimo__/
 
 
 
-logs/ols_app*
-logs/ols_tech.log*
+logs/*
+!logs/*.db
 weight.log*
-
