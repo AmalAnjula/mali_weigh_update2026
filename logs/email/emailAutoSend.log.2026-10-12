@@ -1,0 +1,40 @@
+2026-10-12 04:24:00 [ERROR] Unexpected error in poll_inbox: [Errno 101] Network is unreachable
+2026-10-12 04:24:32 [INFO] No new emails.
+2026-10-12 08:00:55 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-12 08:01:32 [INFO] No new emails.
+2026-10-12 08:18:39 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-12 08:19:11 [INFO] No new emails.
+2026-10-12 14:06:24 [INFO] Found 1 unread email(s).
+2026-10-12 14:06:24 [INFO] Processing email from noreply@email.openai.com | Subject: '4 new image styles to try'
+2026-10-12 14:06:24 [WARNING] Rejected — subject does not start with 'sendme': '4 new image styles to try'
+2026-10-12 14:06:34 [ERROR] Email send failed | stage=connecting to SMTP server | recipient=noreply@email.openai.com | subject='Re: 4 new image styles to try'
+Traceback (most recent call last):
+  File "/home/coco_oil/stuff/emailAutoSend.py", line 299, in _send_email
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+         ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 341, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 312, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socket.py", line 840, in create_connection
+    for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+               ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socket.py", line 977, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno -3] Temporary failure in name resolution
+2026-10-12 14:06:34 [ERROR] Unhandled error processing email uid=b'88': [Errno -3] Temporary failure in name resolution
+2026-10-12 14:07:07 [INFO] No new emails.
+2026-10-12 16:45:01 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-12 16:47:19 [INFO] No new emails.
+2026-10-12 16:55:33 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-12 16:57:15 [INFO] No new emails.
+2026-10-12 18:26:08 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-12 18:26:41 [INFO] No new emails.

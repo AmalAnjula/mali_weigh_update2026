@@ -207,7 +207,8 @@ marimo/_lsp/
 __marimo__/
 
 
-
+logs/email/email*
+logs/production*
 logs/ols_app*
 logs/ols_tech.log*
 weight.log*

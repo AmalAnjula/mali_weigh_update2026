@@ -1,0 +1,26 @@
+2026-10-19 06:00:04 [INFO] Email send started | recipient=sprayer01weighingco@malibangroup.lk | subject='PLANT 01 COCONUT OIL' | attachment=/home/coco_oil/stuff/logs/production_2026-10-18.csv
+2026-10-19 06:02:23 [ERROR] Email send failed | attempt=1/4 | stage=connecting to SMTP server | recipient=sprayer01weighingco@malibangroup.lk | subject='PLANT 01 COCONUT OIL'
+Traceback (most recent call last):
+  File "/home/coco_oil/stuff/emailsend.py", line 169, in send_email
+    with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+         ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 341, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 312, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socket.py", line 864, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.13/socket.py", line 849, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+OSError: [Errno 101] Network is unreachable
+2026-10-19 06:02:30 [INFO] Email sent successfully | recipient=sprayer01weighingco@malibangroup.lk | subject='PLANT 01 COCONUT OIL'
+2026-10-19 06:02:32 [INFO] Email send started | recipient=amalanjula@gmail.com | subject='PLANT_01_COCONUT_OIL' | attachment=/home/coco_oil/stuff/logs/production_2026-10-18.csv
+2026-10-19 06:02:36 [INFO] Email sent successfully | recipient=amalanjula@gmail.com | subject='PLANT_01_COCONUT_OIL'

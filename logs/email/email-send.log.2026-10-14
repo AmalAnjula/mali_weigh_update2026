@@ -1,0 +1,4 @@
+2026-10-14 06:00:07 [INFO] Email send started | recipient=sprayer01weighingco@malibangroup.lk | subject='PLANT 01 COCONUT OIL' | attachment=/home/coco_oil/stuff/logs/production_2026-10-13.csv
+2026-10-14 06:00:12 [INFO] Email sent successfully | recipient=sprayer01weighingco@malibangroup.lk | subject='PLANT 01 COCONUT OIL'
+2026-10-14 06:00:14 [INFO] Email send started | recipient=amalanjula@gmail.com | subject='PLANT_01_COCONUT_OIL' | attachment=/home/coco_oil/stuff/logs/production_2026-10-13.csv
+2026-10-14 06:00:18 [INFO] Email sent successfully | recipient=amalanjula@gmail.com | subject='PLANT_01_COCONUT_OIL'

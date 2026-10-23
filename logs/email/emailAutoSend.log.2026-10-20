@@ -1,0 +1,8 @@
+2026-10-20 02:08:01 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-20 02:08:33 [INFO] No new emails.
+2026-10-20 06:12:04 [ERROR] Unexpected error in poll_inbox: [Errno 101] Network is unreachable
+2026-10-20 06:12:36 [INFO] No new emails.
+2026-10-20 12:33:47 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-20 12:36:03 [INFO] No new emails.
+2026-10-20 13:36:05 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-20 13:37:51 [INFO] No new emails.
