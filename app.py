@@ -556,7 +556,7 @@ def gpio_handler():
                         "oil_add thread started remote manual — now=%.2f kg  requested=%.2f kg",
                         _now_w, _req_w)
                     print(f"[infeed remote manual ] oil_add thread started  now={_now_w:.2f} kg  req={_req_w:.2f} kg")
-
+                     
             elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"] and auto_start_after_outfeed==False:
                     time.sleep(2)
                     if gpio.state("intke_start"):
@@ -870,8 +870,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
             #gpio.output_on("ind_led_in")
             
         elif (weiVal<state["infeed"]["auto_start_level"]) :  
-            ols_log.info("Auto fill sequence wait 10 seconds. Current weight: %.2f kg, Required weight: %.2f kg", weiVal, required_weight)
-            time.sleep(10)  
+             
             result=oil_add(weiVal, required_weight,True)
 
              
@@ -3003,6 +3002,10 @@ if __name__ == "__main__":
     t.start()
     print(f"[SYNC] Remote DB sync thread started → {REMOTE_SYNC_URL}")
  
+        #--------------------------------------------
+    
+    #t = threading.Thread(target=oil_add,args=(0, 95,False), daemon=True, name="infeed_manual_remote",
+    #t.start() # 
     tech_log.info("****Server started.Version 1.05 ******")
     # Start Flask (use_reloader=False required when using threads)
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

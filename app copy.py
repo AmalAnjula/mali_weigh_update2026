@@ -962,7 +962,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     infeed_mode_change         = False
     # Note: do NOT reset serial_error — it reflects live MQTT state
 
-    intial_weight = now_weight
+    intial_weight = weiVal
 
     tech_log.info(
         "Oil addition started. Initial: %.2f kg  Requested: %.2f kg",
