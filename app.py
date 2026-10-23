@@ -543,7 +543,7 @@ def gpio_handler():
 
             elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"] and auto_start_after_outfeed==False:
                     time.sleep(2)
-                    if gpio.state("intke_start"):
+                    if gpio.state("intke_start") and not gpio.state("ind_led_in"):
                         state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
                         _now_w = weiVal
                         _req_w = state["infeed"]["manual_vol_L"]
@@ -829,8 +829,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
 
 
         elif (weiVal<state["infeed"]["auto_start_level"]) :  
-            ols_log.info("Auto fill sequence wait 10 seconds. Current weight: %.2f kg, Required weight: %.2f kg", weiVal, required_weight)
-            time.sleep(10)    
+              
             result=oil_add(weiVal, required_weight,True)
 
              
