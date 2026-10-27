@@ -216,3 +216,4 @@ logs/production_*.csv
 logs/*
 !logs/*.db
 weight.log*
+logs/ols_alarm_*.csv
