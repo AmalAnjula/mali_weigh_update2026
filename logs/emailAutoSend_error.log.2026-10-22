@@ -1,0 +1,2 @@
+2026-10-22 11:24:02 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-22 23:53:23 [ERROR] IMAP error: b'Temporary system problem.  Please try again later. 616947a28c9db-75d180f39e3mb84689766b6c'

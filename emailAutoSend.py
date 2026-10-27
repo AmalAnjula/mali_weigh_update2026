@@ -46,9 +46,9 @@ IMAP_HOST   = os.getenv("EMAIL_IMAP_HOST",   "imap.gmail.com")
 IMAP_PORT   = int(os.getenv("EMAIL_IMAP_PORT", "993"))
 SMTP_HOST   = os.getenv("EMAIL_SMTP_HOST",   "smtp.gmail.com")
 SMTP_PORT   = int(os.getenv("EMAIL_SMTP_PORT", "587"))
-EMAIL_USER  = os.getenv("EMAIL_USER",  "sprayer01weighingco@gmail.com")
-EMAIL_PASS  = os.getenv("EMAIL_PASS",  "wkdbfbnnuipytoep")
-EMAIL_NAME  = os.getenv("EMAIL_NAME",  "Coconut Production System")
+EMAIL_USER  = os.getenv("EMAIL_USER",  "sprayer04weighingco@gmail.com")
+EMAIL_PASS  = os.getenv("EMAIL_PASS",  "utzvwdhknrcavxhv")
+EMAIL_NAME  = os.getenv("EMAIL_NAME",  "Coconut plant 4 System")
 
  
 
@@ -437,6 +437,8 @@ def process_email(subject_or_uid, email_msg_or_sender=None):
 def poll_inbox():
     """Connects to IMAP, fetches all UNSEEN emails, processes each one."""
     try:
+        log.info("Connecting to IMAP server %s:%d", IMAP_HOST, IMAP_PORT)
+        print("Connecting to IMAP server...")
         with imaplib.IMAP4_SSL(IMAP_HOST, IMAP_PORT) as imap:
             imap.login(EMAIL_USER, EMAIL_PASS)
             imap.select("INBOX")

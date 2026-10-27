@@ -1,0 +1,35 @@
+2026-10-20 06:00:09 [INFO] Email send started (attempt 1/3): recipient=amalanjula@gmail.com subject='PLANT_04_COCONUT' attachment=production_2026-10-18.csv
+2026-10-20 06:00:09 [INFO] Attached file: production_2026-10-18.csv
+2026-10-20 06:00:09 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-20 06:00:10 [INFO] Starting TLS
+2026-10-20 06:00:10 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-20 06:00:11 [INFO] Submitting message to amalanjula@gmail.com
+2026-10-20 06:00:13 [INFO] Email sent successfully: recipient=amalanjula@gmail.com subject='PLANT_04_COCONUT'
+2026-10-20 06:00:13 [INFO] Email send started (attempt 1/3): recipient=sprayer04weighingco@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER' attachment=production_2026-10-19.csv
+2026-10-20 06:00:13 [INFO] Attached file: production_2026-10-19.csv
+2026-10-20 06:00:13 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-20 06:00:14 [INFO] Starting TLS
+2026-10-20 06:00:15 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-20 06:00:16 [INFO] Submitting message to sprayer04weighingco@malibangroup.lk
+2026-10-20 06:00:18 [INFO] Email sent successfully: recipient=sprayer04weighingco@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER'
+2026-10-20 06:00:20 [INFO] Email send started (attempt 1/3): recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER' attachment=production_2026-10-19.csv
+2026-10-20 06:00:20 [INFO] Attached file: production_2026-10-19.csv
+2026-10-20 06:00:20 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-20 06:00:21 [INFO] Starting TLS
+2026-10-20 06:00:21 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-20 06:00:22 [INFO] Submitting message to amalanjula@gmail.com
+2026-10-20 06:00:24 [INFO] Email sent successfully: recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER'
+2026-10-20 06:00:26 [INFO] Email send started (attempt 1/3): recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log' attachment=ols_alarms.log
+2026-10-20 06:00:26 [INFO] Attached file: ols_alarms.log
+2026-10-20 06:00:26 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-20 06:00:27 [INFO] Starting TLS
+2026-10-20 06:00:28 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-20 06:00:28 [INFO] Submitting message to amalanjula@gmail.com
+2026-10-20 06:00:30 [INFO] Email sent successfully: recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log'
+2026-10-20 06:00:32 [INFO] Email send started (attempt 1/3): recipient=indika.baranasuriya@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log' attachment=ols_alarms.log
+2026-10-20 06:00:32 [INFO] Attached file: ols_alarms.log
+2026-10-20 06:00:32 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-20 06:00:33 [INFO] Starting TLS
+2026-10-20 06:00:34 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-20 06:00:35 [INFO] Submitting message to indika.baranasuriya@malibangroup.lk
+2026-10-20 06:00:38 [INFO] Email sent successfully: recipient=indika.baranasuriya@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log'

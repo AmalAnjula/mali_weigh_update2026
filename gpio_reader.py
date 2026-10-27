@@ -13,8 +13,8 @@ out_wei_led    = 18
 # ⚠️  WARNING: myrelay was pin 12, but pin 12 is also used by
 #     relay_normal_off_pin (INPUT). Assign myrelay a unique pin!
 myrelay        = 4 #12   # <-- CHANGE THIS to an unused pin
-alm_led        = 1
-pwr_led        = 14
+alm_led        = 14
+pwr_led        = 1
 out_solv       = 23
 in_solv        = 24
 ind_led_in     = 7

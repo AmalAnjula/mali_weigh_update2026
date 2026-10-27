@@ -54,8 +54,24 @@ client = None
 # ── ALARMS LIST (in-memory) ──────────────────────────────────
 # Each element: {"timestamp": "YYYY-MM-DD HH:MM:SS", "message": "alarm text"}
 alarms_list = [
-    
+     
 ]
+
+alarm_low_level=False
+alarm_hi_level=False
+alarm_serial_error=False
+alarm_feed_error=False
+alarm_outfeed_error=False
+alarm_common=False
+
+sensor_alarm_active = {
+    "hi_level": False,   # tracks the raw critical condition, for edge detection
+    "lo_level": False,
+}
+sensor_alarm_acked = {
+    "hi_level": False,   # True = condition still active but overridden/cleared — suppressed
+    "lo_level": False,
+}
 
 with open("config.yml") as f:
     CONFIG = yaml.safe_load(f)
@@ -115,7 +131,6 @@ def mqtt_publish(topic: str, payload, retain: bool = False, qos: int = 0):
 # ══════════════════════════════════════════════════════════════════
 
 DB_PATH      = os.path.join(LOG_DIR, "production.db")
-print("DB_PATH =", DB_PATH)
 DB_MAX_BYTES = 500 * 1024 * 1024   # 500 MB hard ceiling
  
 # ── Remote sync config ─────────────────────────────────────────────
@@ -315,6 +330,11 @@ tech_log = logging.getLogger("ols.tech")
 tech_log.addHandler(_make_file_handler("ols_tech.log"))
 tech_log.setLevel(logging.DEBUG)
 
+# Dedicated alarm logger → writes to ols_alarms.log, 30 days of history kept
+alarm_log = logging.getLogger("ols.alarm")
+alarm_log.addHandler(_make_file_handler("ols_alarms.log"))
+alarm_log.setLevel(logging.DEBUG)
+
 # ── Silence Flask/Werkzeug access log lines ────────────────────────
 # Suppresses:  192.168.x.x - - [..] "GET /api/data HTTP/1.1" 200 -
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -325,7 +345,7 @@ logging.getLogger("werkzeug").propagate = False
 #  FLASK APP
 # ══════════════════════════════════════════════════════════════════
 app   = Flask(__name__, static_folder=".")
-_lock = threading.Lock()
+_lock = threading.RLock()
 
 # ══════════════════════════════════════════════════════════════════
 #  SHARED STATE  (all UI data lives here)
@@ -342,7 +362,6 @@ state = {
     "serial": {
         "port":     CONFIG.get("serial", {}).get("port",     "/dev/ttyUSB0"),
         "baudrate": CONFIG.get("serial", {}).get("baudrate", 9600),
-        "line":     "",
     },
 
     "tank": {
@@ -368,6 +387,8 @@ state = {
     "sensors": {
         "lo_level": False,   # True = float switch triggered
         "hi_level": False,
+        "lo_level_alarm": False,   # True = low level critical AND currently alerting
+        "hi_level_alarm": False,   # True = high level critical AND currently alerting
     },
 
     "infeed": {
@@ -375,6 +396,7 @@ state = {
         "operation":    "LOCAL",
         "running":      False,
         "valve_open":   False,
+        "filling_time": CONFIG["infeed"].get("filling_time", 300),
          "manual_vol_L": CONFIG["infeed"].get("manual_vol_L", 25.0),
          "auto_start_level": CONFIG["infeed"].get("auto_start_level", 60.0),
          
@@ -387,6 +409,7 @@ state = {
         "operation":    "LOCAL",
         "running":      False,
         "valve_open":   False,
+        "draining_time": CONFIG["outfeed"].get("draining_time", 300),
         "manual_vol_L": CONFIG["outfeed"].get("manual_vol_L", 26.0),
     },
 
@@ -432,7 +455,7 @@ weiVal       = 0.0
 serial_error = False
 out_feed_sucess=False
 auto_start_after_outfeed=False
- 
+olready_running=False
 # ── Infeed sequence control flags ──────────────────────────────────
 # busyFlagInfeedBusy  → True while oil_add() sequence is running
 # busyFlagOutfeedBusy → set True externally when outfeed is active;
@@ -465,7 +488,7 @@ _publish_queue = queue.Queue()
 def gpio_handler():
     tech_log.info("GPIO handler thread started.")
     global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
-    global hi_level_sensor,out_feed_sucess,auto_start_after_outfeed
+    global hi_level_sensor,out_feed_sucess,auto_start_after_outfeed,olready_running
     gpio.update() 
     
     state["infeed"]["operation"] = "REMOTE"
@@ -536,7 +559,9 @@ def gpio_handler():
 
             elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"] and auto_start_after_outfeed==False:
                     time.sleep(2)
-                    if gpio.state("intke_start"):
+                    tech_log.info("intake start pressed. debounce wait")
+                    if gpio.state("intke_start") and olready_running==False:
+                        olready_running=True
                         state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
                         _now_w = weiVal
                         _req_w = state["infeed"]["manual_vol_L"]
@@ -560,6 +585,9 @@ def gpio_handler():
             if gpio.rising("outtk_stop"):
                 outfeed_remote_stop=True
                 tech_log.info("GPIO: outtk_stop_pin triggered — setting outfeed_remote_stop=True")
+                _override_outfeed_alarms()
+                gpio.output_off("alm_led")
+                alarm_log.error("alarms cleared by outtk_stop_pin")
 
             #if gpio.rising("outtk_start") and state["outfeed"]["operation"]=="REMOTE": #chnge button state amal 
             if gpio.rising("outtk_start") : #chnge button state amal 
@@ -621,12 +649,20 @@ def gpio_handler():
 
                 #tech_log.info("GPIO: intke_stop_pin triggered — setting local_stop=True")
 
-  
+
+
+           
                 #tech_log.info("GPIO: intke_remot_pin triggered — setting remote_stop=True")
             state["sensors"]["lo_level"] =  gpio.state("lowr_sns")   # assuming active LOW sensor (0 when triggered)
             state["sensors"]["hi_level"] = gpio.state("up_sns")      # assuming active HIGH sensor (1 when triggered)
             low_level_sensor = not state["sensors"]["lo_level"] 
-            hi_level_sensor =not state["sensors"]["hi_level"] 
+            hi_level_sensor =not state["sensors"][  "hi_level"] 
+
+         
+
+
+
+            _check_sensor_alarm()
              
  
             #print("tank low level sensor:", inputs["lowr_sns"], "  tank up level sensor:", inputs["up_sns"])
@@ -659,35 +695,97 @@ def _log(event, **extras):
     state["log"].insert(0, entry)
     state["log"] = state["log"][:200]
 
-def _log_alarm(message: str):
-    """Append an alarm to the in-memory alarms list (shown on the Alarms page and banner)."""
-    global alarms_list
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    alarms_list.append({"timestamp": ts, "message": message})
-    tech_log.info("[ALARM] %s", message)
-
 def _recalc_alarms():
     """Recalculate level_pct and hi/lo alarms from weight_kg."""
     tk  = state["tank"]
     net = max(0.0, tk["weight_kg"] - tk["tare_kg"])
     tk["level_pct"] = round(min(100.0, net / tk["max_kg"] * 100.0), 2) \
                       if tk["max_kg"] > 0 else 0.0
-
-    prev_hi = tk.get("hi_alarm", False)
-    prev_lo = tk.get("lo_alarm", False)
     tk["hi_alarm"]  = tk["level_pct"] >= tk["hi_threshold_pct"]
     tk["lo_alarm"]  = tk["level_pct"] <= tk["lo_threshold_pct"]
+    _update_alarm_led()
 
-    # Log to the alarms list on the rising edge only, so it doesn't spam on every recalc
-    if tk["hi_alarm"] and not prev_hi:
-        _log_alarm(f"HI ALARM - tank level {tk['level_pct']:.1f}% reached high threshold ({tk['hi_threshold_pct']}%)")
-    if tk["lo_alarm"] and not prev_lo:
-        _log_alarm(f"LO ALARM - tank level {tk['level_pct']:.1f}% reached low threshold ({tk['lo_threshold_pct']}%)")
+
+def _update_alarm_led():
+    """Keep the physical alarm LED on while any alarm is active."""
+    with _lock:
+        alarm_active = (
+            state["tank"]["hi_alarm"]
+            or state["tank"]["lo_alarm"]
+            or state["sensors"]["hi_level_alarm"]
+            or state["sensors"]["lo_level_alarm"]
+        )
+
+    if alarm_active:
+        gpio.output_on("alm_led")
+     
+        
 
 def _print_event(payload: dict):
     print(f"\n[BUTTON EVENT] {json.dumps(payload, indent=2)}")
 
 
+def _check_sensor_alarm():
+    """Rising/falling-edge alarms for the tank level float switches.
+
+    hi_level: NOT hi_level_sensor  -> critical, raise alarm.
+              hi_level_sensor True -> ok, clear alarm.
+    lo_level: low_level_sensor     -> critical, raise alarm and log.
+              NOT low_level_sensor -> ok, clear alarm.
+
+    An outfeed-stop override (see _override_outfeed_alarms) can mark a still-active
+    condition as "acked" so it stops alerting; the ack is dropped again as soon as
+    the condition clears, so the next fresh trip alerts normally.
+    """
+    global sensor_alarm_active, sensor_alarm_acked
+
+    hi_critical = not hi_level_sensor
+    lo_critical = bool(low_level_sensor)
+
+    checks = (
+        ("hi_level", hi_critical, "Tank high level sensor alarm"),
+        ("lo_level", lo_critical, "Tank low level sensor alarm"),
+    )
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    with _lock:
+        for key, is_active, message in checks:
+            was_active = sensor_alarm_active[key]
+            if is_active and not was_active:
+                alarms_list.append({"timestamp": now, "message": message})
+                alarm_log.warning("[ALARM] %s", message)
+                sensor_alarm_acked[key] = False
+            elif not is_active and was_active:
+                alarms_list.append({
+                    "timestamp": now,
+                    "message": f"[ALARM CLEARED] {message}",
+                })
+                alarm_log.info("[ALARM CLEARED] %s", message)
+                sensor_alarm_acked[key] = False
+            sensor_alarm_active[key] = is_active
+            state["sensors"][f"{key}_alarm"] = is_active and not sensor_alarm_acked[key]
+
+    _update_alarm_led()
+
+
+def _override_outfeed_alarms():
+    """Operator override via the physical outfeed-stop button.
+
+    Clears all current alarms and, for any sensor condition that is still
+    physically active, suppresses re-alerting until it clears and re-trips
+    (a fresh edge) — it will not re-appear just because it is still active.
+    """
+    global sensor_alarm_acked
+    with _lock:
+        alarms_list.clear()
+        for key in sensor_alarm_acked:
+            if sensor_alarm_active[key]:
+                sensor_alarm_acked[key] = True
+            state["sensors"][f"{key}_alarm"] = False
+
+    alarm_log.warning("[ALARM OVERRIDE] All alarms cleared via outfeed stop button")
+    tech_log.warning("[ALARM OVERRIDE] All alarms cleared via outfeed stop button")
+    _update_alarm_led()
 # ══════════════════════════════════════════════════════════════════
 #  INFEED HELPERS  (write directly to state — no HTTP round-trip)
 # ══════════════════════════════════════════════════════════════════
@@ -777,8 +875,9 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
                  
 
 
-        elif (weiVal<state["infeed"]["auto_start_level"]) :  
-              
+        elif (weiVal<state["infeed"]["auto_start_level"]) : 
+            #ols_log.info("Auto fill sequence wait 10 seconds. Current weight: %.2f kg, Required weight: %.2f kg", weiVal, required_weight)
+            #time.sleep(5)  #sleep for 
             result=oil_add(weiVal, required_weight,True)
 
              
@@ -845,12 +944,15 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     global low_level_sensor
     global hi_level_sensor
     global diff
+    
     infeed_open(False)
-    gpio.output_on("ind_led_in") 
+    gpio.output_on("ind_led_in")    
     state["ui"]["buttons"]["in-mode-btn"]["disabled"] = True
     state["ui"]["buttons"]["in-op-btn"]["disabled"] = True
     tech_log.info("oil_add requested — checking if outfeed is busy ...")
-
+    
+    time.sleep(10)
+    tech_log.info("wait ok for stable in oil_add ")
     # ── STEP 1: Wait until outfeed finishes ────────────────────────
     _waited = False
     while busyFlagOutfeedBusy:
@@ -873,7 +975,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     infeed_mode_change         = False
     # Note: do NOT reset serial_error — it reflects live MQTT state
 
-    intial_weight = now_weight
+    intial_weight = weiVal
 
     tech_log.info(
         "Oil addition started. Initial: %.2f kg  Requested: %.2f kg",
@@ -893,7 +995,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
     infeed_open(True)
     infeed_run_state(True)
     gpio.output_on("in_solv")
-    
+
     while not done:
         elapsed = time.time() - start_time
         print(f"  Elapsed: {elapsed:.1f} s  Current weight: {weiVal:.2f} kg ", end="\r")
@@ -901,7 +1003,7 @@ def oil_add(now_weight: float, required_weight: float,infeed_auto: bool):
 
 
         diff= weiVal-intial_weight
-        
+
         if elapsed > INFEED_TIMEOUT:
             done = True
             result=False
@@ -1235,7 +1337,7 @@ def oil_drain(requested_vol_L: float):
     global outfeed_local_stop, outfeed_remote_stop
     global outfeed_local_remote_change, outfeed_mode_change
     global low_level_sensor,outfeed_remote_stop
-    global out_feed_sucess,auto_start_after_outfeed
+    global out_feed_sucess,auto_start_after_outfeed,olready_running
     #tech_log.info("[outfeed] oil_drain requested — vol=%.2f L", requested_vol_L)
 
     # Lock buttons while sequence runs
@@ -1365,10 +1467,13 @@ def oil_drain(requested_vol_L: float):
             "Sucess",
             "[outfeed] Oven request to stop"
             )
+
+            
             break
         # Tank too low — stop draining
         elif weiVal<= lo_level or low_level_sensor:
-            done = True
+            pass
+            '''done = True
             shutdown_outfeed()
             time.sleep(4)  # allow time for valve to close and weight to stabilize
             reason = "low level sensor" if low_level_sensor else "lo_level threshold"
@@ -1383,7 +1488,7 @@ def oil_drain(requested_vol_L: float):
             "FAIL",
             f"[outfeed] Stopped: {reason}"
             )
-            break
+            break'''
 
         elif outfeed_remote_stop:
             done = True
@@ -1524,9 +1629,9 @@ def oil_drain(requested_vol_L: float):
         #tech_log.info("infeed active after outfeed. always keep same")
         #print("[infeed active after outfeed. always keep same.")
 
-        if not auto_start_after_outfeed :
+        if not auto_start_after_outfeed and olready_running== False :
             auto_start_after_outfeed=True
-
+            olready_running=True
             state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
             _now_w = weiVal
             _req_w = state["infeed"]["manual_vol_L"]
@@ -1626,12 +1731,13 @@ def auto_outfeed_control():
             break
 
         elif weiVal<= lo_level or low_level_sensor:
-            done = True
+            pass
+            '''done = True
             reason = "low level sensor" if low_level_sensor else "lo_level threshold"
             tech_log.warning("[outfeed AUTO] Stopped: %s", reason)
             print("[auto_outfeed] Stopped: %s" % reason)
             _log(f"⚠ Outfeed AUTO stopped: {reason}", final_kg=round(weiVal, 2))
-            break
+            break'''
 
         elif serial_error:
             done = True
@@ -1710,43 +1816,83 @@ def serial_read_data():
     ser = serial.Serial(serial_port, serial_baud)
     SPIKE_LIMIT = CONFIG["serial"]["diff"]
     f = DiffFilter(threshold=SPIKE_LIMIT)
-    pattern = re.compile(r'([A-Z]{2}),([A-Z]{2})\s+([\d.]+)\s*KG')
-
+    buffer      = ""
     while True:
         try:
-            line = ser.readline().decode('utf-8', errors='ignore').strip()
-            if not line:
-                continue
+             
+            chunk  = ser.read(20).decode('utf-8' )
+            buffer += chunk
 
-            with _lock:
-                state["serial"]["line"] = line
-
-            match = pattern.search(line)
-            if not match:
-                continue
-            status, mode, raw = match.groups()
-
-            raw_val = float(raw)
-            weight = f.feed(raw_val)
-
-            if weight is not None  :
-                weiVal = float(weight)
-
-                with _lock:
-                    state["tank"]["weight_kg"]    = weiVal
-                    state["mqtt"]["serial_error"] = False
-                    state["mqtt"]["last_value"]   = weiVal
-                    state["mqtt"]["last_ts"]      = _now()
-                    _recalc_alarms()
-
-                print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
-            else:
-                print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> SPIKE/REJECTED: {raw_val} \r", end="")
-
+            numbers = re.findall(r'=\s*([\d.]+)', buffer)
+            buffer  = re.split(r'=\s*[\d.]+', buffer)[-1]  # keep partial tail
+            weight=0
+            mqtt_send_flag=False
+            for raw in numbers:
+                #weight = float(raw)
                 
-                  
-         
+                weight = f.feed( float(raw))
+                '''
+                # ── Spike filter ──────────────────────────────────────
+                if last_weight is not None:
+                    diff = abs(weight - last_weight)
+                    if diff > SPIKE_LIMIT:
+                        msg = (f"IGNORED spike: prev={last_weight:.2f}  "
+                            f"new={weight:.2f}  diff={diff:.2f}")
+                        print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> {msg}")
+                        logging.warning(msg)
+                        continue          # skip, keep last_weight unchanged
+
+                if clear_now:
+                    logging.info("Clearing spike filter after previous spike")
+                # ─────────────────────────────────────────────────────
+
+                last_weight = weight
+                '''
+                if weight is not None:
+                    weiVal= float(weight)
+                    
+                    with _lock:
+                        # Push weight into tank state
+                        state["tank"]["weight_kg"]    = weiVal
+                        state["serial"]["line"]        = chunk.strip()
+                        state["mqtt"]["serial_error"] = False
+                        state["mqtt"]["last_value"]   = weiVal
+                        state["mqtt"]["last_ts"]      = _now()
+                        # Recalculate level % and alarms from new weight
+                        _recalc_alarms()
+
+                    #log_msg = f"Weight published: {weight}"
+                    
+                    print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> : {weiVal} \r", end="")
+
+                    now = datetime.now()
+                    seconds = now.second
+
+                    
+                    if seconds % 5 == 0 and mqtt_send_flag==False:  # every 10 second   
+                        mqtt_send_flag=True
+                        try:
+                            payload = {
+                                "w": weight,
+                                "in":    busyFlagInfeedBusy,
+                                "out":   busyFlagOutfeedBusy,
+                                "d":    diff
+                            }
+                            #weight,runflag,diff
+                            client.publish("serial/weight", json.dumps(payload),qos=0, retain=False)
+                            client.publish("serial/weight", weight, qos=0, retain=False)
+                            #print(f"{time.strftime('%Y-%m-%d %H:%M:%S')} >> Published to MQTT: {payload}")
+                        except Exception as e:
+                            print (e)
+                            pass
+                    
+                    if seconds % 5 != 0 and mqtt_send_flag==True:
+                        mqtt_send_flag=False
+
+                #logging.info(log_msg)
+
         except Exception as e:
+            alarm_log.error("Error reading from serial or publishing to MQTT: %s", e)
             err_msg = f"Error reading from serial or publishing to MQTT: {e}"
              
             print(err_msg)
@@ -2008,8 +2154,7 @@ def api_control():
                 elif not s["running"]:
                     # STOP pressed → signal the running oil_add loop to exit
                     local_stop = True
-                    alarms_list.clear()
-                    tech_log.info("Local stop signalled to oil_add. Alarm list cleared.")
+                    tech_log.info("Local stop signalled to oil_add.")
 
             # ── Outfeed run handling ────────────────────────────────
             if side == "outfeed":
@@ -2040,10 +2185,7 @@ def api_control():
 
                 elif not s["running"]:
                     outfeed_local_stop = True
-                    state["tank"]["hi_alarm"] = False
-                    state["tank"]["lo_alarm"] = False
-                    alarms_list.clear()
-                    tech_log.info("[outfeed] Local stop signalled. Tank alarms cleared.")
+                    tech_log.info("[outfeed] Local stop signalled.")
                  
 
 
@@ -2174,7 +2316,7 @@ def api_add_alarm():
         if alarm_msg:
             ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             alarms_list.append({"timestamp": ts, "message": alarm_msg})
-            tech_log.info("[ALARM] Added: %s", alarm_msg)
+            alarm_log.info("[ALARM] Added: %s", alarm_msg)
 
         return jsonify({"success": True})
     except Exception as e:
@@ -2187,8 +2329,15 @@ def api_add_alarm():
 # ─────────────────────────────────────────────────────────────────
 @app.route("/api/alarms", methods=["DELETE"])
 def api_clear_alarms():
-    global alarms_list
-    alarms_list.clear()
+    global alarms_list, sensor_alarm_acked
+    with _lock:
+        alarms_list.clear()
+        for key in sensor_alarm_acked:
+            if sensor_alarm_active[key]:
+                sensor_alarm_acked[key] = True
+            state["sensors"][f"{key}_alarm"] = False
+    _update_alarm_led()
+    alarm_log.info("[ALARM] Cleared all alarms (manual)")
     tech_log.info("[ALARM] Cleared all alarms")
     return jsonify({"success": True})
 
@@ -2250,14 +2399,16 @@ def api_products():
 # ─────────────────────────────────────────────────────────────────
 @app.route("/api/settings", methods=["POST"])
 def api_settings():
+    global INFEED_TIMEOUT, OUTFEED_TIMEOUT
     body = request.get_json(force=True)
 
     cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yml")
     try:
         with open(cfg_path) as f:
             cfg = yaml.safe_load(f) or {}
-    except Exception:
-        cfg = {}
+    except (OSError, yaml.YAMLError) as e:
+        tech_log.error("[SETTINGS] Failed to read config.yml: %s", e)
+        return jsonify({"error": str(e)}), 500
 
     if "product_code" in body:
         cfg["product_code"] = body["product_code"]
@@ -2290,7 +2441,13 @@ def api_settings():
     if "infeed" in body:
         i = body["infeed"]
         cfg.setdefault("infeed", {})
-        if "filling_time" in i: cfg["infeed"]["filling_time"] = int(i["filling_time"])
+        if "filling_time" in i:
+            INFEED_TIMEOUT = int(i["filling_time"])
+            cfg["infeed"]["filling_time"] = INFEED_TIMEOUT
+            state["infeed"]["filling_time"] = INFEED_TIMEOUT
+        if "auto_start_level" in i:
+            cfg["infeed"]["auto_start_level"] = float(i["auto_start_level"])
+            state["infeed"]["auto_start_level"] = cfg["infeed"]["auto_start_level"]
         if "manual_vol_L" in i:
             cfg["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
             state["infeed"]["manual_vol_L"] = float(i["manual_vol_L"])
@@ -2298,7 +2455,10 @@ def api_settings():
     if "outfeed" in body:
         o = body["outfeed"]
         cfg.setdefault("outfeed", {})
-        if "draining_time" in o: cfg["outfeed"]["draining_time"] = int(o["draining_time"])
+        if "draining_time" in o:
+            OUTFEED_TIMEOUT = int(o["draining_time"])
+            cfg["outfeed"]["draining_time"] = OUTFEED_TIMEOUT
+            state["outfeed"]["draining_time"] = OUTFEED_TIMEOUT
         if "manual_vol_L"  in o:
             cfg["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
             state["outfeed"]["manual_vol_L"] = float(o["manual_vol_L"])
@@ -2679,7 +2839,7 @@ def _generate_daily_csv():
 
 
 # ── DAILY 6 AM SCHEDULER THREAD ────────────────────────────────────
-def daily_6am_scheduler():
+def _daily_6am_scheduler_loop():
     """Polls time. Runs job once at/after 6 AM (flag=0), resets flag at 7 AM."""
     while True:
         now = datetime.now()
@@ -2699,6 +2859,7 @@ def daily_6am_scheduler():
         # 6 AM or later AND job not done yet → run it
         if hour == 6 and job_done == 0:
             import emailsend as em
+            alarm_log_file = os.path.join(LOG_DIR, "ols_alarms.log")
 
             # Generate CSV from database for yesterday (6 AM to 11:59 PM)
             csv_file = _generate_daily_csv()
@@ -2711,18 +2872,35 @@ def daily_6am_scheduler():
                 body = em.build_body(csv_file)
 
                 em.send_email(
-                    "PLANT 01 COCONUT OIL",
+                    "PLANT_04_COCO_OIL_SPRAYER",
                     body,
-                    "sprayer01weighingco@malibangroup.lk",
+                    "sprayer04weighingco@malibangroup.lk",
                     csv_file
                 )
                 time.sleep(2)
                 em.send_email(
-                    "PLANT_01_COCONUT_OIL",
+                    "PLANT_04_COCO_OIL_SPRAYER",
                     body,
                     "amalanjula@gmail.com",
                     csv_file
                 )
+                time.sleep(2)
+                if os.path.exists(alarm_log_file):
+                    em.send_email(
+                        "PLANT_04_COCO_OIL_SPRAYER - Alarm Log",
+                        "Daily alarm log attached.",
+                        "amalanjula@gmail.com",
+                        alarm_log_file
+                    )
+                time.sleep(2)
+                if os.path.exists(alarm_log_file):
+                    em.send_email(
+                        "PLANT_04_COCO_OIL_SPRAYER - Alarm Log",
+                        "Daily alarm log attached.",
+                        "indika.baranasuriya@malibangroup.lk",
+                        alarm_log_file
+                    )
+
                 tech_log.info("[SCHEDULER] Daily CSV emailed successfully")
             else:
                 tech_log.warning("[SCHEDULER] No data found or CSV generation failed for today's job")
@@ -2733,11 +2911,11 @@ def daily_6am_scheduler():
                 For old log files, please contact your admin.
 
                 --------------------------------------------------
-                DAILY PRODUCTION SUMMARY 
+                DAILY PRODUCTION SUMMARY
                 
                 --------------------------------------------------
 
-                    No production data found for yesterday for coconut oil (6 AM to next day 5.59 AM).
+                    No production data found for yesterday (6 AM to next day 5.59 AM).
                 --------------------------------------------------
 
                 Have a nice day!
@@ -2748,18 +2926,25 @@ def daily_6am_scheduler():
                 
 
                 em.send_email(
-                    "PLANT_01_COCONUT_OIL",
+                    "PLANT_04_COCO_OIL_SPRAYER",
                     body,
-                    "sprayer01weighingpo@malibangroup.lk"
+                    "sprayer04weighingco@malibangroup.lk"
                     
                 )
                 time.sleep(2)
                 em.send_email(
-                    "PLANT_01_COCONUT_OIL",
+                    "PLANT_04_COCO_OIL_SPRAYER",
                     body,
                     "amalanjula@gmail.com"
                     
                 )
+                if os.path.exists(alarm_log_file):
+                    em.send_email(
+                        "PLANT_04_COCO_OIL_SPRAYER - Alarm Log",
+                        "Daily alarm log attached.",
+                        "amalanjula@gmail.com",
+                        alarm_log_file
+                    )
                 tech_log.info("[SCHEDULER] Daily CSV emailed successfully")
 
 
@@ -2782,6 +2967,16 @@ def daily_6am_scheduler():
 
         time.sleep(10)  # check every minute
 
+def daily_6am_scheduler():
+    """Keep the scheduler thread alive if an unexpected error escapes its loop."""
+    while True:
+        try:
+            _daily_6am_scheduler_loop()
+        except Exception:
+            tech_log.exception(
+                "[SCHEDULER] Scheduler stopped unexpectedly; restarting in 60 seconds"
+            )
+        time.sleep(60)
 
 # ══════════════════════════════════════════════════════════════════
 #  ENTRY POINT
@@ -2820,6 +3015,6 @@ if __name__ == "__main__":
     #t.start()
     #print(f"[SYNC] Remote DB sync thread started → {REMOTE_SYNC_URL}")
  
-    tech_log.info("****Server started.Version 1.04 ******")
+    tech_log.info("******************** Server started.Version 1.07 coco plant 4 ***************")
     # Start Flask (use_reloader=False required when using threads)
     app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)

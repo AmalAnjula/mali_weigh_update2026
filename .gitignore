@@ -211,4 +211,8 @@ __marimo__/
 logs/ols_app*
 logs/ols_tech.log*
 weight.log*
-
+logs/email/emailAutoSend_error.log.*
+logs/production_*.csv
+logs/*
+!logs/*.db
+weight.log*

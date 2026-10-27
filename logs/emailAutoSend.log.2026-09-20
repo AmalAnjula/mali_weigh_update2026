@@ -1,0 +1,123 @@
+2026-09-20 12:28:27 [INFO] =======================================================
+2026-09-20 12:28:27 [INFO]   OLS Email Auto-Send started
+2026-09-20 12:28:27 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 12:28:27 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 12:28:27 [INFO]   Poll   : every 30s
+2026-09-20 12:28:27 [INFO] =======================================================
+2026-09-20 12:28:31 [INFO] No new emails.
+2026-09-20 12:32:29 [INFO] =======================================================
+2026-09-20 12:32:29 [INFO]   OLS Email Auto-Send started
+2026-09-20 12:32:29 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 12:32:29 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 12:32:29 [INFO]   Poll   : every 30s
+2026-09-20 12:32:29 [INFO] =======================================================
+2026-09-20 12:32:32 [INFO] No new emails.
+2026-09-20 12:32:56 [INFO] =======================================================
+2026-09-20 12:32:56 [INFO]   OLS Email Auto-Send started
+2026-09-20 12:32:56 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 12:32:56 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 12:32:56 [INFO]   Poll   : every 30s
+2026-09-20 12:32:56 [INFO] =======================================================
+2026-09-20 12:32:58 [INFO] No new emails.
+2026-09-20 12:41:01 [INFO] =======================================================
+2026-09-20 12:41:01 [INFO]   OLS Email Auto-Send started
+2026-09-20 12:41:01 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 12:41:01 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 12:41:01 [INFO]   Poll   : every 30s
+2026-09-20 12:41:01 [INFO] =======================================================
+2026-09-20 12:41:04 [INFO] No new emails.
+2026-09-20 12:58:53 [INFO] =======================================================
+2026-09-20 12:58:53 [INFO]   OLS Email Auto-Send started
+2026-09-20 12:58:53 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 12:58:53 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 12:58:53 [INFO]   Poll   : every 30s
+2026-09-20 12:58:53 [INFO] =======================================================
+2026-09-20 12:58:55 [INFO] No new emails.
+2026-09-20 12:59:46 [INFO] =======================================================
+2026-09-20 12:59:46 [INFO]   OLS Email Auto-Send started
+2026-09-20 12:59:46 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 12:59:46 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 12:59:46 [INFO]   Poll   : every 30s
+2026-09-20 12:59:46 [INFO] =======================================================
+2026-09-20 12:59:50 [INFO] No new emails.
+2026-09-20 15:24:11 [INFO] =======================================================
+2026-09-20 15:24:11 [INFO]   OLS Email Auto-Send started
+2026-09-20 15:24:11 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 15:24:11 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 15:24:11 [INFO]   Poll   : every 30s
+2026-09-20 15:24:11 [INFO] =======================================================
+2026-09-20 15:24:14 [INFO] No new emails.
+2026-09-20 15:33:44 [INFO] =======================================================
+2026-09-20 15:33:44 [INFO]   OLS Email Auto-Send started
+2026-09-20 15:33:44 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 15:33:44 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 15:33:44 [INFO]   Poll   : every 30s
+2026-09-20 15:33:44 [INFO] =======================================================
+2026-09-20 15:33:46 [INFO] No new emails.
+2026-09-20 15:34:17 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-20 16:19:14 [INFO] =======================================================
+2026-09-20 16:19:14 [INFO]   OLS Email Auto-Send started
+2026-09-20 16:19:14 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 16:19:14 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 16:19:14 [INFO]   Poll   : every 30s
+2026-09-20 16:19:14 [INFO] =======================================================
+2026-09-20 16:19:14 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-09-20 16:27:58 [INFO] No new emails.
+2026-09-20 16:33:51 [INFO] =======================================================
+2026-09-20 16:33:51 [INFO]   OLS Email Auto-Send started
+2026-09-20 16:33:51 [INFO]   Inbox  : sprayer01weighingco@gmail.com @ imap.gmail.com
+2026-09-20 16:33:51 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 16:33:51 [INFO]   Poll   : every 30s
+2026-09-20 16:33:51 [INFO] =======================================================
+2026-09-20 16:33:53 [INFO] No new emails.
+2026-09-20 17:17:42 [INFO] =======================================================
+2026-09-20 17:17:42 [INFO]   OLS Email Auto-Send started
+2026-09-20 17:17:42 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-09-20 17:17:42 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 17:17:42 [INFO]   Poll   : every 30s
+2026-09-20 17:17:42 [INFO] =======================================================
+2026-09-20 17:17:45 [INFO] Found 10 unread email(s).
+2026-09-20 17:17:45 [INFO] Processing email from googlecommunityteam-noreply@google.com | Subject: 'Sprayer04, finish setting up your new Google Account'
+2026-09-20 17:17:45 [WARNING] Rejected — subject does not start with 'sendme': 'Sprayer04, finish setting up your new Google Account'
+2026-09-20 17:17:50 [INFO] Email sent → googlecommunityteam-noreply@google.com | Subject: Re: Sprayer04, finish setting up your new Google Account
+2026-09-20 17:17:52 [INFO] Processing email from no-reply@accounts.google.com | Subject: 'Security alert'
+2026-09-20 17:17:52 [WARNING] Rejected — subject does not start with 'sendme': 'Security alert'
+2026-09-20 17:17:58 [INFO] Email sent → no-reply@accounts.google.com | Subject: Re: Security alert
+2026-09-20 17:18:00 [INFO] Processing email from no-reply@accounts.google.com | Subject: '2-Step Verification turned on'
+2026-09-20 17:18:00 [WARNING] Rejected — subject does not start with 'sendme': '2-Step Verification turned on'
+2026-09-20 17:18:06 [INFO] Email sent → no-reply@accounts.google.com | Subject: Re: 2-Step Verification turned on
+2026-09-20 17:18:07 [INFO] Processing email from no-reply@accounts.google.com | Subject: 'Security alert'
+2026-09-20 17:18:07 [WARNING] Rejected — subject does not start with 'sendme': 'Security alert'
+2026-09-20 17:18:14 [INFO] Email sent → no-reply@accounts.google.com | Subject: Re: Security alert
+2026-09-20 17:18:15 [INFO] Processing email from no-reply@accounts.google.com | Subject: 'Updating our Google Account inactivity policy'
+2026-09-20 17:18:15 [WARNING] Rejected — subject does not start with 'sendme': 'Updating our Google Account inactivity policy'
+2026-09-20 17:18:21 [INFO] Email sent → no-reply@accounts.google.com | Subject: Re: Updating our Google Account inactivity policy
+2026-09-20 17:18:22 [INFO] Processing email from no-reply@accounts.google.com | Subject: 'Learn more about our updated Terms of Service'
+2026-09-20 17:18:22 [WARNING] Rejected — subject does not start with 'sendme': 'Learn more about our updated Terms of Service'
+2026-09-20 17:18:27 [INFO] Email sent → no-reply@accounts.google.com | Subject: Re: Learn more about our updated Terms of Service
+2026-09-20 17:18:29 [INFO] Processing email from mailer-daemon@googlemail.com | Subject: 'Delivery Status Notification (Failure)'
+2026-09-20 17:18:29 [WARNING] Rejected — subject does not start with 'sendme': 'Delivery Status Notification (Failure)'
+2026-09-20 17:18:35 [INFO] Email sent → mailer-daemon@googlemail.com | Subject: Re: Delivery Status Notification (Failure)
+2026-09-20 17:18:36 [INFO] Processing email from google-noreply@google.com | Subject: 'New privacy settings for Search services and Google Play'
+2026-09-20 17:18:36 [WARNING] Rejected — subject does not start with 'sendme': 'New privacy settings for Search services and Google Play'
+2026-09-20 17:19:29 [INFO] =======================================================
+2026-09-20 17:19:29 [INFO]   OLS Email Auto-Send started
+2026-09-20 17:19:29 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-09-20 17:19:29 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 17:19:29 [INFO]   Poll   : every 30s
+2026-09-20 17:19:29 [INFO] =======================================================
+2026-09-20 17:19:32 [INFO] Found 2 unread email(s).
+2026-09-20 17:19:32 [INFO] Processing email from google-noreply@google.com | Subject: 'Learn more about our updated Terms of Service'
+2026-09-20 17:19:32 [WARNING] Rejected — subject does not start with 'sendme': 'Learn more about our updated Terms of Service'
+2026-09-20 17:19:38 [INFO] Email sent → google-noreply@google.com | Subject: Re: Learn more about our updated Terms of Service
+2026-09-20 17:19:39 [INFO] Processing email from mailer-daemon@googlemail.com | Subject: 'Delivery Status Notification (Failure)'
+2026-09-20 17:19:39 [WARNING] Rejected — subject does not start with 'sendme': 'Delivery Status Notification (Failure)'
+2026-09-20 17:19:45 [INFO] Email sent → mailer-daemon@googlemail.com | Subject: Re: Delivery Status Notification (Failure)
+2026-09-20 17:20:19 [INFO] No new emails.
+2026-09-20 17:24:30 [INFO] =======================================================
+2026-09-20 17:24:30 [INFO]   OLS Email Auto-Send started
+2026-09-20 17:24:30 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-09-20 17:24:30 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-09-20 17:24:30 [INFO]   Poll   : every 30s
+2026-09-20 17:24:30 [INFO] =======================================================
+2026-09-20 17:24:32 [INFO] No new emails.

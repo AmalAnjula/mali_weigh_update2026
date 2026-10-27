@@ -1,0 +1,13 @@
+2026-10-08 06:01:19 [WARNING] ols.alarm: [ALARM] Tank low level sensor alarm
+2026-10-08 06:01:35 [INFO] ols.alarm: [ALARM CLEARED] Tank low level sensor alarm
+2026-10-08 08:09:43 [WARNING] ols.alarm: [ALARM] Tank low level sensor alarm
+2026-10-08 08:09:57 [INFO] ols.alarm: [ALARM CLEARED] Tank low level sensor alarm
+2026-10-08 10:13:49 [WARNING] ols.alarm: [ALARM] Tank low level sensor alarm
+2026-10-08 10:14:04 [INFO] ols.alarm: [ALARM CLEARED] Tank low level sensor alarm
+2026-10-08 12:26:39 [WARNING] ols.alarm: [ALARM] Tank low level sensor alarm
+2026-10-08 12:26:52 [INFO] ols.alarm: [ALARM CLEARED] Tank low level sensor alarm
+2026-10-08 14:43:02 [WARNING] ols.alarm: [ALARM] Tank low level sensor alarm
+2026-10-08 14:43:16 [INFO] ols.alarm: [ALARM CLEARED] Tank low level sensor alarm
+2026-10-08 17:03:27 [WARNING] ols.alarm: [ALARM] Tank low level sensor alarm
+2026-10-08 17:03:40 [INFO] ols.alarm: [ALARM CLEARED] Tank low level sensor alarm
+2026-10-08 21:48:21 [ERROR] ols.alarm: Error reading from serial or publishing to MQTT: 'utf-8' codec can't decode byte 0x82 in position 0: invalid start byte

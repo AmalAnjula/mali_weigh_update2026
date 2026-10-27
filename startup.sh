@@ -3,7 +3,7 @@
 # Runs on Raspberry Pi 5 boot via systemd or autostart
 # ──────────────────────────────────────────────────────────────
 
-cd /home/coco_oil/stuff
+cd /home/coco_oil_p4/stuff
 
 source venv/bin/activate
 

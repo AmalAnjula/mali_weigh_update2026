@@ -1,23 +1,23 @@
 alarm_keywords: "\u26A0,ALARM,alarm,level,sensor,FAIL"
 daily_job_done: 0
 infeed:
-  auto_start_level: 100
-  filling_time: 300
-  manual_vol_L: 180.0
+  auto_start_level: 105.0
+  filling_time: 250
+  manual_vol_L: 200.0
   min_level_kg: 100.0
 outfeed:
-  draining_time: 300
+  draining_time: 250
   manual_vol_L: 60.0
-product: KRISCO
-product_code: '1'
+product: LEMON PUFF
+product_code: '15'
 serial:
   baudrate: 1200
   diff: 3
   port: /dev/ttyUSB0
 tank:
   density_kgl: 1.0
-  hi_level_kg: 190.0
-  hi_threshold_pct: 95.0
+  hi_level_kg: 205.0
+  hi_threshold_pct: 200.0
   infeed_valve: 1.0
   lo_level_kg: 20.0
   lo_threshold_pct: 20.0

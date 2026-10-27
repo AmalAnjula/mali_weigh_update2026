@@ -1,0 +1,4 @@
+2026-10-06 07:45:53 [ERROR] Unexpected error in poll_inbox: [Errno 101] Network is unreachable
+2026-10-06 08:44:01 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-06 19:31:59 [ERROR] IMAP error: command: SELECT => System Error
+2026-10-06 23:50:11 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out

@@ -1,6 +1,6 @@
 auto run
 
-nano  /etc/systemd/system/ols.service 
+sudo nano  /etc/systemd/system/ols.service 
 add this 
 [Unit]
 Description=OLS Monitor Startup
@@ -10,8 +10,8 @@ After=network.target graphical.target
 Type=forking
 User=palmoil
 Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/palmoil/.Xauthority
-ExecStart=/bin/bash /home/palmoil/stuff/startup.sh
+Environment=XAUTHORITY=/home/coco_oil_p4/.Xauthority
+ExecStart=/bin/bash /home/coco_oil_p4/stuff/startup.sh
 Restart=on-failure
 RestartSec=5
 
@@ -21,7 +21,49 @@ WantedBy=graphical.target
 
 run below for create link
 
-sudo -u palmoil /bin/bash /home/palmoil/stuff/startup.sh
+sudo -u coco_oil_p4 /bin/bash /home/coco_oil_p4/stuff/startup.sh
 sudo systemctl daemon-reload
 sudo systemctl enable ols.service
 sudo systemctl restart ols.service
+
+sudo timedatectl set-ntp false
+sudo timedatectl set-time "2026-10-04 6:10:00"
+
+rm -rf ~/.vscode-server
+rm -rf ~/.vscode-remote
+cat ~/.ssh/known_hosts
+ls -la ~/.ssh
+rm -rf ~/.vscode-server-insiders
+
+sudo apt update
+sudo apt install speedtest-cli -y
+
+speedtest-cli
+
+make venv
+
+python3 -m venv --system-site-packages venv
+
+
+sudo apt install sqlite3
+
+
+// to see dublicate
+sqlite3 -header -column /home/coco_oil_p4/stuff/logs/production.db "SELECT * FROM production_log WHERE timestamp IN (SELECT timestamp FROM production_log GROUP BY timestamp HAVING COUNT(*) > 1) ORDER BY timestamp, id;"
+
+1. Backup
+
+bash
+cp /home/coco_oil_p4/stuff/logs/production.db /home/coco_oil_p4/stuff/logs/production.db.bak
+
+2. Preview how many rows will be removed
+
+bash
+sqlite3 /home/coco_oil_p4/stuff/logs/production.db "SELECT COUNT(*) FROM production_log WHERE id NOT IN (SELECT MIN(id) FROM production_log GROUP BY timestamp);"
+
+3. Delete duplicates, keeping the lowest id per timestamp
+
+bash
+sqlite3 /home/coco_oil_p4/stuff/logs/production.db "DELETE FROM production_log WHERE id NOT IN (SELECT MIN(id) FROM production_log GROUP BY timestamp);"
+
+Or, prefer keeping the synced row (synced=1 first, then lowest id):

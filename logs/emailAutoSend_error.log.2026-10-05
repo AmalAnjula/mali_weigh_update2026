@@ -1,0 +1,3 @@
+2026-10-05 08:38:41 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-05 11:39:23 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-05 16:05:40 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution

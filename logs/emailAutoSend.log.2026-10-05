@@ -1,0 +1,22 @@
+2026-10-05 08:38:41 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-05 08:39:14 [INFO] No new emails.
+2026-10-05 09:42:58 [INFO] =======================================================
+2026-10-05 09:42:58 [INFO]   OLS Email Auto-Send started
+2026-10-05 09:42:58 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-10-05 09:42:58 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-10-05 09:42:58 [INFO]   Poll   : every 30s
+2026-10-05 09:42:58 [INFO] =======================================================
+2026-10-05 09:43:00 [INFO] No new emails.
+2026-10-05 11:39:23 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-05 11:39:55 [INFO] No new emails.
+2026-10-05 12:44:50 [INFO] =======================================================
+2026-10-05 12:44:50 [INFO]   OLS Email Auto-Send started
+2026-10-05 12:44:50 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-10-05 12:44:50 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-10-05 12:44:50 [INFO]   Poll   : every 30s
+2026-10-05 12:44:50 [INFO] =======================================================
+2026-10-05 12:44:53 [INFO] No new emails.
+2026-10-05 16:05:40 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-05 16:06:12 [INFO] No new emails.
+2026-10-05 16:12:26 [ERROR] Unexpected error in poll_inbox: [Errno -3] Temporary failure in name resolution
+2026-10-05 16:13:00 [INFO] No new emails.

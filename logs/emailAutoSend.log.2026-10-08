@@ -1,0 +1,29 @@
+2026-10-08 00:56:47 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-08 00:57:20 [INFO] No new emails.
+2026-10-08 03:00:13 [ERROR] Unexpected error in poll_inbox: [Errno 110] Connection timed out
+2026-10-08 03:00:45 [INFO] No new emails.
+2026-10-08 10:14:40 [INFO] =======================================================
+2026-10-08 10:14:40 [INFO]   OLS Email Auto-Send started
+2026-10-08 10:14:40 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-10-08 10:14:40 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-10-08 10:14:40 [INFO]   Poll   : every 30s
+2026-10-08 10:14:40 [INFO] =======================================================
+2026-10-08 10:14:42 [INFO] No new emails.
+2026-10-08 13:05:21 [ERROR] Unexpected error in poll_inbox: [Errno 101] Network is unreachable
+2026-10-08 13:05:53 [INFO] No new emails.
+2026-10-08 17:40:49 [INFO] =======================================================
+2026-10-08 17:40:49 [INFO]   OLS Email Auto-Send started
+2026-10-08 17:40:49 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-10-08 17:40:49 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-10-08 17:40:49 [INFO]   Poll   : every 30s
+2026-10-08 17:40:49 [INFO] =======================================================
+2026-10-08 17:40:51 [INFO] No new emails.
+2026-10-08 19:06:43 [ERROR] Unexpected error in poll_inbox: [Errno 101] Network is unreachable
+2026-10-08 19:07:17 [INFO] No new emails.
+2026-10-08 21:48:27 [INFO] =======================================================
+2026-10-08 21:48:27 [INFO]   OLS Email Auto-Send started
+2026-10-08 21:48:27 [INFO]   Inbox  : sprayer04weighingco@gmail.com @ imap.gmail.com
+2026-10-08 21:48:27 [INFO]   DB     : /home/coco_oil_p4/stuff/logs/production.db
+2026-10-08 21:48:27 [INFO]   Poll   : every 30s
+2026-10-08 21:48:27 [INFO] =======================================================
+2026-10-08 21:48:29 [INFO] No new emails.

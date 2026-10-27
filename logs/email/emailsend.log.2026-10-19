@@ -1,0 +1,54 @@
+2026-10-19 06:00:02 [INFO] Email send started (attempt 1/3): recipient=sprayer04weighingco@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER' attachment=production_2026-10-18.csv
+2026-10-19 06:00:02 [INFO] Attached file: production_2026-10-18.csv
+2026-10-19 06:00:02 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-19 06:00:38 [ERROR] Email send failed during SMTP connection: recipient=sprayer04weighingco@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER' (attempt 1/3)
+Traceback (most recent call last):
+  File "/home/coco_oil_p4/stuff/emailsend.py", line 162, in send_email
+    with smtplib.SMTP("smtp.gmail.com", 587, timeout=30) as smtp:
+         ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+                  ~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 341, in connect
+    self.sock = self._get_socket(host, port, self.timeout)
+                ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/smtplib.py", line 312, in _get_socket
+    return socket.create_connection((host, port), timeout,
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+                                    self.source_address)
+                                    ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/socket.py", line 864, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.13/socket.py", line 849, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+OSError: [Errno 101] Network is unreachable
+2026-10-19 06:00:38 [WARNING] Retrying email send in 5 seconds: recipient=sprayer04weighingco@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER'
+2026-10-19 06:00:43 [INFO] Email send started (attempt 2/3): recipient=sprayer04weighingco@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER' attachment=production_2026-10-18.csv
+2026-10-19 06:00:43 [INFO] Attached file: production_2026-10-18.csv
+2026-10-19 06:00:43 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-19 06:00:45 [INFO] Starting TLS
+2026-10-19 06:00:45 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-19 06:00:46 [INFO] Submitting message to sprayer04weighingco@malibangroup.lk
+2026-10-19 06:00:48 [INFO] Email sent successfully: recipient=sprayer04weighingco@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER'
+2026-10-19 06:00:50 [INFO] Email send started (attempt 1/3): recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER' attachment=production_2026-10-18.csv
+2026-10-19 06:00:50 [INFO] Attached file: production_2026-10-18.csv
+2026-10-19 06:00:50 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-19 06:00:51 [INFO] Starting TLS
+2026-10-19 06:00:51 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-19 06:00:52 [INFO] Submitting message to amalanjula@gmail.com
+2026-10-19 06:00:54 [INFO] Email sent successfully: recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER'
+2026-10-19 06:00:56 [INFO] Email send started (attempt 1/3): recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log' attachment=ols_alarms.log
+2026-10-19 06:00:56 [INFO] Attached file: ols_alarms.log
+2026-10-19 06:00:56 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-19 06:00:57 [INFO] Starting TLS
+2026-10-19 06:00:57 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-19 06:00:58 [INFO] Submitting message to amalanjula@gmail.com
+2026-10-19 06:01:01 [INFO] Email sent successfully: recipient=amalanjula@gmail.com subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log'
+2026-10-19 06:01:03 [INFO] Email send started (attempt 1/3): recipient=indika.baranasuriya@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log' attachment=ols_alarms.log
+2026-10-19 06:01:03 [INFO] Attached file: ols_alarms.log
+2026-10-19 06:01:03 [INFO] Connecting to SMTP server smtp.gmail.com:587
+2026-10-19 06:01:04 [INFO] Starting TLS
+2026-10-19 06:01:04 [INFO] Authenticating as sprayer04weighingco@gmail.com
+2026-10-19 06:01:05 [INFO] Submitting message to indika.baranasuriya@malibangroup.lk
+2026-10-19 06:01:07 [INFO] Email sent successfully: recipient=indika.baranasuriya@malibangroup.lk subject='PLANT_04_COCO_OIL_SPRAYER - Alarm Log'
