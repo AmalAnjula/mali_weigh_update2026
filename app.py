@@ -455,7 +455,7 @@ weiVal       = 0.0
 serial_error = False
 out_feed_sucess=False
 auto_start_after_outfeed=False
- 
+olready_running=False
 # ── Infeed sequence control flags ──────────────────────────────────
 # busyFlagInfeedBusy  → True while oil_add() sequence is running
 # busyFlagOutfeedBusy → set True externally when outfeed is active;
@@ -488,7 +488,7 @@ _publish_queue = queue.Queue()
 def gpio_handler():
     tech_log.info("GPIO handler thread started.")
     global inputs, local_stop, infeed_remote_stop,weiVal, low_level_sensor, infeed_mode_change, infeed_local_remote_change,outfeed_remote_stop
-    global hi_level_sensor,out_feed_sucess,auto_start_after_outfeed
+    global hi_level_sensor,out_feed_sucess,auto_start_after_outfeed,olready_running
     gpio.update() 
     
     state["infeed"]["operation"] = "REMOTE"
@@ -559,8 +559,9 @@ def gpio_handler():
                      
             elif gpio.rising("intke_start") and state["infeed"]["mode"]=="AUTO" and state["infeed"]["operation"] == "REMOTE" and not state["infeed"]["running"] and auto_start_after_outfeed==False:
                     time.sleep(2)
-                    
-                    if gpio.state("intke_start") and not gpio.state("ind_led_in"):
+                    tech_log.info("intake start pressed. debounce wait")
+                    if gpio.state("intke_start")  and olready_running==False:
+                        olready_running=True
                         state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
                         _now_w = weiVal
                         _req_w = state["infeed"]["manual_vol_L"]
@@ -909,7 +910,7 @@ def auto_infeed_control(now_weight: float, required_weight: float,infeed_auto: b
     state["ui"]["buttons"]["in-op-btn"]["disabled"] = False
     print("Exit auto control loop.")
     gpio.output_off("ind_led_in")
-    gpio.output_off("ind_led_in")
+     
     state["labels"]["in_op_label"] = "Now Working"
     auto_start_after_outfeed=False
            
@@ -1329,7 +1330,7 @@ def oil_drain(requested_vol_L: float):
     global outfeed_local_stop, outfeed_remote_stop
     global outfeed_local_remote_change, outfeed_mode_change
     global low_level_sensor,outfeed_remote_stop
-    global out_feed_sucess,auto_start_after_outfeed
+    global out_feed_sucess,auto_start_after_outfeed,olready_running
     #tech_log.info("[outfeed] oil_drain requested — vol=%.2f L", requested_vol_L)
 
     # Lock buttons while sequence runs
@@ -1464,7 +1465,9 @@ def oil_drain(requested_vol_L: float):
             break
         # Tank too low — stop draining
         elif weiVal<= lo_level or low_level_sensor:
-            done = True
+            pass
+            #remve indika req
+            '''done = True
             shutdown_outfeed()
             time.sleep(4)  # allow time for valve to close and weight to stabilize
             reason = "low level sensor" if low_level_sensor else "lo_level threshold"
@@ -1479,7 +1482,7 @@ def oil_drain(requested_vol_L: float):
             "FAIL",
             f"[outfeed] Stopped: {reason}"
             )
-            break
+            break'''
 
         elif outfeed_remote_stop:
             done = True
@@ -1620,9 +1623,9 @@ def oil_drain(requested_vol_L: float):
         #tech_log.info("infeed active after outfeed. always keep same")
         #print("[infeed active after outfeed. always keep same.")
 
-        if not auto_start_after_outfeed :
+        if not auto_start_after_outfeed and olready_running== False :
             auto_start_after_outfeed=True
-
+            olready_running=True
             state["labels"]["in_op_label"] = "Now Continuously" #ANJULA
             _now_w = weiVal
             _req_w = state["infeed"]["manual_vol_L"]
@@ -1722,12 +1725,14 @@ def auto_outfeed_control():
             break
 
         elif weiVal<= lo_level or low_level_sensor:
-            done = True
+            pass
+            #remve indika req
+            '''done = True
             reason = "low level sensor" if low_level_sensor else "lo_level threshold"
             tech_log.warning("[outfeed AUTO] Stopped: %s", reason)
             print("[auto_outfeed] Stopped: %s" % reason)
             _log(f"⚠ Outfeed AUTO stopped: {reason}", final_kg=round(weiVal, 2))
-            break
+            break'''
 
         elif serial_error:
             done = True
