@@ -43,5 +43,27 @@ speedtest-cli
 make venv
 
 python3 -m venv --system-site-packages venv
-sudo nano /etc/samba/smb.conf
-sudo systemctl restart smbd
+
+
+sudo apt install sqlite3
+
+
+// to see dublicate
+sqlite3 -header -column /home/coco_oil_p4/stuff/logs/production.db "SELECT * FROM production_log WHERE timestamp IN (SELECT timestamp FROM production_log GROUP BY timestamp HAVING COUNT(*) > 1) ORDER BY timestamp, id;"
+
+1. Backup
+
+bash
+cp /home/coco_oil_p4/stuff/logs/production.db /home/coco_oil_p4/stuff/logs/production.db.bak
+
+2. Preview how many rows will be removed
+
+bash
+sqlite3 /home/coco_oil_p4/stuff/logs/production.db "SELECT COUNT(*) FROM production_log WHERE id NOT IN (SELECT MIN(id) FROM production_log GROUP BY timestamp);"
+
+3. Delete duplicates, keeping the lowest id per timestamp
+
+bash
+sqlite3 /home/coco_oil_p4/stuff/logs/production.db "DELETE FROM production_log WHERE id NOT IN (SELECT MIN(id) FROM production_log GROUP BY timestamp);"
+
+Or, prefer keeping the synced row (synced=1 first, then lowest id):
